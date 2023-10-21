@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerInteract : MonoBehaviour
 {
+    public Inventory inventory;
     public Camera cam;
 
     public float checkDistance;
@@ -15,10 +16,6 @@ public class PlayerInteract : MonoBehaviour
     Vector3Int placePos;
 
     World world;
-    public int selectedBlock = 1;
-
-    private BlockType[] blockTypes = Enum.GetValues(typeof(BlockType)).Cast<BlockType>().ToArray();
-
 
     private void Awake()
     {
@@ -30,40 +27,16 @@ public class PlayerInteract : MonoBehaviour
     {
 
         RayCast();
-        SelecteBlock();
 
         if (Input.GetMouseButtonDown(0) && destroyFound)
         {
             world.EditBlock(destroyPos, BlockType.Air);
         }
 
-        if (Input.GetMouseButtonDown(1) && placeFound)
+        if (Input.GetMouseButtonDown(1) && placeFound && inventory.HandItem.Item is BlockData blockData)
         {
-            world.EditBlock(placePos, blockTypes[selectedBlock]);
+            world.EditBlock(placePos, blockData.blockType);
         }
-    }
-
-    private void SelecteBlock()
-    {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll != 0)
-        {
-            if (scroll > 0)
-            {
-                selectedBlock++;
-            }
-            else
-            {
-                selectedBlock--;
-            }
-            if(selectedBlock < 1)
-            {
-                selectedBlock += (blockTypes.Length - 1);
-            }
-            selectedBlock %= blockTypes.Length;
-            Debug.Log(blockTypes[selectedBlock]);
-        }
-
     }
 
     private void RayCast()

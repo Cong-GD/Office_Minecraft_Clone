@@ -2,6 +2,7 @@
 using UnityEngine;
 using ObjectPooling;
 using System;
+using Unity.VisualScripting;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -16,6 +17,7 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
     public ChunkData ChunkData { get; private set; }
 
     public Vector3Int ChunkCoord => ChunkData.chunkCoord;
+
 
     public void SetChunkData(ChunkData chunk)
     {
@@ -39,27 +41,31 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
     public void RenderMesh(MeshData meshData)
     {
         if (meshData.vertices.Count == 0)
+        {
+            ConcurrentPool.Release(meshData);
             return;
+        }
 
         vertices = meshData.vertices.Count;
         triangles = meshData.triangles.Count;
+
+
         Mesh mesh = new Mesh();
         mesh.subMeshCount = 2;
         mesh.SetVertices(meshData.vertices);
         mesh.SetTriangles(meshData.triangles, 0);
-        meshData.triangles.Clear();
         mesh.SetTriangles(meshData.transparentTriangles, 1);
         mesh.SetUVs(0, meshData.uvs);
         mesh.RecalculateNormals();
-        meshFilter.mesh = mesh;
 
         Mesh colliderMesh = new Mesh();
         colliderMesh.SetVertices(meshData.vertices);
         colliderMesh.SetTriangles(meshData.colliderTriangles, 0);
         colliderMesh.RecalculateNormals();
+
+        meshFilter.mesh = mesh;
         meshCollider.sharedMesh = colliderMesh;
-
-
+        ConcurrentPool.Release(meshData);
     }
 
     public void ReturnToPool()

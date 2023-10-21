@@ -20,18 +20,16 @@ MonoBehaviour:
   treeZoneThreshold: 0.6
   treePlacementScale: 15
   treePlacementThreshold: 0.8
-  maxTreeHeight: 12
-  minTreeHeight: 5
   lodes:
   - name: Dirt
-    blockType: 8
+    blockType: 7
     minHeight: 1
     maxHeight: 255
     scale: 0.25
     threshold: 0.5
     noiseOffset: 0
   - name: Sand
-    blockType: 10
+    blockType: 9
     minHeight: 30
     maxHeight: 60
     scale: 0.2

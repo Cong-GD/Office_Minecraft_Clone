@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd1b27d437f981641ab2e2eef1bcc52f, type: 3}
   m_Name: Air
   m_EditorClassIdentifier: 
-  blockType: 1
+  blockType: 0
   isSolid: 0
   isTransparent: 1
   generateCollider: 0
@@ -22,3 +22,4 @@ MonoBehaviour:
   right: 0
   forward: 0
   backward: 0
+  <Icon>k__BackingField: {fileID: 0}

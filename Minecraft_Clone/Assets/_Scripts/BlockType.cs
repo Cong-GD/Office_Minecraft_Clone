@@ -1,6 +1,5 @@
 ﻿public enum BlockType : byte
 {
-    Void,
     Air,
     Bedrock,
     OakLog,

@@ -15,6 +15,9 @@ public class PlayerCamera : MonoBehaviour
 
     private void Update()
     {
+        if (UIManager.Instance.IsActive)
+            return;
+
         var mouseInputDelta = input.MouseInput * Time.deltaTime * mouseSensitive;
 
         rootTransform.Rotate(Vector3.up, mouseInputDelta.x);

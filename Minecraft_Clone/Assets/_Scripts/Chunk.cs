@@ -7,7 +7,8 @@ public static class Chunk
 {
     public static MeshData GetMeshData(ChunkData chunkData)
     {
-        MeshData meshData = new MeshData();
+        MeshData meshData = ConcurrentPool.GetMeshData();
+        meshData.Clear();
 
         var pos = Vector3Int.zero;
         for (pos.x = 0; pos.x < ChunkSize.x; pos.x++)
@@ -30,12 +31,26 @@ public static class Chunk
             && localPos.y > -1 && localPos.y < ChunkSize.y
             && localPos.z > -1 && localPos.z < ChunkSize.z;
     }
-
-    public static Vector3Int GetChunkCoord(Vector3 worldPosition)
+    public static bool IsPositionInChunk(ref Vector3Int localPos)
     {
-        int x = Mathf.FloorToInt(worldPosition.x / ChunkSize.x);
-        int y = Mathf.FloorToInt(worldPosition.y / ChunkSize.y);
-        int z = Mathf.FloorToInt(worldPosition.z / ChunkSize.z);
+        return localPos.x > -1 && localPos.x < ChunkSize.x
+            && localPos.y > -1 && localPos.y < ChunkSize.y
+            && localPos.z > -1 && localPos.z < ChunkSize.z;
+    }
+
+    public static Vector3Int GetChunkCoord(Vector3Int worldPosition)
+    {
+        int x = Mathf.FloorToInt((float)worldPosition.x / ChunkSize.x);
+        int y = Mathf.FloorToInt((float)worldPosition.y / ChunkSize.y);
+        int z = Mathf.FloorToInt((float)worldPosition.z / ChunkSize.z);
+        return new Vector3Int(x, y, z);
+    }
+
+    public static Vector3Int GetChunkCoord(ref Vector3Int worldPosition)
+    {
+        int x = Mathf.FloorToInt((float)worldPosition.x / ChunkSize.x);
+        int y = Mathf.FloorToInt((float)worldPosition.y / ChunkSize.y);
+        int z = Mathf.FloorToInt((float)worldPosition.z / ChunkSize.z);
         return new Vector3Int(x, y, z);
     }
 

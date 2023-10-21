@@ -5,12 +5,12 @@ using UnityEngine;
 public class BlockDataManager : MonoBehaviour
 {
 
-    private static Dictionary<BlockType, BlockDataSO> _blockDataMap;
+    private static Dictionary<BlockType, BlockData> _blockDataMap;
 
     /// <summary>
     /// Don't use this method on awake
     /// </summary>
-    public static BlockDataSO GetData(BlockType type)
+    public static BlockData GetData(BlockType type)
     {
         if(_blockDataMap.TryGetValue(type, out var data))
         {
@@ -21,7 +21,7 @@ public class BlockDataManager : MonoBehaviour
 
     private void Awake()
     {
-        _blockDataMap = Resources.LoadAll<BlockDataSO>("BlockDatas").ToDictionary(data => data.blockType, data => data);
+        _blockDataMap = Resources.LoadAll<BlockData>("BlockDatas").ToDictionary(data => data.blockType, data => data);
     }
 
 

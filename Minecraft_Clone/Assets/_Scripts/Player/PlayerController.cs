@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
 
     private bool isWaiting;
 
+    private bool _isInUI;
+
     private void Awake()
     {
         if(mainCamera == null)
@@ -40,6 +42,23 @@ public class PlayerController : MonoBehaviour
     }
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.E))
+        {
+            _isInUI = !_isInUI;
+            UIManager.Instance.IsActive = _isInUI;
+            Cursor.lockState = _isInUI ? CursorLockMode.None : CursorLockMode.Locked;
+        }
+
+        if (!_isInUI)
+        {
+            HandlerMovement();
+        }
+
+        
+    }
+
+    private void HandlerMovement()
+    {
         if (flying)
         {
             //animator.SetFloat("speed", 0);
@@ -62,8 +81,7 @@ public class PlayerController : MonoBehaviour
             playerMovement.Walk(playerInput.MovementVector, playerInput.IsSprinting);
         }
     }
-
-    IEnumerator ResetWaiting()
+    private IEnumerator ResetWaiting()
     {
         yield return new WaitForSeconds(0.1f);
         //animator.ResetTrigger("jump");

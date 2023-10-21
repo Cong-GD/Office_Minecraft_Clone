@@ -12,13 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd1b27d437f981641ab2e2eef1bcc52f, type: 3}
   m_Name: Leaves
   m_EditorClassIdentifier: 
-  blockType: 12
+  blockType: 11
   isSolid: 0
-  isTransparent: 1
+  isTransparent: 0
   generateCollider: 1
-  up: 9
-  down: 9
-  left: 9
-  right: 9
-  forward: 9
-  backward: 9
+  up: 22
+  down: 22
+  left: 22
+  right: 22
+  forward: 22
+  backward: 22
+  <Icon>k__BackingField: {fileID: -647956623, guid: 4e94f503a19d0c949b9745303267f02f,
+    type: 3}
+  <MaxStack>k__BackingField: 64

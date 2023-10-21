@@ -20,21 +20,21 @@ public static class BlockHelper
 
     public static void AddBlockMeshData(ChunkData chunkData,MeshData meshData, Vector3Int localPos)
     {
-        var blockData = BlockDataManager.GetData(chunkData.GetBlock(localPos));
+        var blockData = BlockDataManager.GetData(chunkData.GetBlock(ref localPos));
         if (blockData.blockType == BlockType.Air)
             return;
 
         foreach (var direction in DirectionExtensions.GetDirections())
         {
             var adjacentLocalPosition = localPos + direction.GetVector();
-            BlockDataSO adjacentBlockData;
-            if(Chunk.IsPositionInChunk(adjacentLocalPosition))
+            BlockData adjacentBlockData;
+            if(Chunk.IsPositionInChunk( adjacentLocalPosition))
             {
-                adjacentBlockData = BlockDataManager.GetData(chunkData.GetBlock(adjacentLocalPosition));
+                adjacentBlockData = BlockDataManager.GetData(chunkData.GetBlock(ref adjacentLocalPosition));
             }
             else
             {
-                adjacentBlockData = chunkData.world.GetBlockData(chunkData.worldPosition + adjacentLocalPosition);
+                adjacentBlockData = World.Instance.GetBlockData(chunkData.worldPosition + adjacentLocalPosition);
             }
             
             if(adjacentBlockData.isTransparent)
@@ -61,7 +61,7 @@ public static class BlockHelper
         }
     }
 
-    private static IEnumerable<Vector3> GetDirectionVertices(Direction direction, Vector3Int position)
+    private static IEnumerable<Vector3> GetDirectionVertices(Direction direction,Vector3Int position)
     {
         position.Parse(out var x, out var y, out var z);
         switch (direction)

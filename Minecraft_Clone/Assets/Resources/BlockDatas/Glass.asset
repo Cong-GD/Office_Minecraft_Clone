@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd1b27d437f981641ab2e2eef1bcc52f, type: 3}
   m_Name: Glass
   m_EditorClassIdentifier: 
-  blockType: 9
+  blockType: 8
   isSolid: 1
   isTransparent: 1
   generateCollider: 1
@@ -22,3 +22,5 @@ MonoBehaviour:
   right: 18
   forward: 18
   backward: 18
+  <Icon>k__BackingField: {fileID: 430780514, guid: 4e94f503a19d0c949b9745303267f02f,
+    type: 3}

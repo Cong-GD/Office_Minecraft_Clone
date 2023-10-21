@@ -6,7 +6,15 @@ public class MeshData
     public List<Vector3> vertices = new();
     public List<int> triangles = new();
     public List<Vector2> uvs = new();
-    //public List<Vector3> colliderVertices = new();
     public List<int> colliderTriangles = new();
     public List<int> transparentTriangles = new();
+
+    public void Clear()
+    {
+        vertices.Clear();
+        triangles.Clear();
+        uvs.Clear();
+        colliderTriangles.Clear();
+        transparentTriangles.Clear();
+    }
 }

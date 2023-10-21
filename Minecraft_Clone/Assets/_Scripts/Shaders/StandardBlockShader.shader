@@ -20,17 +20,19 @@ Shader "Minecraft/Blocks"
 struct appdata
 {
     float4 vertex : POSITION;
-
     float2 uv : TEXCOORD0;
+    float4 color : COLOR;
 };
 
 struct v2f
 {
     float4 vertex : SV_Position;
     float2 uv : TEXCOORD0;
+    float4 color : COLOR;
 };
 
 sampler2D _MainTex;
+float GlobalLightLevel;
 
 v2f vertFunction(appdata v)
 {
@@ -38,6 +40,7 @@ v2f vertFunction(appdata v)
     
     o.vertex = UnityObjectToClipPos(v.vertex);
     o.uv = v.uv;
+    o.color = v.color;
     
     return o;
 }
@@ -45,8 +48,9 @@ v2f vertFunction(appdata v)
 fixed4 fragFunction(v2f i) : SV_Target
 {
     fixed4 col = tex2D(_MainTex, i.uv);
+    float localLightLevel = clamp(GlobalLightLevel + i.color.a,0, 1);
     clip(col.a - 1);
-    col = lerp(col, float4(0, 0, 0, 1), 0);
+    col = lerp(col, float4(0, 0, 0, 1), GlobalLightLevel);
     return col;
 }
 

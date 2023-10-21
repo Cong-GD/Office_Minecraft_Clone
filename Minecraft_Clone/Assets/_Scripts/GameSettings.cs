@@ -6,7 +6,7 @@ public static class GameSettings
 
     public static readonly int TotalBlockInChunk = ChunkSize.x * ChunkSize.y * ChunkSize.z;
 
-    public static readonly int MapHeightInChunk = 8;
+    public static readonly int MapHeightInChunk = 4;
 
     public static readonly int MapHeightInBlock = MapHeightInChunk * ChunkSize.y;
 }
