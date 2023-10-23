@@ -11,6 +11,7 @@
     Glass,
     Sand,
     Brick,
-    Leaves
-
+    Leaves,
+    Castus,
+    Water
 }

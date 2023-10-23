@@ -18,7 +18,6 @@ public class Inventory : MonoBehaviour
         for (int i = 0; i < itemFactory.Length && i < toolBarItems.Length; i++) 
         {
             var createdItem = itemFactory[i].Create();
-            Debug.Log(createdItem.Amount);
             createdItem.TransferTo(toolBarItems[i], createdItem.Amount);
         }
     }

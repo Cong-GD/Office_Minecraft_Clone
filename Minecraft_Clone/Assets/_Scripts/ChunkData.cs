@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using static GameSettings;
 
@@ -13,9 +15,10 @@ public enum ChunkState : byte
     InPool
 }
 
+[Serializable]
 public class ChunkData
 {
-    public readonly BlockType[] blocks = new BlockType[TotalBlockInChunk];
+    public readonly BlockType[] blocks = new BlockType[TOTAL_BLOCK_IN_CHUNK];
     public Vector3Int worldPosition;
     public Vector3Int chunkCoord;
 
@@ -24,38 +27,44 @@ public class ChunkData
     public bool isDirty;
     public bool modifiedByPlayer;
 
-    public readonly List<(Vector3Int, Structure)> structures = new();
+    public List<(Vector3Int, Structure)> structures = new();
 
-    public readonly Queue<ModifierUnit> modifierQueue = new();
+    public Queue<ModifierUnit> modifierQueue = new();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int GetIndex(int x, int y, int z)
+        => (z * CHUNK_WIDTH * CHUNK_DEPTH) + (y * CHUNK_WIDTH) + x;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetChunkCoord(Vector3Int chunkCoord)
     {
         this.chunkCoord = chunkCoord;
-        worldPosition = chunkCoord * ChunkSize;
+        worldPosition = chunkCoord * ChunkSizeVector;
     }
 
-    public void SetBlock(Vector3Int localPos, BlockType type)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetBlock(Vector3Int localPos, BlockType block)
     {
-        int index = localPos.x + ChunkSize.x * (localPos.y + ChunkSize.z * localPos.z);
-        blocks[index] = type;
+        blocks[GetIndex(localPos.x, localPos.y, localPos.z)] = block;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public BlockType GetBlock(Vector3Int localPos)
     {
-        int index = localPos.x + ChunkSize.x * (localPos.y + ChunkSize.z * localPos.z);
-        return blocks[index];
+        return blocks[GetIndex(localPos.x, localPos.y, localPos.z)];
     }
 
-    /// <summary>
-    ///  More optimize way to set block, use it carefully
-    /// </summary>
-    internal void SetBlock(ref Vector3Int localPos, BlockType type)
-        => blocks[localPos.x + ChunkSize.x * (localPos.y + ChunkSize.z * localPos.z)] = type;
-    /// <summary>
-    ///  More optimize way to get block, use it carefully
-    /// </summary>
-    internal BlockType GetBlock(ref Vector3Int localPos)
-        => blocks[localPos.x + ChunkSize.x * (localPos.y + ChunkSize.z * localPos.z)];
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetBlock(int x, int y, int z, BlockType block)
+    {
+        blocks[GetIndex(x, y, z)] = block;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public BlockType GetBlock(int x, int y, int z)
+    {
+        return blocks[GetIndex(x, y, z)];
+    }
 
     public bool HasStructure() => structures.Count > 0;
 

@@ -1,8 +1,7 @@
-﻿using System.Threading.Tasks;
-using UnityEngine;
-using ObjectPooling;
+﻿using ObjectPooling;
 using System;
-using Unity.VisualScripting;
+using System.Threading.Tasks;
+using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -14,10 +13,7 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
 
     public event Action OnReturn;
 
-    public ChunkData ChunkData { get; private set; }
-
-    public Vector3Int ChunkCoord => ChunkData.chunkCoord;
-
+    public ChunkData ChunkData; //{ get; private set; }
 
     public void SetChunkData(ChunkData chunk)
     {
@@ -38,41 +34,62 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
     }
     public int vertices;
     public int triangles;
+
+    public Mesh mesh;
+    public Mesh colliderMesh;
+
+    private void Awake()
+    {
+        mesh = new Mesh();
+        meshFilter.mesh = mesh;
+    }
     public void RenderMesh(MeshData meshData)
     {
-        if (meshData.vertices.Count == 0)
-        {
-            ConcurrentPool.Release(meshData);
-            return;
-        }
-
         vertices = meshData.vertices.Count;
         triangles = meshData.triangles.Count;
 
-
-        Mesh mesh = new Mesh();
+        mesh.Clear();
         mesh.subMeshCount = 2;
         mesh.SetVertices(meshData.vertices);
         mesh.SetTriangles(meshData.triangles, 0);
         mesh.SetTriangles(meshData.transparentTriangles, 1);
         mesh.SetUVs(0, meshData.uvs);
-        mesh.RecalculateNormals();
+        mesh.SetNormals(meshData.normals);
+        //mesh.RecalculateNormals();
 
         Mesh colliderMesh = new Mesh();
         colliderMesh.SetVertices(meshData.vertices);
         colliderMesh.SetTriangles(meshData.colliderTriangles, 0);
         colliderMesh.RecalculateNormals();
-
-        meshFilter.mesh = mesh;
         meshCollider.sharedMesh = colliderMesh;
-        ConcurrentPool.Release(meshData);
     }
+
+    //private void OnBecameVisible()
+    //{
+    //    meshFilter.mesh = mesh;
+    //}
+
+    //private void OnBecameInvisible()
+    //{
+    //    meshFilter.mesh = null;
+    //}
 
     public void ReturnToPool()
     {
         OnReturn?.Invoke();
         ChunkData = null;
-        meshFilter.mesh = null;
         meshCollider.sharedMesh = null;
     }
+
+#if UNITY_EDITOR
+    public Color gizmosColor;
+    private void OnDrawGizmosSelected()
+    {
+        if (ChunkData == null)
+            return;
+        Gizmos.color = gizmosColor;
+        var centor = ChunkData.worldPosition + (Vector3)GameSettings.ChunkSizeVector / 2;
+        Gizmos.DrawCube(centor, GameSettings.ChunkSizeVector);
+    }
+#endif
 }

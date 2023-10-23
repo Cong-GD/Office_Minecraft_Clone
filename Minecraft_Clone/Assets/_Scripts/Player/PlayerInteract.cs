@@ -33,7 +33,7 @@ public class PlayerInteract : MonoBehaviour
             world.EditBlock(destroyPos, BlockType.Air);
         }
 
-        if (Input.GetMouseButtonDown(1) && placeFound && inventory.HandItem.Item is BlockData blockData)
+        if (Input.GetMouseButtonDown(1) && placeFound && inventory.HandItem.Item is BlockData_SO blockData)
         {
             world.EditBlock(placePos, blockData.blockType);
         }

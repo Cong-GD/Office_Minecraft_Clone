@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public static class BlockHelper
@@ -20,92 +21,96 @@ public static class BlockHelper
 
     public static void AddBlockMeshData(ChunkData chunkData,MeshData meshData, Vector3Int localPos)
     {
-        var blockData = BlockDataManager.GetData(chunkData.GetBlock(ref localPos));
+        var blockData = BlockDataManager.GetData(chunkData.GetBlock(localPos));
         if (blockData.blockType == BlockType.Air)
             return;
 
         foreach (var direction in DirectionExtensions.GetDirections())
         {
             var adjacentLocalPosition = localPos + direction.GetVector();
-            BlockData adjacentBlockData;
+            BlockData_SO adjacentBlockData;
+
             if(Chunk.IsPositionInChunk( adjacentLocalPosition))
             {
-                adjacentBlockData = BlockDataManager.GetData(chunkData.GetBlock(ref adjacentLocalPosition));
+                adjacentBlockData = BlockDataManager.GetData(chunkData.GetBlock(adjacentLocalPosition));
             }
             else
             {
                 adjacentBlockData = World.Instance.GetBlockData(chunkData.worldPosition + adjacentLocalPosition);
             }
             
-            if(adjacentBlockData.isTransparent)
+            if(adjacentBlockData.isTransparent && blockData.blockType != adjacentBlockData.blockType)
             {
-                meshData.vertices.AddRange(GetDirectionVertices(direction, localPos));
+                AddGetDirectionVertices(meshData.vertices, direction, localPos);
+
+                for (int i = 0; i < 4; i++) meshData.normals.Add(direction.GetVector());
 
                 if (blockData.isTransparent)
                 {
-                    meshData.transparentTriangles.AddRange(GetQuadTriangle(meshData.vertices.Count));
+                    GetQuadTriangle(meshData.vertices.Count, meshData.transparentTriangles);
                 }
                 else
                 {
-                    meshData.triangles.AddRange(GetQuadTriangle(meshData.vertices.Count));
+                    GetQuadTriangle(meshData.vertices.Count, meshData.triangles);
                 }
 
                 //meshData.triangles.AddRange(GetQuadTriangle(meshData.vertices.Count));
 
-                if (blockData.generateCollider && !adjacentBlockData.generateCollider)
+                if (blockData.isSolid && !adjacentBlockData.isSolid)
                 {
-                    meshData.colliderTriangles.AddRange(GetQuadTriangle(meshData.vertices.Count));
+                    GetQuadTriangle(meshData.vertices.Count, meshData.colliderTriangles);
                 }
                 AddUvs(meshData, blockData.GetUvIndex(direction));
             }
         }
     }
 
-    private static IEnumerable<Vector3> GetDirectionVertices(Direction direction,Vector3Int position)
+    public static void AddGetDirectionVertices(List<Vector3> vertices,Direction direction,Vector3Int position)
     {
         position.Parse(out var x, out var y, out var z);
         switch (direction)
         {
             case Direction.Forward:
-                yield return new Vector3(x + 1, y + 0, z + 1);
-                yield return new Vector3(x + 1, y + 1, z + 1);
-                yield return new Vector3(x + 0, y + 1, z + 1);
-                yield return new Vector3(x + 0, y + 0, z + 1);
+                vertices.Add(new Vector3(x + 1, y + 0, z + 1));
+                vertices.Add(new Vector3(x + 1, y + 1, z + 1));
+                vertices.Add(new Vector3(x + 0, y + 1, z + 1));
+                vertices.Add(new Vector3(x + 0, y + 0, z + 1));
                 break;                        
-            case Direction.Backward:          
-                yield return new Vector3(x + 0, y + 0, z + 0);
-                yield return new Vector3(x + 0, y + 1, z + 0);
-                yield return new Vector3(x + 1, y + 1, z + 0);
-                yield return new Vector3(x + 1, y + 0, z + 0);
-                break;
-            case Direction.Right:
-                yield return new Vector3(x + 1, y + 0, z + 0);
-                yield return new Vector3(x + 1, y + 1, z + 0);
-                yield return new Vector3(x + 1, y + 1, z + 1);
-                yield return new Vector3(x + 1, y + 0, z + 1);
+            case Direction.Backward:
+                vertices.Add(new Vector3(x + 0, y + 0, z + 0));
+                vertices.Add(new Vector3(x + 0, y + 1, z + 0));
+                vertices.Add(new Vector3(x + 1, y + 1, z + 0));
+                vertices.Add(new Vector3(x + 1, y + 0, z + 0));
+                break;                                       
+            case Direction.Right:                            
+                vertices.Add(new Vector3(x + 1, y + 0, z + 0));
+                vertices.Add(new Vector3(x + 1, y + 1, z + 0));
+                vertices.Add(new Vector3(x + 1, y + 1, z + 1));
+                vertices.Add(new Vector3(x + 1, y + 0, z + 1));
                 break;                       
-            case Direction.Left:             
-                yield return new Vector3(x + 0, y + 0, z + 1);
-                yield return new Vector3(x + 0, y + 1, z + 1);
-                yield return new Vector3(x + 0, y + 1, z + 0);
-                yield return new Vector3(x + 0, y + 0, z + 0);
+            case Direction.Left:
+                vertices.Add(new Vector3(x + 0, y + 0, z + 1));
+                vertices.Add(new Vector3(x + 0, y + 1, z + 1));
+                vertices.Add(new Vector3(x + 0, y + 1, z + 0));
+                vertices.Add(new Vector3(x + 0, y + 0, z + 0));
                 break;                        
-            case Direction.Up:                
-                yield return new Vector3(x + 0, y + 1, z + 0);
-                yield return new Vector3(x + 0, y + 1, z + 1);
-                yield return new Vector3(x + 1, y + 1, z + 1);
-                yield return new Vector3(x + 1, y + 1, z + 0);
+            case Direction.Up:
+                vertices.Add(new Vector3(x + 0, y + 1, z + 0));
+                vertices.Add(new Vector3(x + 0, y + 1, z + 1));
+                vertices.Add(new Vector3(x + 1, y + 1, z + 1));
+                vertices.Add(new Vector3(x + 1, y + 1, z + 0));
                 break;               
-            case Direction.Down:     
-                yield return new Vector3(x + 0, y + 0, z + 1);
-                yield return new Vector3(x + 0, y + 0, z + 0);
-                yield return new Vector3(x + 1, y + 0, z + 0);
-                yield return new Vector3(x + 1, y + 0, z + 1);
+            case Direction.Down:
+                vertices.Add(new Vector3(x + 0, y + 0, z + 1));
+                vertices.Add(new Vector3(x + 0, y + 0, z + 0));
+                vertices.Add(new Vector3(x + 1, y + 0, z + 0));
+                vertices.Add(new Vector3(x + 1, y + 0, z + 1));
                 break;
         }
     }
 
-    private static void AddUvs(MeshData meshData, int uvIndex)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddUvs(MeshData meshData, int uvIndex)
     {
         int yPos = uvIndex / AtlasSize;
         int xPos = uvIndex % AtlasSize;
@@ -117,14 +122,15 @@ public static class BlockHelper
         meshData.uvs.Add(uv1 + _nomalized_UV_Vector[3]);
     }
 
-    private static IEnumerable<int> GetQuadTriangle(int verticesCount)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void GetQuadTriangle(int verticesCount, List<int> triangles)
     {
-        yield return verticesCount - 4;
-        yield return verticesCount - 3;
-        yield return verticesCount - 2;
+        triangles.Add(verticesCount - 4);
+        triangles.Add(verticesCount - 3);
+        triangles.Add(verticesCount - 2);
 
-        yield return verticesCount - 4;
-        yield return verticesCount - 2;
-        yield return verticesCount - 1;
+        triangles.Add(verticesCount - 4);
+        triangles.Add(verticesCount - 2);
+        triangles.Add(verticesCount - 1);
     }
 }

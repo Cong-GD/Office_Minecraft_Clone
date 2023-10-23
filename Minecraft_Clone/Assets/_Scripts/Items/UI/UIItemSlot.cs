@@ -4,11 +4,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UIItemSlot : MonoBehaviour, IPointerClickHandler
+public class UIItemSlot : MonoBehaviour
 {
-    public static event Action<UIItemSlot> OnSlotRightClick;
-    public static event Action<UIItemSlot> OnSlotLeftClick;
-
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI amountText;
 
@@ -25,7 +22,7 @@ public class UIItemSlot : MonoBehaviour, IPointerClickHandler
     {
         ClearSlot();
         slot.OnItemChanged += UpdateUI;
-        this._slot = slot;
+        _slot = slot;
         UpdateUI();
     }
 
@@ -51,17 +48,5 @@ public class UIItemSlot : MonoBehaviour, IPointerClickHandler
         amountText.enabled = true;
         iconImage.sprite = _slot.Item.Icon;
         amountText.text = _slot.Amount.ToString();
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if(eventData.button == PointerEventData.InputButton.Left)
-        {
-            OnSlotLeftClick?.Invoke(this);
-        }
-        if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            OnSlotRightClick?.Invoke(this);
-        }
     }
 }

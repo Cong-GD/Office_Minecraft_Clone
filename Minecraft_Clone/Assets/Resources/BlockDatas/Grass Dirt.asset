@@ -9,18 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd1b27d437f981641ab2e2eef1bcc52f, type: 3}
+  m_Script: {fileID: 11500000, guid: 117b7b39aba6d474d91feb72803791d2, type: 3}
   m_Name: Grass Dirt
   m_EditorClassIdentifier: 
-  blockType: 6
-  isSolid: 1
-  isTransparent: 0
-  generateCollider: 1
+  <blockType>k__BackingField: 6
+  <isSolid>k__BackingField: 1
+  <isTransparent>k__BackingField: 0
+  <Icon>k__BackingField: {fileID: -1215541213, guid: 4e94f503a19d0c949b9745303267f02f,
+    type: 3}
+  <MaxStack>k__BackingField: 64
+  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 8604ed79133a39947a134db2048f8f98,
+    type: 2}
   up: 19
   down: 1
   left: 2
   right: 2
   forward: 2
   backward: 2
-  <Icon>k__BackingField: {fileID: -1215541213, guid: 4e94f503a19d0c949b9745303267f02f,
-    type: 3}

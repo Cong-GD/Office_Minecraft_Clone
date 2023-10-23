@@ -3,7 +3,7 @@
 [CreateAssetMenu(menuName = "Item/Factory/Block")]
 public class BlockFactory : ItemFactory
 {
-    [SerializeField] private BlockData blockToCreate;
+    [SerializeField] private BlockData_SO blockToCreate;
 
     [Min(1)]
     [SerializeField] private int amount;

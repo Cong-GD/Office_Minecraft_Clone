@@ -24,16 +24,6 @@ public class UIToolBar : MonoBehaviour
         }
         uiItemSlots = uiSlots.ToArray();
         UpdateSelectedUI();
-        //uiItemSlots = GetComponentsInChildren<UIItemSlot>();
-        //if(uiItemSlots.Length != 9)
-        //{
-        //    throw new System.Exception("There must be 9 slot on tool bar");
-        //}
-        //for (int i = 0; i < inventory.toolBarItems.Length && i < uiItemSlots.Length; i++)
-        //{
-        //    uiItemSlots[i].SetSlot(inventory.toolBarItems[i]);
-        //}
-
     }
 
     private void Update()

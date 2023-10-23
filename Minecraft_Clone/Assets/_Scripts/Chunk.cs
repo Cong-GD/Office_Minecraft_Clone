@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using static GameSettings;
 
@@ -7,17 +8,18 @@ public static class Chunk
 {
     public static MeshData GetMeshData(ChunkData chunkData)
     {
-        MeshData meshData = ConcurrentPool.GetMeshData();
+        MeshData meshData = ThreadSafePool<MeshData>.Get(); //ConcurrentPool.GetMeshData();
         meshData.Clear();
 
-        var pos = Vector3Int.zero;
-        for (pos.x = 0; pos.x < ChunkSize.x; pos.x++)
+        for (int x = 0; x < CHUNK_WIDTH; x++)
         {
-            for (pos.y = 0; pos.y < ChunkSize.y; pos.y++)
+            for (int y = 0; y < CHUNK_DEPTH; y++)
             {
-                for(pos.z = 0; pos.z < ChunkSize.z; pos.z++)
+                for(int z = 0; z < CHUNK_WIDTH; z++)
                 {
-                    BlockHelper.AddBlockMeshData(chunkData, meshData, pos);
+                    //var blockData = BlockDataManager.GetData(chunkData.GetBlock(pos));
+                    //blockData.MeshGenerator.GetMeshData(meshData, chunkData, pos);
+                    BlockHelper.AddBlockMeshData(chunkData, meshData, new (x, y, z));
                 }
             }
         }
@@ -25,38 +27,27 @@ public static class Chunk
         return meshData;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsPositionInChunk(Vector3Int localPos)
     {
-        return localPos.x > -1 && localPos.x < ChunkSize.x
-            && localPos.y > -1 && localPos.y < ChunkSize.y
-            && localPos.z > -1 && localPos.z < ChunkSize.z;
-    }
-    public static bool IsPositionInChunk(ref Vector3Int localPos)
-    {
-        return localPos.x > -1 && localPos.x < ChunkSize.x
-            && localPos.y > -1 && localPos.y < ChunkSize.y
-            && localPos.z > -1 && localPos.z < ChunkSize.z;
+        return localPos.x > -1 && localPos.x < CHUNK_WIDTH
+            && localPos.y > -1 && localPos.y < CHUNK_DEPTH
+            && localPos.z > -1 && localPos.z < CHUNK_WIDTH;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector3Int GetChunkCoord(Vector3Int worldPosition)
     {
-        int x = Mathf.FloorToInt((float)worldPosition.x / ChunkSize.x);
-        int y = Mathf.FloorToInt((float)worldPosition.y / ChunkSize.y);
-        int z = Mathf.FloorToInt((float)worldPosition.z / ChunkSize.z);
+        int x = Mathf.FloorToInt((float)worldPosition.x / CHUNK_WIDTH);
+        int y = Mathf.FloorToInt((float)worldPosition.y / CHUNK_DEPTH);
+        int z = Mathf.FloorToInt((float)worldPosition.z / CHUNK_WIDTH);
         return new Vector3Int(x, y, z);
     }
 
-    public static Vector3Int GetChunkCoord(ref Vector3Int worldPosition)
-    {
-        int x = Mathf.FloorToInt((float)worldPosition.x / ChunkSize.x);
-        int y = Mathf.FloorToInt((float)worldPosition.y / ChunkSize.y);
-        int z = Mathf.FloorToInt((float)worldPosition.z / ChunkSize.z);
-        return new Vector3Int(x, y, z);
-    }
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsValidChunkCoordY(int y)
     {
-        return y > -1 && y < ChunkSize.y;
+        return y > -1 && y < MAP_HEIGHT_IN_CHUNK;
     }
 
     public static IEnumerable<Vector3Int> GetCoordsInRange(Vector3Int center, int range)
@@ -65,9 +56,9 @@ public static class Chunk
         int yStart = 0;
         int zStart = center.z - range;
         int xEnd = center.x + range;
-        int yEnd = MapHeightInChunk;
+        int yEnd = MAP_HEIGHT_IN_CHUNK;
         int zEnd = center.z + range;
-        Vector3Int pos = new Vector3Int(xStart, yStart, zStart);
+        Vector3Int pos = new Vector3Int();
         for (pos.x = xStart;pos.x <= xEnd; pos.x++)
         {
             for (pos.y = yStart;pos.y < yEnd; pos.y++)
@@ -80,6 +71,7 @@ public static class Chunk
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsPositionInRange(Vector3Int center, Vector3Int position, int range)
     {
         return Mathf.Abs(center.x - position.x) <= range && Mathf.Abs(center.z - position.z) <= range;
