@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class Wait
 {
-    private const int MAX_INTANCE_COUNT = 300;
+    private const int MAX_INTANCE_COUNT = 500;
     private const float LIMIT_TIME = 0.001f;
 
     private static readonly WaitForEndOfFrame _waitForEndOfFrame = new();

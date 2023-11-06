@@ -1,17 +1,21 @@
-﻿public class WaterLayerHandler : BlockLayerHandler
+﻿namespace Minecraft.ProceduralTerrain
 {
-    public int waterLevel = 1;
-    protected override bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
+    public class WaterLayerHandler : BlockLayerHandler
     {
-        if(y > surfaceHeightNoise && y <= waterLevel)
+        public int waterLevel = 1;
+        protected override bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
         {
-            chunkData.SetBlock(x, y, z, BlockType.Water);
-            if(y == surfaceHeightNoise + 1 && y + chunkData.worldPosition.y > 0)
+            int yPos = chunkData.worldPosition.y + y;
+            if (yPos > surfaceHeightNoise && yPos <= WorldSettings.waterLevel)
             {
-                chunkData.SetBlock(x, surfaceHeightNoise, z, BlockType.Sand);
+                chunkData.SetBlock(x, y, z, BlockType.Water);
+                if (yPos == surfaceHeightNoise + 1 && y > 0)
+                {
+                    chunkData.SetBlock(x, y - 1, z, BlockType.Sand);
+                }
+                return true;
             }
-            return true;
+            return false;
         }
-        return false;
     }
 }

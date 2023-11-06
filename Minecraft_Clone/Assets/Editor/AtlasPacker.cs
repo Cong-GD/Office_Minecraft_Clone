@@ -1,13 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using System.Linq;
 using System.IO;
-using System;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
 public class AtlasPacker : EditorWindow
 {
+
     int blockSize = 16; // Block size in pixels
     int atlasSizeInBlock = 16;
     int atlasSize;
@@ -15,10 +14,10 @@ public class AtlasPacker : EditorWindow
     List<Texture2D> rawTexture;
     Texture2D atlas;
 
-    [MenuItem("Minecraft Clone/Atlas Packer")]
+    [MenuItem("Minecraft/Atlas Packer")]
     public static void ShowWindow()
     {
-        EditorWindow.GetWindow(typeof(AtlasPacker));
+        GetWindow(typeof(AtlasPacker));
     }
 
     private void OnGUI()
@@ -29,7 +28,15 @@ public class AtlasPacker : EditorWindow
 
         blockSize = EditorGUILayout.IntField("Block Size", blockSize);
         atlasSizeInBlock = EditorGUILayout.IntField("Atlas Size In Block", atlasSizeInBlock);
-
+        if (rawTexture != null)
+        {
+            GUILayout.BeginScrollView(Vector2.zero);
+            foreach (Texture2D tex in rawTexture)
+            {
+                GUILayout.Label(tex);
+            }
+            GUILayout.EndScrollView();
+        }
         GUILayout.Label(atlas);
 
         if (GUILayout.Button("Load Textures"))
@@ -38,19 +45,20 @@ public class AtlasPacker : EditorWindow
             PackAtlas();
         }
 
-        if(GUILayout.Button("Clear Textures"))
+        if (GUILayout.Button("Clear Textures"))
         {
+            DestroyImmediate(atlas);
             atlas = null;
             rawTexture = null;
         }
 
-        if(atlas != null && GUILayout.Button("Save Atlas"))
+        if (atlas != null && GUILayout.Button("Save Atlas"))
         {
             byte[] bytes = atlas.EncodeToPNG();
 
             try
             {
-                File.WriteAllBytes(Path.Combine(Application.dataPath, "Textures", "Packed_Atlas.png"), bytes);
+                File.WriteAllBytes(Path.Combine(Application.dataPath, "Textures", "Resources", "Packed_Atlas.png"), bytes);
                 //var texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Textures/Packed_Atlas.png");
                 //texture.alphaIsTransparency = true;
                 //Debug.Log(texture.name);
@@ -67,7 +75,7 @@ public class AtlasPacker : EditorWindow
         rawTexture = Resources.LoadAll<Texture2D>("Blocks")
                     .Where(texture =>
                     {
-                        if(texture.width != blockSize || texture.height != blockSize)
+                        if (texture.width != blockSize || texture.height != blockSize)
                         {
                             Debug.LogWarning("Incorect texture size name: " + texture.name);
                             return false;
@@ -83,9 +91,9 @@ public class AtlasPacker : EditorWindow
         atlas = new Texture2D(atlasSize, atlasSize);
         Color[] pixels = new Color[atlasSize * atlasSize];
 
-        for(int x = 0; x < atlasSize; x++)
+        for (int x = 0; x < atlasSize; x++)
         {
-            for(int y = 0; y < atlasSize; y++)
+            for (int y = 0; y < atlasSize; y++)
             {
 
                 int currentBlockX = x / blockSize;

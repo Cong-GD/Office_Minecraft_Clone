@@ -41,6 +41,7 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
     private void Awake()
     {
         mesh = new Mesh();
+        colliderMesh = new Mesh();
         meshFilter.mesh = mesh;
     }
     public void RenderMesh(MeshData meshData)
@@ -50,29 +51,27 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
 
         mesh.Clear();
         mesh.subMeshCount = 2;
-        mesh.SetVertices(meshData.vertices);
-        mesh.SetTriangles(meshData.triangles, 0);
-        mesh.SetTriangles(meshData.transparentTriangles, 1);
-        mesh.SetUVs(0, meshData.uvs);
-        mesh.SetNormals(meshData.normals);
-        //mesh.RecalculateNormals();
+        mesh.SetVertices(meshData.vertices.Items, 0, meshData.vertices.Count);
+        mesh.SetTriangles(meshData.triangles.Items, 0, meshData.triangles.Count, 0);
+        mesh.SetTriangles(meshData.transparentTriangles.Items, 0, meshData.transparentTriangles.Count, 1);
+        mesh.SetUVs(0, meshData.uvs.Items, 0, meshData.uvs.Count);
+        mesh.SetNormals(meshData.normals.Items, 0, meshData.normals.Count);
 
-        Mesh colliderMesh = new Mesh();
-        colliderMesh.SetVertices(meshData.vertices);
-        colliderMesh.SetTriangles(meshData.colliderTriangles, 0);
-        colliderMesh.RecalculateNormals();
+        meshCollider.sharedMesh = null;
+        if (meshData.colliderTriangles.Count == 0)
+            return;
+
+        colliderMesh.Clear();
+        colliderMesh.SetVertices(meshData.vertices.Items, 0, meshData.vertices.Count);
+        colliderMesh.SetTriangles(meshData.colliderTriangles.Items, 0, meshData.colliderTriangles.Count, 0);
         meshCollider.sharedMesh = colliderMesh;
     }
 
-    //private void OnBecameVisible()
-    //{
-    //    meshFilter.mesh = mesh;
-    //}
-
-    //private void OnBecameInvisible()
-    //{
-    //    meshFilter.mesh = null;
-    //}
+    private void OnDestroy()
+    {
+        Destroy(mesh);
+        Destroy(colliderMesh);
+    }
 
     public void ReturnToPool()
     {
@@ -88,8 +87,8 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
         if (ChunkData == null)
             return;
         Gizmos.color = gizmosColor;
-        var centor = ChunkData.worldPosition + (Vector3)GameSettings.ChunkSizeVector / 2;
-        Gizmos.DrawCube(centor, GameSettings.ChunkSizeVector);
+        var centor = ChunkData.worldPosition + (Vector3)WorldSettings.ChunkSizeVector / 2;
+        Gizmos.DrawCube(centor, WorldSettings.ChunkSizeVector);
     }
 #endif
 }

@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0aae6c0dff6f0f4b934d6ea85cb4dce, type: 3}
+  m_Name: TestingNoise
+  m_EditorClassIdentifier: 
+  noiseSettings:
+    seedOffset: 1
+    noiseType: 3
+    rotationType3d: 2
+    frequency: 0.13
+    cellularField:
+      cellularDistanceFunction: 0
+      cellularReturnType: 1
+      cellularJitterModifier: 1
+    fractalType: 0
+    octaves: 5
+    gain: 0.5
+    lucunarity: 2.6
+    weightedStrength: 0
+    pingpongStrength: 0.91
+  useDomainWrapper: 0
+  domainWrapper:
+    seed: 9
+    domainWrappingType: 0
+    domainFractalType: 0
+    frequency: 0.01
+    amplitude: 1
+    octaves: 3
+    gain: 0.5
+    lucunarity: 2
+  postProcessors: []

@@ -1,12 +1,15 @@
-﻿public class AirLayerHandler : BlockLayerHandler
+﻿namespace Minecraft.ProceduralTerrain
 {
-    protected override bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
+    public class AirLayerHandler : BlockLayerHandler
     {
-        if(y > surfaceHeightNoise)
+        protected override bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
         {
-            chunkData.SetBlock(x, y, z, BlockType.Air);
-            return true;
+            if (chunkData.worldPosition.y + y > surfaceHeightNoise)
+            {
+                chunkData.SetBlock(x, y, z, BlockType.Air);
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 }

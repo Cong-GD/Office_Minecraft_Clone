@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public interface IStructure
+namespace Minecraft.ProceduralTerrain.Structures
 {
-    public string Name { get; }
-    public IEnumerable<ModifierUnit> GetStructure();
-}
+    public abstract class Structure : ScriptableObject, IStructure
+    {
+        public string Name => name;
 
-public abstract class Structure : ScriptableObject
-{
-    public abstract IEnumerable<ModifierUnit> GetModifications(Vector3Int position);
+        public abstract void GetModifications(Queue<ModifierUnit> modifiers, Vector3Int position);
+
+    }
 }

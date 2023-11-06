@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class MeshData
 {
-    public List<Vector3> vertices = new();
-    public List<int> triangles = new();
-    public List<Vector2> uvs = new();
-    public List<int> colliderTriangles = new();
-    public List<int> transparentTriangles = new();
-    public List<Vector3> normals = new();
+    public ArrayBuffer<Vector3> vertices = new(5000);
+    public ArrayBuffer<Vector3> normals = new(5000);
+    public ArrayBuffer<Vector2> uvs = new(5000);
+    public ArrayBuffer<int> triangles = new(5000);
+    public ArrayBuffer<int> colliderTriangles = new(5000);
+    public ArrayBuffer<int> transparentTriangles = new(5000);
 
     public void Clear()
     {

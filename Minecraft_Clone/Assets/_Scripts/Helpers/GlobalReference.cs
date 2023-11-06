@@ -22,7 +22,7 @@ public class GlobalReference<T> : MonoBehaviour where T : MonoBehaviour
 
     protected virtual void Awake()
     {
-        if(IsValidInstance() && !ReferenceEquals(_reference, this))
+        if(IsValidInstance() && _reference != this)
             Destroy(gameObject);
         else
         {

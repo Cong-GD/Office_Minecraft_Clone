@@ -1,17 +1,8 @@
+using Minecraft.ProceduralMeshGenerate;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-
-public interface IItem : IEquatable<IItem>
-{
-    public string Name { get; }
-    public Sprite Icon { get; }
-
-    public int MaxStack { get; }
-
-}
 
 public class ItemSlot
 {
@@ -41,7 +32,7 @@ public class ItemSlot
             return true;
         }
         
-        if(!Item.Equals(slot.Item))
+        if(Item != slot.Item)
             return false;
 
         TransferItemToSlotWithSameItem(slot, amount);

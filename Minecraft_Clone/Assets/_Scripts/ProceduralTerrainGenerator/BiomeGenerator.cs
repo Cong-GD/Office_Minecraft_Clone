@@ -1,16 +1,12 @@
-﻿using System;
+﻿using Minecraft;
+using Minecraft.ProceduralTerrain;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
-using static GameSettings;
+using static WorldSettings;
 
 public class BiomeGenerator : MonoBehaviour
 {
-    public int waterThreashold = 50;
-    public float noiseScale = 0.03f;
-
-    public NoiseSettings biomeNoiseSettings;
-    public DomainWarping domainWarping;
+    public NoiseGenerator_SO biomeNoiseGenerator;
 
     public bool useDomainWrapping;
 
@@ -18,32 +14,32 @@ public class BiomeGenerator : MonoBehaviour
 
     public List<BlockLayerHandler> addictionalLayerHandlers;
 
-    public void ProcessChunkCollumn(ChunkData chunkData, int x, int z)
+    public int solidGroundHeight = 128;
+    public int terrainHeight = 50;
+
+    private NoiseInstance _noiseInstance;
+
+    private void Awake()
     {
-        //Vector2Int worldPosition = new (chunkData.worldPosition.x + x, chunkData.worldPosition.z + z);
-        int terrainHeight = GetSurfaceHeightNoise(chunkData.worldPosition.x + x, chunkData.worldPosition.z + z);
-        for (int y = 0; y < CHUNK_DEPTH; y++)
+        _noiseInstance = biomeNoiseGenerator.GetNoiseInstance();
+    }
+
+    public void ProcessChunkCollumn(ChunkData chunkData, int localX, int localZ, int terrainHeight)
+    {
+        for (int localY = 0; localY < CHUNK_DEPTH; localY++)
         {
-            startLayerHandler.Handle(chunkData, x, y, z, terrainHeight); 
+            startLayerHandler.Handle(chunkData, localX, localY, localZ, terrainHeight);
         }
         foreach (var layer in addictionalLayerHandlers)
         {
-            layer.Handle(chunkData, x, 0, z, terrainHeight);
+            layer.Handle(chunkData, localX, 0, localZ, terrainHeight);
         }
     }
 
-    private int GetSurfaceHeightNoise(int x, int z)
+    public float GetSurfaceHeightNoise(int worldX, int worldZ)
     {
-        float terrainHeight;
-        if (useDomainWrapping)
-        {
-            terrainHeight = domainWarping.GenerateDomainNoise(x, z, biomeNoiseSettings);
-        }
-        else
-        {
-            terrainHeight = Noise.OctavePerlin(x, z, biomeNoiseSettings);
-        }
-        terrainHeight = Noise.Redistribution(terrainHeight, biomeNoiseSettings);
-        return Noise.RemapValue01ToInt(terrainHeight, 0, MAP_HEIGHT_IN_BLOCK);
+        float terrainHeightNoise;
+        terrainHeightNoise = _noiseInstance.GetNoise(worldX, worldZ);
+        return solidGroundHeight + terrainHeightNoise * terrainHeight;
     }
 }

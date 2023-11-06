@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "Item/Factory/Block")]
-public class BlockFactory : ItemFactory
+public class BlockFactory : ItemFactory_SO
 {
     [SerializeField] private BlockData_SO blockToCreate;
 

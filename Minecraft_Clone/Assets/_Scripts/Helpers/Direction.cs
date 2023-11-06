@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 public enum Direction
@@ -9,27 +10,13 @@ public enum Direction
 
 public static class DirectionExtensions
 {
-    public static IEnumerable<Direction> GetDirections()
+    public static ReadOnlyCollection<Direction> SixDirections = new List<Direction>
     {
-        yield return Direction.Forward;
-        yield return Direction.Backward;
-        yield return Direction.Up;
-        yield return Direction.Down;
-        yield return Direction.Right;
-        yield return Direction.Left;
-    }
-
-    public static Vector3Int GetVector(this Direction direction)
-    {
-        return direction switch
-        {
-            Direction.Up => Vector3Int.up,
-            Direction.Forward => Vector3Int.forward,
-            Direction.Backward => Vector3Int.back,
-            Direction.Down => Vector3Int.down,
-            Direction.Left => Vector3Int.left,
-            Direction.Right => Vector3Int.right,
-            _ => throw new System.Exception("Invalid input direction")
-        };
-    }
+            Direction.Forward,
+            Direction.Backward,
+            Direction.Up,
+            Direction.Down,
+            Direction.Right,
+            Direction.Left,
+    }.AsReadOnly();
 }

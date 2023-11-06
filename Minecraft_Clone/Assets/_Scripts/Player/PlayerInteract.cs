@@ -1,12 +1,18 @@
-﻿using System;
+﻿using Minecraft.Input;
+using NaughtyAttributes;
+using System;
 using System.Linq;
 using UnityEngine;
 
 public class PlayerInteract : MonoBehaviour
 {
-    public Inventory inventory;
-    public Camera cam;
+    [SerializeField ,Required]
+    private Inventory inventory;
 
+    [SerializeField, Required]
+    private Transform eye;
+
+    [Min(1f)]
     public float checkDistance;
 
     bool destroyFound;
@@ -15,33 +21,39 @@ public class PlayerInteract : MonoBehaviour
     Vector3Int destroyPos;
     Vector3Int placePos;
 
-    World world;
-
-    private void Awake()
-    {
-        cam = Camera.main;
-        world = FindAnyObjectByType<World>();
-    }
-
     private void Update()
     {
+        CheckForDestroy();
+        CheckForPlaceBlock();
+    }
+
+    private void CheckForDestroy()
+    {
+        if (!MInput.LeftMouse.WasPerformedThisFrame())
+            return;
 
         RayCast();
+        if (!destroyFound)
+            return;
 
-        if (Input.GetMouseButtonDown(0) && destroyFound)
-        {
-            world.EditBlock(destroyPos, BlockType.Air);
-        }
+        World.Instance.EditBlock(destroyPos, BlockType.Air);
+    }
 
-        if (Input.GetMouseButtonDown(1) && placeFound && inventory.HandItem.Item is BlockData_SO blockData)
-        {
-            world.EditBlock(placePos, blockData.blockType);
-        }
+    private void CheckForPlaceBlock()
+    {
+        if (!MInput.RightMouse.WasPerformedThisFrame())
+            return;
+
+        RayCast();
+        if (!placeFound || inventory.HandItem.Item is not BlockData_SO blockData)
+            return;
+
+        World.Instance.EditBlock(placePos, blockData.BlockType);
     }
 
     private void RayCast()
     {
-        var ray = new Ray(cam.transform.position, cam.transform.forward);
+        var ray = new Ray(eye.transform.position, eye.transform.forward);
 
         if (Physics.Raycast(ray, out var hit, checkDistance, LayerHelper.GroundLayer))
         {

@@ -12,17 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 117b7b39aba6d474d91feb72803791d2, type: 3}
   m_Name: Oak Plank
   m_EditorClassIdentifier: 
-  <blockType>k__BackingField: 3
-  <isSolid>k__BackingField: 1
-  <isTransparent>k__BackingField: 0
+  <BlockType>k__BackingField: 3
+  <IsSolid>k__BackingField: 1
+  <IsTransparent>k__BackingField: 0
   <Icon>k__BackingField: {fileID: 2079815244, guid: 4e94f503a19d0c949b9745303267f02f,
     type: 3}
   <MaxStack>k__BackingField: 64
-  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 8604ed79133a39947a134db2048f8f98,
+  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 7f488de66eb42cb47af582fd1fee7cb1,
     type: 2}
-  up: 8
-  down: 8
-  left: 8
-  right: 8
-  forward: 8
-  backward: 8

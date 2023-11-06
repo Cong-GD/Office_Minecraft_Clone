@@ -12,16 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 117b7b39aba6d474d91feb72803791d2, type: 3}
   m_Name: Air
   m_EditorClassIdentifier: 
-  <blockType>k__BackingField: 0
-  <isSolid>k__BackingField: 0
-  <isTransparent>k__BackingField: 1
+  <BlockType>k__BackingField: 0
+  <IsSolid>k__BackingField: 0
+  <IsTransparent>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 0}
   <MaxStack>k__BackingField: 64
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 6b285fa297bffa94fb64649cc91d9f61,
     type: 2}
-  up: 0
-  down: 0
-  left: 0
-  right: 0
-  forward: 0
-  backward: 0

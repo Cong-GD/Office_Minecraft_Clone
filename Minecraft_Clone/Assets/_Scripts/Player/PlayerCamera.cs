@@ -1,28 +1,52 @@
+using Cinemachine;
+using Minecraft.Input;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
 {
-    public Transform rootTransform;
-
-    [SerializeField] private PlayerInput input;
+    [SerializeField] private Transform orientation;
+    [SerializeField] private Rigidbody playerBody;
+    [SerializeField] private CinemachineVirtualCamera vcam;
 
     [Header("Settings")]
-    public float mouseSensitive;
+    public Vector2 mouseSensitive;
+    public float minNoiseScale = 1f;
+    public float maxNoiseScale = 5f;
+    public float maxSpeed = 7f;
 
-    private float currentRotationY = 0;
+    private Vector2 lookInput;
+    private float _xRotation = 0;
+    private float _yRotation = 0;
+    private CinemachineBasicMultiChannelPerlin _camNoise;
+
+    private void Start()
+    {
+        _camNoise = vcam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+    }
 
     private void Update()
     {
-        if (UIManager.Instance.IsActive)
+        lookInput = MInput.Look.ReadValue<Vector2>();
+        if (lookInput == Vector2.zero)
             return;
 
-        var mouseInputDelta = input.MouseInput * Time.deltaTime * mouseSensitive;
+        var inputDelta = lookInput * mouseSensitive * Time.deltaTime;
 
-        rootTransform.Rotate(Vector3.up, mouseInputDelta.x);
+        _xRotation += inputDelta.x;
+        _yRotation += inputDelta.y;
+        _yRotation = Mathf.Clamp(_yRotation, -90, 90);
 
-        currentRotationY = Mathf.Clamp(currentRotationY + mouseInputDelta.y, -90, 90);
-        transform.localRotation = Quaternion.Euler(currentRotationY, 0, 0);
+        transform.rotation = Quaternion.Euler(_yRotation, _xRotation, 0);
+        orientation.rotation = Quaternion.Euler(0, _xRotation, 0);
     }
+
+    private void FixedUpdate()
+    {
+        float flatSpeed = playerBody.velocity.XZ().magnitude;
+        _camNoise.m_FrequencyGain = MyMath.RemapValue(flatSpeed, 0, maxSpeed, minNoiseScale, maxNoiseScale);
+    }
+
+
 }

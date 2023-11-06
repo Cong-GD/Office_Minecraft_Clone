@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Minecraft.Input;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -16,7 +17,7 @@ public class ItemDragingSystem : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (MInput.UI_LeftClick.WasPerformedThisFrame())
         {
             if(GetCurrentMouseOverSlot(out var slot))
             {

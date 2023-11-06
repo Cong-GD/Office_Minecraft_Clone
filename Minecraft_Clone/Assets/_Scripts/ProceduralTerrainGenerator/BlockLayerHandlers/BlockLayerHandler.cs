@@ -1,18 +1,36 @@
 ﻿using UnityEngine;
 
-public abstract class BlockLayerHandler : MonoBehaviour
+namespace Minecraft.ProceduralTerrain
 {
-    [SerializeField] private BlockLayerHandler Next;
-
-    public bool Handle(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
+    public abstract class BlockLayerHandler : MonoBehaviour
     {
-        if(TryHandling(chunkData, x, y, z, surfaceHeightNoise))
-            return true;
-        if(Next != null)
-            return Next.Handle(chunkData, x, y, z, surfaceHeightNoise);
+        [SerializeField] private BlockLayerHandler Next;
 
-        return false;
+        private string layerName;
+
+        private void Awake()
+        {
+            layerName = name;
+        }
+
+        public bool Handle(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
+        {
+
+            try
+            {
+                if (TryHandling(chunkData, x, y, z, surfaceHeightNoise))
+                    return true;
+            }
+            catch
+            {
+                throw new System.Exception($"Error when handler {layerName}");
+            }
+            if (Next != null)
+                return Next.Handle(chunkData, x, y, z, surfaceHeightNoise);
+
+            return false;
+        }
+
+        protected abstract bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise);
     }
-
-    protected abstract bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise);
 }

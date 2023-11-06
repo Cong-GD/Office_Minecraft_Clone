@@ -1,31 +1,39 @@
 ﻿using UnityEngine;
 
-public class StoneLayerHandler : BlockLayerHandler
+namespace Minecraft.ProceduralTerrain
 {
-    [Range(0, 1)]
-    public float stoneThreashold = 0.5f;
-
-    public NoiseSettings stoneNoiseSettings;
-    public DomainWarping domainWrapping;
-
-    protected override bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
+    public class StoneLayerHandler : BlockLayerHandler
     {
-        if(chunkData.worldPosition.y > surfaceHeightNoise)
+        [Range(0, 1)]
+        public float stoneThreashold = 0.5f;
+
+        public NoiseGenerator_SO stoneNoise;
+
+        private NoiseInstance _noiseInstance;
+
+        private void Start()
+        {
+            _noiseInstance = stoneNoise.GetNoiseInstance();
+        }
+
+        protected override bool TryHandling(ChunkData chunkData, int x, int _, int z, int surfaceHeightNoise)
+        {
+            int localSurfaceHeight = surfaceHeightNoise - chunkData.worldPosition.y;
+            if (!Chunk.IsValidLocalY(localSurfaceHeight))
+                return false;
+
+            float stoneNoiseValue = _noiseInstance.GetNoise(chunkData.worldPosition.x + x, chunkData.worldPosition.z + z);
+
+            if (stoneNoiseValue > stoneThreashold)
+            {
+                for (int i = 0; i <= localSurfaceHeight; i++)
+                {
+                    chunkData.SetBlock(x, i, z, BlockType.Stone);
+                }
+                return true;
+            }
             return false;
 
-        //float stoneNoise = Noise.OctavePerlin(chunkData.worldPosition.x + x, chunkData.worldPosition.z + z, stoneNoiseSettings);
-        float stoneNoise = domainWrapping.GenerateDomainNoise(chunkData.worldPosition.x + x, chunkData.worldPosition.z + z, stoneNoiseSettings);
-        int endPosition = surfaceHeightNoise - chunkData.worldPosition.y;
-
-        if(stoneNoise > stoneThreashold)
-        {
-            for(int i = 0; i <= endPosition; i++)
-            {
-                chunkData.SetBlock(x, i, z, BlockType.Stone);
-            }
-            return true;
         }
-        return false;
-
     }
 }

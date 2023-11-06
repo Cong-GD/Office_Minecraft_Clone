@@ -1,28 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class UIToolBar : MonoBehaviour
 {
     [SerializeField] private Inventory inventory;
-
     [SerializeField] private UIItemSlot[] uiItemSlots;
     [SerializeField] private Transform selectionImage;
-
-    [SerializeField] private UIItemSlot itemSlotPrefab;
-    [SerializeField] private Transform toolBarParent;
 
     private int _currentSelected = 0;
 
     private void Start()
     {
-        var uiSlots = new List<UIItemSlot>();
-        for (int i = 0; i < inventory.toolBarItems.Length; i++)
+        for (int i = 0; i < inventory.toolBarItems.Length && i < uiItemSlots.Length; i++)
         {
-            var uiSlot = Instantiate(itemSlotPrefab, toolBarParent);
-            uiSlots.Add(uiSlot);
-            uiSlot.SetSlot(inventory.toolBarItems[i]);
+            uiItemSlots[i].SetSlot(inventory.toolBarItems[i]);
         }
-        uiItemSlots = uiSlots.ToArray();
         UpdateSelectedUI();
     }
 

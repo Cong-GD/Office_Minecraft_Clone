@@ -12,17 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 117b7b39aba6d474d91feb72803791d2, type: 3}
   m_Name: Castus
   m_EditorClassIdentifier: 
-  <blockType>k__BackingField: 12
-  <isSolid>k__BackingField: 1
-  <isTransparent>k__BackingField: 0
+  <BlockType>k__BackingField: 12
+  <IsSolid>k__BackingField: 1
+  <IsTransparent>k__BackingField: 0
   <Icon>k__BackingField: {fileID: 1414263068, guid: 4e94f503a19d0c949b9745303267f02f,
     type: 3}
   <MaxStack>k__BackingField: 64
-  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 8604ed79133a39947a134db2048f8f98,
+  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: b0da834d85011a84189554e44c78e3c9,
     type: 2}
-  up: 26
-  down: 26
-  left: 25
-  right: 25
-  forward: 25
-  backward: 25

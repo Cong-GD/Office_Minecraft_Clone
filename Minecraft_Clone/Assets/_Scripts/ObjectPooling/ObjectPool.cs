@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,29 +18,25 @@ namespace ObjectPooling
     [CreateAssetMenu(menuName = "ObjectPool")]
     public class ObjectPool : ScriptableObject
     {
-        [SerializeField] private Prefab prefab;
+        [SerializeField, Required] 
+        private Prefab prefab;
 
+        [ShowNonSerializedField]
         private int _currentID = 0;
 
         private readonly Dictionary<int, Prefab> _pool = new();
         private readonly HashSet<int> _inactive = new();
         private readonly HashSet<int> _active = new();
 
-#if UNITY_EDITOR
-        [field: SerializeField]
-        public int CountAll { get; private set; }
-
-        [field: SerializeField]
-        public int CountActive { get; private set; }
-
-        [field: SerializeField]
-        public int CountInactive { get; private set; }
-#else
+        [ShowNativeProperty]
         public int CountAll => _pool.Count;
+
+        [ShowNativeProperty]
         public int CountActive => _active.Count;
+
+        [ShowNativeProperty]
         public int CountInactive => _inactive.Count;
 
-#endif
 
         public IPoolObject Get()
         {
@@ -56,7 +53,6 @@ namespace ObjectPooling
             _active.Add(id);
             var instance = _pool[id].Instance;
             instance.gameObject.SetActive(true);
-            UpdateAmount();
             return instance;
         }
 
@@ -73,7 +69,6 @@ namespace ObjectPooling
             _pool[id].gameObject.SetActive(false);
             _active.Remove(id);
             _inactive.Add(id);
-            UpdateAmount();
         }
 
         private void Remove(int id)
@@ -81,17 +76,6 @@ namespace ObjectPooling
             _active.Remove(id);
             _inactive.Remove(id);
             _pool.Remove(id);
-            UpdateAmount();
-        }
-
-
-        private void UpdateAmount()
-        {
-#if UNITY_EDITOR
-            CountAll = _pool.Count;
-            CountActive = _active.Count;
-            CountInactive = _inactive.Count;
-#endif
         }
     }
 }
