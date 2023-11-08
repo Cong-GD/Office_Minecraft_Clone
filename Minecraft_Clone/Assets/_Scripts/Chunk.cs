@@ -28,6 +28,7 @@ public static class Chunk
         return meshData;
     }
 
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsPositionInChunk(Vector3Int localPos)
     {
@@ -35,6 +36,7 @@ public static class Chunk
             && localPos.y > -1 && localPos.y < CHUNK_DEPTH
             && localPos.z > -1 && localPos.z < CHUNK_WIDTH;
     }
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsPositionInChunk(int localX, int localY, int localZ)
@@ -44,29 +46,32 @@ public static class Chunk
             && localZ > -1 && localZ < CHUNK_WIDTH;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3Int GetChunkCoord(Vector3Int worldPos)
-    {
-        int x = Mathf.FloorToInt((float)worldPos.x / CHUNK_WIDTH);
-        int y = Mathf.FloorToInt((float)worldPos.y / CHUNK_DEPTH);
-        int z = Mathf.FloorToInt((float)worldPos.z / CHUNK_WIDTH);
-        return new Vector3Int(x, y, z);
-    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3Int GetChunkCoord(int worldX, int worldY, int worldZ)
+    public static Vector3Int GetChunkCoord(Vector3 worldPos)
     {
-        worldX = Mathf.FloorToInt((float)worldX / CHUNK_WIDTH);
-        worldY = Mathf.FloorToInt((float)worldY / CHUNK_DEPTH);
-        worldZ = Mathf.FloorToInt((float)worldZ / CHUNK_WIDTH);
-        return new Vector3Int(worldX, worldY, worldZ);
+        return GetChunkCoord(worldPos.x, worldPos.y, worldPos.z);
     }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector3Int GetChunkCoord(float worldX, float worldY, float worldZ)
+    {
+        return new Vector3Int
+        {
+            x = Mathf.FloorToInt(worldX / CHUNK_WIDTH),
+            y = Mathf.FloorToInt(worldY / CHUNK_DEPTH),
+            z = Mathf.FloorToInt(worldZ / CHUNK_WIDTH)
+        };
+    }
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsValidChunkCoordY(int y)
     {
         return y > -1 && y < MAP_HEIGHT_IN_CHUNK;
     }
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsValidWorldY(int y)
@@ -79,10 +84,11 @@ public static class Chunk
     {
         return y > -1 && y < CHUNK_DEPTH;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetBlockIndex(int localX, int localY, int localZ)
-=> (localZ * CHUNK_WIDTH * CHUNK_DEPTH) + (localY * CHUNK_WIDTH) + localX;
+        => (localZ * CHUNK_WIDTH * CHUNK_DEPTH) + (localY * CHUNK_WIDTH) + localX;
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -114,12 +120,14 @@ public static class Chunk
                  blockType);
     }
 
+    public static BlockType GetBlock(Vector3Int worldPos)
+    {
+        return GetBlock(worldPos.x, worldPos.y, worldPos.z);
+    }
+
     public static BlockType GetBlock(int worldX, int worldY, int worldZ)
     {
         var chunkCoord = GetChunkCoord(worldX, worldY, worldZ);
-
-        if (!IsValidChunkCoordY(chunkCoord.y))
-            return BlockType.Air;
 
         if (World.Instance.TryGetChunkData(chunkCoord, out var chunkData))
         {
@@ -132,12 +140,14 @@ public static class Chunk
         return BlockType.Air;
     }
 
+    public static void SetBlock(Vector3Int worldPos, BlockType blockType)
+    {
+        SetBlock(worldPos.x, worldPos.y, worldPos.z, blockType);
+    }
+
     public static void SetBlock(int worldX, int worldY, int worldZ, BlockType blockType)
     {
         var chunkCoord = GetChunkCoord(worldX, worldY, worldZ);
-
-        if (!IsValidChunkCoordY(chunkCoord.y))
-            return;
 
         if (World.Instance.TryGetChunkData(chunkCoord, out var chunkData))
         {

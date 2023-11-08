@@ -15,27 +15,31 @@ public class World : MonoBehaviour
     [ShowNonSerializedField]
     public static int WorldSeed = 1;
 
-    [OnValueChanged(nameof(UpdateSeed))]
-
     public int seed;
 
-    public TerrainGenerator terrainGenerator;
+    [SerializeField]
+    private TerrainGenerator terrainGenerator;
 
-    [SerializeField] private ObjectPool chunkRendererPool;
-    public Transform player;
-    public Vector3Int playerCoord;
+    [SerializeField] 
+    private ObjectPool chunkRendererPool;
 
-    [Header("Chunk render properties")]
-    public int viewDistance = 3;
+    [field: SerializeField]
+    public Transform Player { get; private set; }
+
+    [field: SerializeField]
+    public Vector3Int PlayerCoord { get; private set; }
+
+    [SerializeField ,Header("Chunk render properties")]
+    private int viewDistance = 3;
 
     [SerializeField, Range(1, 12)]
-    int startMaxDegreeOfParallelism = 6;
+    private int startMaxDegreeOfParallelism = 6;
 
     [SerializeField, Range(1, 6)]
-    int maxDegreeOfParallelism;
+    private int maxDegreeOfParallelism;
 
     [SerializeField, Range(1, 1000)]
-    int chunkRenderPerFrame;
+    private int chunkRenderPerFrame;
 
     [Header("Testing Purpose")]
     public bool multiThread;
@@ -46,8 +50,6 @@ public class World : MonoBehaviour
 
     [ShowNativeProperty]
     public int ChunkRendering => _chunkRendererDictionary.Count;
-
-
 
     public int ChunkDataLoadRange => viewDistance + 1;
     public int HiddenChunkDistance => viewDistance + 2;
@@ -65,15 +67,17 @@ public class World : MonoBehaviour
     private CancellationTokenSource _blockEditToken;
     private CancellationToken _cancellationToken;
     private ParallelOptions _parallelOptions;
-    private Camera cam;
 
     public static World Instance { get; private set; }
 
     private void Awake()
     {
-        BlockDataHelper.Init();
-        cam = Camera.main;
+        if(Instance != null)
+            Destroy(gameObject);
+
         Instance = this;
+        WorldSeed = seed;
+
         _cancellationToken = destroyCancellationToken;
         _parallelOptions = new ParallelOptions()
         {
@@ -84,23 +88,24 @@ public class World : MonoBehaviour
 
     private async void Start()
     {
-        await Task.Delay(100);
+        await Task.Delay(50);
+        
         if (!multiThread)
         {
-            PrepareChunkData(playerCoord);
+            PrepareChunkData(PlayerCoord);
             ExcuseModifyQuery();
             BuildStructures();
-            PrepareMeshDatas(playerCoord);
+            PrepareMeshDatas(PlayerCoord);
         }
 
         try
         {
             if (multiThread)
             {
-                await Task.Run(() => PrepareChunkData(playerCoord), _cancellationToken);
+                await Task.Run(() => PrepareChunkData(PlayerCoord), _cancellationToken);
                 ExcuseModifyQuery();
                 BuildStructures();
-                await Task.Run(() => PrepareMeshDatas(playerCoord), _cancellationToken);
+                await Task.Run(() => PrepareMeshDatas(PlayerCoord), _cancellationToken);
             }
             if (continueGenerate)
             {
@@ -118,17 +123,13 @@ public class World : MonoBehaviour
 
     private void Update()
     {
-        playerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(player.transform.position)).X_Z(0);
+        PlayerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(Player.transform.position)).X_Z(0);
+
         int renderCount = 0;
         while (renderCount++ < chunkRenderPerFrame && _preparedMeshs.TryDequeue(out var preparedMesh))
         {
             RenderMesh(preparedMesh.coord, preparedMesh.meshData);
         }
-    }
-
-    private void UpdateSeed()
-    {
-        WorldSeed = seed;
     }
 
 
@@ -139,16 +140,16 @@ public class World : MonoBehaviour
     #region Long term world operation method group
     private async Task LongtermViewCheckTask()
     {
-        var playerCoord = this.playerCoord - Vector3Int.one;
+        var playerCoord = this.PlayerCoord - Vector3Int.one;
         while (true)
         {
             _cancellationToken.ThrowIfCancellationRequested();
-            if (playerCoord == this.playerCoord)
+            if (playerCoord == this.PlayerCoord)
             {
                 await Task.Delay(1000).ConfigureAwait(false);
                 continue;
             }
-            playerCoord = this.playerCoord;
+            playerCoord = this.PlayerCoord;
             _parallelOptions.MaxDegreeOfParallelism = maxDegreeOfParallelism;
             RemoveOutOfRangeChunkData(playerCoord);
             PrepareChunkData(playerCoord);
@@ -385,18 +386,18 @@ public class World : MonoBehaviour
 
     private IEnumerator HiddenAnOutOfViewChunk()
     {
-        var oldPlayerCoord = playerCoord;
+        var oldPlayerCoord = PlayerCoord;
         while (true)
         {
-            if (oldPlayerCoord == playerCoord)
+            if (oldPlayerCoord == PlayerCoord)
             {
                 yield return Wait.ForSeconds(1f);
                 continue;
             }
-            oldPlayerCoord = playerCoord;
+            oldPlayerCoord = PlayerCoord;
             foreach (var chunk in _chunkRendererDictionary.ToArray())
             {
-                if (Chunk.IsPositionInRange(playerCoord, chunk.Key, HiddenChunkDistance) || !TryGetChunkData(chunk.Key, out var chunkData))
+                if (Chunk.IsPositionInRange(PlayerCoord, chunk.Key, HiddenChunkDistance) || !TryGetChunkData(chunk.Key, out var chunkData))
                     continue;
 
                 if (chunkData.state != ChunkState.Rendering)

@@ -1,39 +1,68 @@
 ﻿using Minecraft.Input;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class ItemDragingSystem : MonoBehaviour
 {
-    private List<RaycastResult> _rayCastResut = new();
 
-    [SerializeField] private UIItemSlot draggingSlot;
-    private bool _isDragging;
+    [SerializeField] private UIItemSlot uiDraggingSlot;
+
+    private List<RaycastResult> _rayCastResut = new();
+    public bool IsDragging => !DraggingSlot.IsEmpty();
+
+    public ItemSlot DraggingSlot { get; private set; } = new ItemSlot();
 
     private void Awake()
     {
-        draggingSlot.Slot = new ItemSlot();
+        uiDraggingSlot.Slot = DraggingSlot;
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        if (MInput.UI_LeftClick.WasPerformedThisFrame())
-        {
-            if(GetCurrentMouseOverSlot(out var slot))
-            {
-                UIItemSlot_OnSlotLeftClick(slot);
-            }
-        }
+        MInput.UI_LeftClick.performed += ProcessLeftClickInput;
+        MInput.UI_RightClick.performed += ProcessRightClickInput;
 
-        if(_isDragging)
+        MInput.Pointer.performed += OnPointerMoving;
+        DraggingSlot.OnItemModified += UpdateDraggingSlotPosition;
+    }
+
+
+    private void OnDisable()
+    {
+        MInput.UI_LeftClick.performed -= ProcessLeftClickInput;
+        MInput.UI_RightClick.performed -= ProcessRightClickInput;
+
+        MInput.Pointer.performed -= OnPointerMoving;
+        DraggingSlot.OnItemModified -= UpdateDraggingSlotPosition;
+    }
+
+    private void OnPointerMoving(InputAction.CallbackContext context)
+    {
+        UpdateDraggingSlotPosition();
+    }
+
+    private void ProcessLeftClickInput(InputAction.CallbackContext context)
+    {
+        if (GetCurrentMouseOverSlot(out var slot))
         {
-            draggingSlot.transform.position = (Vector2)Input.mousePosition;
+            UIItemSlot_OnSlotLeftClick(slot);
+        }
+    }
+
+    private void ProcessRightClickInput(InputAction.CallbackContext context)
+    {
+        if (GetCurrentMouseOverSlot(out var slot))
+        {
+            UIItemSlot_OnSlotRightClick(slot);
         }
     }
 
     private bool GetCurrentMouseOverSlot(out UIItemSlot slot)
     {
-        RaycastUtilities.UIRaycast((Vector2)Input.mousePosition, _rayCastResut);
+        RaycastUtilities.UIRaycast(MInput.PointerPosition, _rayCastResut);
         foreach (var hit in _rayCastResut)
         {
             if(hit.gameObject.TryGetComponent(out slot))
@@ -47,7 +76,10 @@ public class ItemDragingSystem : MonoBehaviour
 
     private void UIItemSlot_OnSlotLeftClick(UIItemSlot uiItemSlot)
     {
-        if (!_isDragging)
+        if (uiItemSlot.Slot is null)
+            return;
+
+        if (!IsDragging)
         {
             HandlerStartDragItemSlot(uiItemSlot);
         }
@@ -57,30 +89,41 @@ public class ItemDragingSystem : MonoBehaviour
         }
     }
 
-    private void HandlerEndDragItemSlot(UIItemSlot uiItemSlot)
-    {
-        if (!uiItemSlot.HasItem())
-        {
-            draggingSlot.Slot.TransferTo(uiItemSlot.Slot, draggingSlot.Slot.Amount);
-            _isDragging = false;
-        }
-        else
-        {
-            draggingSlot.Slot.SwapItem(uiItemSlot.Slot);
-        }
-    }
-
     private void HandlerStartDragItemSlot(UIItemSlot uiItemSlot)
     {
         if (!uiItemSlot.HasItem())
             return;
 
-        _isDragging = true;
-        uiItemSlot.Slot.TransferTo(draggingSlot.Slot, uiItemSlot.Slot.Amount);
+        uiItemSlot.Slot.TryTransferTo(uiDraggingSlot.Slot, uiItemSlot.Slot.Amount);
+    }
+    private void HandlerEndDragItemSlot(UIItemSlot uiItemSlot)
+    {
+        if (DraggingSlot.TryTransferTo(uiItemSlot.Slot, DraggingSlot.Amount))
+            return;
+
+        DraggingSlot.SwapItem(uiItemSlot.Slot);
     }
 
     private void UIItemSlot_OnSlotRightClick(UIItemSlot uiItemSlot)
     {
+        if (uiItemSlot.Slot is null)
+            return;
 
+        if (IsDragging)
+        {
+            DraggingSlot.TryTransferTo(uiItemSlot.Slot, 1);
+        }
+        else
+        {
+            uiItemSlot.Slot.TryTransferTo(DraggingSlot, uiItemSlot.Slot.Amount / 2);
+        }
+    }
+
+    private void UpdateDraggingSlotPosition()
+    {
+        if (IsDragging)
+        {
+            uiDraggingSlot.transform.position = MInput.PointerPosition;
+        }
     }
 }

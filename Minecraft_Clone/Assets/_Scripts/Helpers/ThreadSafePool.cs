@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class ThreadSafePool<T> where T : class, new()
 {
-    private const int MAX_POOL_SIZE = 50000;
+    private const int MAX_POOL_SIZE = 5000;
 
     private readonly static Queue<T> _pool = new();
 
@@ -26,9 +26,8 @@ public static class ThreadSafePool<T> where T : class, new()
     {
         lock (_lockObj)
         {
-            _pool.Enqueue(instance);
-            if (_pool.Count > MAX_POOL_SIZE)
-                _pool.Clear();
+            if (_pool.Count < MAX_POOL_SIZE)
+                _pool.Enqueue(instance);
         }
     }
 }

@@ -19,9 +19,10 @@ namespace Minecraft.ProceduralMeshGenerate
         protected static Vector3Int[] sixDirectionVectors = VectorExtensions.SixDirectionsVector3Int.ToArray();
         protected static Direction[] sixDirections = DirectionExtensions.SixDirections.ToArray();
 
-        protected override Mesh GenerateObjectMesh()
+        public override Mesh CreateMesh()
         {
             Mesh mesh = new Mesh();
+            ObjectManager.AddToManagingList(mesh);
             ArrayBuffer<Vector3> vertices = new();
             ArrayBuffer<int> triangles = new();
             ArrayBuffer<Vector2> uvs = new();

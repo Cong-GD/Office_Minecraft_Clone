@@ -10,7 +10,7 @@ namespace Minecraft.ProceduralMeshGenerate
             return;
         }
 
-        protected override Mesh GenerateObjectMesh()
+        public override Mesh CreateMesh()
         {
             return null;
         }

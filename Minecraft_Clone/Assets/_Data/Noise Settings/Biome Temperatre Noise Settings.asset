@@ -32,8 +32,8 @@ MonoBehaviour:
     seed: 0
     domainWrappingType: 0
     domainFractalType: 4
-    frequency: 0.001
-    amplitude: 20
+    frequency: 0.01
+    amplitude: 145.6
     octaves: 3
     gain: 0.5
     lucunarity: 2

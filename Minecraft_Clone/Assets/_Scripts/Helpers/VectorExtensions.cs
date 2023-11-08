@@ -3,9 +3,16 @@ using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-
 public static class VectorExtensions
 {
+    public readonly static ReadOnlyCollection<Vector2Int> FourDirectionsVector2Int = new List<Vector2Int>
+    {
+        new Vector2Int(1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, -1),
+    }.AsReadOnly();
+
     public readonly static ReadOnlyCollection<Vector2Int> EightDirectionsVector2Int = new List<Vector2Int>
     {
         new Vector2Int( 0,  1),

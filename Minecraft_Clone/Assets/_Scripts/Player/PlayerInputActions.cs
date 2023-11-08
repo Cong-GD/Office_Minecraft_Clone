@@ -85,7 +85,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""name"": ""ScrollWheel"",
                     ""type"": ""Value"",
                     ""id"": ""91cdf1b4-6204-4123-b418-a73e71bd6812"",
-                    ""expectedControlType"": ""Delta"",
+                    ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -96,13 +96,22 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""id"": ""536a9eca-9d47-48ba-ab1d-ceef2d914b66"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
+                    ""interactions"": ""Press"",
+                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Sprint"",
                     ""type"": ""Button"",
                     ""id"": ""fdb397a0-4d95-40b8-bb38-2bd8e9cdc4d8"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Throw"",
+                    ""type"": ""Button"",
+                    ""id"": ""c6d36892-d920-42e6-96c5-bf7da6d0c1fe"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -223,7 +232,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""1dfc6774-6f3a-4a1a-a487-85a61420371c"",
-                    ""path"": ""<Mouse>/scroll"",
+                    ""path"": ""<Mouse>/scroll/y"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -263,6 +272,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Sprint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b694cd4b-db42-4625-8e2e-0d42f795b260"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Throw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -294,8 +314,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""id"": ""3dca5be0-562f-450c-a6f8-2e539c96884c"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
+                    ""interactions"": ""Press"",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -344,6 +364,54 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""General"",
+            ""id"": ""6714484d-9122-4a44-ba1d-4f9dab316bdf"",
+            ""actions"": [
+                {
+                    ""name"": ""Pointer"",
+                    ""type"": ""Value"",
+                    ""id"": ""eb689cca-375f-45ab-a639-0f2e567b57db"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Shift"",
+                    ""type"": ""Button"",
+                    ""id"": ""31a33e64-e782-4014-9997-846fa1ee84d1"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""720015b7-2d8f-41d2-9fdb-ad806cbcf15c"",
+                    ""path"": ""<Pointer>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pointer"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""89a36f66-f996-4b16-bd55-518bde7d9994"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -359,11 +427,16 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_GamePlay_ScrollWheel = m_GamePlay.FindAction("ScrollWheel", throwIfNotFound: true);
         m_GamePlay_OpenInventory = m_GamePlay.FindAction("OpenInventory", throwIfNotFound: true);
         m_GamePlay_Sprint = m_GamePlay.FindAction("Sprint", throwIfNotFound: true);
+        m_GamePlay_Throw = m_GamePlay.FindAction("Throw", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_UI_LeftClick = m_UI.FindAction("UI_LeftClick", throwIfNotFound: true);
         m_UI_UI_RightClick = m_UI.FindAction("UI_RightClick", throwIfNotFound: true);
         m_UI_UI_Exit = m_UI.FindAction("UI_Exit", throwIfNotFound: true);
+        // General
+        m_General = asset.FindActionMap("General", throwIfNotFound: true);
+        m_General_Pointer = m_General.FindAction("Pointer", throwIfNotFound: true);
+        m_General_Shift = m_General.FindAction("Shift", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -434,6 +507,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_GamePlay_ScrollWheel;
     private readonly InputAction m_GamePlay_OpenInventory;
     private readonly InputAction m_GamePlay_Sprint;
+    private readonly InputAction m_GamePlay_Throw;
     public struct GamePlayActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -447,6 +521,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @ScrollWheel => m_Wrapper.m_GamePlay_ScrollWheel;
         public InputAction @OpenInventory => m_Wrapper.m_GamePlay_OpenInventory;
         public InputAction @Sprint => m_Wrapper.m_GamePlay_Sprint;
+        public InputAction @Throw => m_Wrapper.m_GamePlay_Throw;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -483,6 +558,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
+            @Throw.started += instance.OnThrow;
+            @Throw.performed += instance.OnThrow;
+            @Throw.canceled += instance.OnThrow;
         }
 
         private void UnregisterCallbacks(IGamePlayActions instance)
@@ -514,6 +592,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
+            @Throw.started -= instance.OnThrow;
+            @Throw.performed -= instance.OnThrow;
+            @Throw.canceled -= instance.OnThrow;
         }
 
         public void RemoveCallbacks(IGamePlayActions instance)
@@ -593,6 +674,60 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         }
     }
     public UIActions @UI => new UIActions(this);
+
+    // General
+    private readonly InputActionMap m_General;
+    private List<IGeneralActions> m_GeneralActionsCallbackInterfaces = new List<IGeneralActions>();
+    private readonly InputAction m_General_Pointer;
+    private readonly InputAction m_General_Shift;
+    public struct GeneralActions
+    {
+        private @PlayerInputActions m_Wrapper;
+        public GeneralActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Pointer => m_Wrapper.m_General_Pointer;
+        public InputAction @Shift => m_Wrapper.m_General_Shift;
+        public InputActionMap Get() { return m_Wrapper.m_General; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GeneralActions set) { return set.Get(); }
+        public void AddCallbacks(IGeneralActions instance)
+        {
+            if (instance == null || m_Wrapper.m_GeneralActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GeneralActionsCallbackInterfaces.Add(instance);
+            @Pointer.started += instance.OnPointer;
+            @Pointer.performed += instance.OnPointer;
+            @Pointer.canceled += instance.OnPointer;
+            @Shift.started += instance.OnShift;
+            @Shift.performed += instance.OnShift;
+            @Shift.canceled += instance.OnShift;
+        }
+
+        private void UnregisterCallbacks(IGeneralActions instance)
+        {
+            @Pointer.started -= instance.OnPointer;
+            @Pointer.performed -= instance.OnPointer;
+            @Pointer.canceled -= instance.OnPointer;
+            @Shift.started -= instance.OnShift;
+            @Shift.performed -= instance.OnShift;
+            @Shift.canceled -= instance.OnShift;
+        }
+
+        public void RemoveCallbacks(IGeneralActions instance)
+        {
+            if (m_Wrapper.m_GeneralActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IGeneralActions instance)
+        {
+            foreach (var item in m_Wrapper.m_GeneralActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GeneralActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public GeneralActions @General => new GeneralActions(this);
     public interface IGamePlayActions
     {
         void OnMove(InputAction.CallbackContext context);
@@ -604,11 +739,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnScrollWheel(InputAction.CallbackContext context);
         void OnOpenInventory(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
+        void OnThrow(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
         void OnUI_LeftClick(InputAction.CallbackContext context);
         void OnUI_RightClick(InputAction.CallbackContext context);
         void OnUI_Exit(InputAction.CallbackContext context);
+    }
+    public interface IGeneralActions
+    {
+        void OnPointer(InputAction.CallbackContext context);
+        void OnShift(InputAction.CallbackContext context);
     }
 }

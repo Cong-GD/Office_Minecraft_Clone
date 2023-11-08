@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class WorldSettings : ScriptableObject
+public class WorldSettings
 {
     public const int CHUNK_WIDTH = 16;
 
@@ -17,9 +17,5 @@ public class WorldSettings : ScriptableObject
     public static int worldSeed;
 
     public static int waterLevel;
-
-    public int viewDistance = 1;
-    public int ChunkDataLoadRange => viewDistance + 1;
-    public int HiddenChunkDistance => viewDistance + 2;
 }
 

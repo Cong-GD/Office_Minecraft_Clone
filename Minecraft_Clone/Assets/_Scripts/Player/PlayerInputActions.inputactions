@@ -63,7 +63,7 @@
                     "name": "ScrollWheel",
                     "type": "Value",
                     "id": "91cdf1b4-6204-4123-b418-a73e71bd6812",
-                    "expectedControlType": "Delta",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -74,13 +74,22 @@
                     "id": "536a9eca-9d47-48ba-ab1d-ceef2d914b66",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
+                    "interactions": "Press",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Sprint",
                     "type": "Button",
                     "id": "fdb397a0-4d95-40b8-bb38-2bd8e9cdc4d8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Throw",
+                    "type": "Button",
+                    "id": "c6d36892-d920-42e6-96c5-bf7da6d0c1fe",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -201,7 +210,7 @@
                 {
                     "name": "",
                     "id": "1dfc6774-6f3a-4a1a-a487-85a61420371c",
-                    "path": "<Mouse>/scroll",
+                    "path": "<Mouse>/scroll/y",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -241,6 +250,17 @@
                     "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b694cd4b-db42-4625-8e2e-0d42f795b260",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -272,8 +292,8 @@
                     "id": "3dca5be0-562f-450c-a6f8-2e539c96884c",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
+                    "interactions": "Press",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -318,6 +338,54 @@
                     "processors": "",
                     "groups": "",
                     "action": "UI_Exit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "General",
+            "id": "6714484d-9122-4a44-ba1d-4f9dab316bdf",
+            "actions": [
+                {
+                    "name": "Pointer",
+                    "type": "Value",
+                    "id": "eb689cca-375f-45ab-a639-0f2e567b57db",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Shift",
+                    "type": "Button",
+                    "id": "31a33e64-e782-4014-9997-846fa1ee84d1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "720015b7-2d8f-41d2-9fdb-ad806cbcf15c",
+                    "path": "<Pointer>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pointer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "89a36f66-f996-4b16-bd55-518bde7d9994",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Shift",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

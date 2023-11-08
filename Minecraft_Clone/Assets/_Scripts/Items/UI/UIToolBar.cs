@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Minecraft.Input;
 using UnityEngine;
 
 public class UIToolBar : MonoBehaviour
 {
-    [SerializeField] private Inventory inventory;
     [SerializeField] private UIItemSlot[] uiItemSlots;
     [SerializeField] private Transform selectionImage;
 
@@ -12,28 +10,32 @@ public class UIToolBar : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i < inventory.toolBarItems.Length && i < uiItemSlots.Length; i++)
+        var inventorySystem = InventorySystem.Instance;
+        for (int i = 0; i < inventorySystem.toolBarItems.Length && i < uiItemSlots.Length; i++)
         {
-            uiItemSlots[i].SetSlot(inventory.toolBarItems[i]);
+            uiItemSlots[i].SetSlot(inventorySystem.toolBarItems[i]);
         }
         UpdateSelectedUI();
+        MInput.ScrollWheel.performed += OnMouseWheelScroll;
     }
 
-    private void Update()
+    private void OnDestroy()
     {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll == 0f)
-            return;
+        MInput.ScrollWheel.performed -= OnMouseWheelScroll;
+    }
+
+    private void OnMouseWheelScroll(UnityEngine.InputSystem.InputAction.CallbackContext context)
+    {
+        float scroll = context.ReadValue<float>();
 
         _currentSelected = (int)Mathf.Repeat(_currentSelected + Mathf.Sign(scroll), uiItemSlots.Length);
         UpdateSelectedUI();
-
     }
 
     private void UpdateSelectedUI()
     {
         selectionImage.position = uiItemSlots[_currentSelected].transform.position;
-        inventory.SetHand(uiItemSlots[_currentSelected].Slot);
+        InventorySystem.Instance.SetHand(uiItemSlots[_currentSelected].Slot);
     }
 
 }

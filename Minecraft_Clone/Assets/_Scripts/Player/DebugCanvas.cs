@@ -6,16 +6,24 @@ using UnityEngine;
 
 public class DebugCanvas : MonoBehaviour
 {
-    public Rigidbody playerRb;
+    [SerializeField]
+    private Transform player;
 
+    [SerializeField]
+    private Rigidbody playerRb;
 
-    public TextMeshProUGUI debugText;
+    [SerializeField]
+    private TextMeshProUGUI debugText;
 
-    private StringBuilder _sb = new StringBuilder();
+    private StringBuilder _stringBuilder = new StringBuilder();
     void FixedUpdate()
     {
-        _sb.Length = 0;
-        _sb.Append($"Player speed: {playerRb.velocity.XZ().magnitude}");
-        debugText.SetText(_sb);
+        _stringBuilder.Clear();
+
+        _stringBuilder.AppendLine($"Player speed: {playerRb.velocity.XZ().magnitude:0.000}");
+        _stringBuilder.AppendLine($"Player position: {player.position}");
+        _stringBuilder.AppendLine($"Player coord: {Chunk.GetChunkCoord(player.position)}");
+
+        debugText.SetText(_stringBuilder.ToString());
     }
 }

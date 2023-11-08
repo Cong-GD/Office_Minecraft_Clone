@@ -16,7 +16,7 @@ public class PlayerCamera : MonoBehaviour
     public float maxNoiseScale = 5f;
     public float maxSpeed = 7f;
 
-    private Vector2 lookInput;
+    private Vector2 _lookInput;
     private float _xRotation = 0;
     private float _yRotation = 0;
     private CinemachineBasicMultiChannelPerlin _camNoise;
@@ -28,11 +28,11 @@ public class PlayerCamera : MonoBehaviour
 
     private void Update()
     {
-        lookInput = MInput.Look.ReadValue<Vector2>();
-        if (lookInput == Vector2.zero)
+        _lookInput = MInput.Look.ReadValue<Vector2>();
+        if (_lookInput == Vector2.zero)
             return;
 
-        var inputDelta = lookInput * mouseSensitive * Time.deltaTime;
+        var inputDelta = _lookInput * mouseSensitive * Time.deltaTime;
 
         _xRotation += inputDelta.x;
         _yRotation += inputDelta.y;

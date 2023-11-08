@@ -7,11 +7,9 @@ public static class BlockDataHelper
 {
     private static Dictionary<BlockType, BlockData_SO> _blockDataMap;
 
-    /// <summary>
-    /// This method must to call somewhere before try to get block data
-    /// I don't use static constructor because of performance problem
-    /// </summary>
-    public static void Init()
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void Init()
     {
         _blockDataMap = Resources.LoadAll<BlockData_SO>("BlockDatas").ToDictionary(data => data.BlockType, data => data);
     }

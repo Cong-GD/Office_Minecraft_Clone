@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beda1ae8aa00c254ca90adf9a7d03186, type: 3}
+  m_Name: Crafting Table
+  m_EditorClassIdentifier: 
+  materialPrefab: {fileID: 2100000, guid: 0ae68b4f062066141a83dfa4b5a03c73, type: 2}
+  up: 36
+  down: 36
+  left: 35
+  right: 35
+  forward: 35
+  backward: 35

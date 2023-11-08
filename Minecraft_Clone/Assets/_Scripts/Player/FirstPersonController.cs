@@ -21,6 +21,7 @@ public class FirstPersonController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 2f;
     [SerializeField] private float sprintMultilier = 1.3f;
+    [SerializeField] private float crounchMultilier = 0.3f;
     [SerializeField] private float jumpForce = 6f;
     [SerializeField] private float jumpCooldown = 0.1f;
     [SerializeField] private float airMultilier = 0.4f;
@@ -29,7 +30,7 @@ public class FirstPersonController : MonoBehaviour
     [Header("Ground check")]
     [SerializeField] private float groundOffset;
     [SerializeField] private float groundRadius;
-    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private LayerMask groundLayer;
 
     [ShowNonSerializedField]
     private Vector2 _moveInput;
@@ -39,7 +40,12 @@ public class FirstPersonController : MonoBehaviour
 
     private Rigidbody _rb;
     private float _jumpAllowTime;
+
+    [ShowNonSerializedField]
     private bool _isSprinting;
+
+    [ShowNonSerializedField]
+    private bool _isCrounching;
 
     [ShowNativeProperty]
     public bool IsGrounded { get; private set; }
@@ -51,6 +57,8 @@ public class FirstPersonController : MonoBehaviour
 
         MInput.Jump.performed += ProcessJumpInput;
         MInput.Sprint.performed += ProcessSprintInput;
+        MInput.Crounch.performed += ProcessCronchInput;
+        MInput.Crounch.canceled += ProcessCronchInput;
     }
 
     private void OnDisable()
@@ -60,12 +68,12 @@ public class FirstPersonController : MonoBehaviour
 
         MInput.Jump.performed -= ProcessJumpInput;
         MInput.Sprint.performed -= ProcessSprintInput;
+        MInput.Crounch.performed -= ProcessCronchInput;
+        MInput.Crounch.canceled -= ProcessCronchInput;
     }
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = true;
         _rb = GetComponent<Rigidbody>();
         _rb.freezeRotation = true;
         _moveSpeed = walkSpeed;
@@ -86,6 +94,9 @@ public class FirstPersonController : MonoBehaviour
 
     private void ProcessSprintInput(InputAction.CallbackContext context)
     {
+        if (_isCrounching)
+            return;
+
         _isSprinting = true;
     }
 
@@ -102,21 +113,26 @@ public class FirstPersonController : MonoBehaviour
         Jump(1f);
     }
 
+    private void ProcessCronchInput(InputAction.CallbackContext context)
+    {
+        _isCrounching = context.performed;
+        _isSprinting = _isCrounching ? false : _isSprinting;
+    }
+
     private void Move()
     {
         var moveDirection = orientation.forward * _moveInput.y + orientation.right * _moveInput.x;
-        float multilier = IsGrounded ? 10f : 10f * airMultilier;
-        float sprintMul = _isSprinting ?  sprintMultilier : 1f;
-        _moveSpeed = walkSpeed * sprintMul;
-        _rb.AddForce(multilier * _moveSpeed * moveDirection, ForceMode.Force);
+        float airMultilier = !IsGrounded ? 10f * this.airMultilier : 10f;
+        float sprintMultilier = _isSprinting ?  this.sprintMultilier : 1f;
+        float crounchMultilier = _isCrounching && IsGrounded ? this.crounchMultilier : 1f;
+
+        _moveSpeed = walkSpeed * sprintMultilier * crounchMultilier;
+        _rb.AddForce(airMultilier * _moveSpeed * moveDirection, ForceMode.Force);
     }
 
     private void ResetSprintState()
     {
-        if(_isSprinting && _moveInput == Vector2.zero)
-        {
-            _isSprinting = false;
-        }
+        _isSprinting = _isSprinting && _moveInput != Vector2.zero; 
     }
 
     private void ApplyGroundDrag()
@@ -127,7 +143,7 @@ public class FirstPersonController : MonoBehaviour
     private void GroundCheck()
     {
         var spherePosition = new Vector3(transform.position.x, transform.position.y - groundOffset, transform.position.z);
-        IsGrounded = Physics.CheckSphere(spherePosition, groundRadius, groundMask, QueryTriggerInteraction.Ignore);
+        IsGrounded = Physics.CheckSphere(spherePosition, groundRadius, groundLayer, QueryTriggerInteraction.Ignore);
     }
 
     private void Jump(float value)

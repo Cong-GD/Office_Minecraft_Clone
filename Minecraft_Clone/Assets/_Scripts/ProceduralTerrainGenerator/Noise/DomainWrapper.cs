@@ -12,11 +12,11 @@ namespace Minecraft
             DomainWarpProgressive = 4,
             DomainWarpIndependent = 5
         };
+
         public int seed;
         public FastNoise.DomainWarpType domainWrappingType;
         public DomainFractalType domainFractalType;
         public float frequency = 0.01f;
-
         public float amplitude = 1.0f;
 
         [DisableIf("domainFractalType", DomainFractalType.None)]

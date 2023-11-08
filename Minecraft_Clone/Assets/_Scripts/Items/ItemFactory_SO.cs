@@ -2,5 +2,5 @@
 
 public abstract class ItemFactory_SO : ScriptableObject
 {
-    public abstract ItemSlot Create();
+    public abstract ItemPacked Create();
 }

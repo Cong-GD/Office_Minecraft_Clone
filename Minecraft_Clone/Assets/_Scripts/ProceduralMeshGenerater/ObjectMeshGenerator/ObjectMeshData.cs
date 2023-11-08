@@ -35,24 +35,25 @@ namespace Minecraft.ProceduralMeshGenerate
     [Serializable]
     public class ItemRelaviteTransforms
     {
-        [Serializable]
-        public class ItemTransform
-        {
-            public ItemTransformState state;
-            public RelativeTransform transform;
-        }
 
         [SerializeField]
-        private RelativeTransform @default = new();
+        private RelativeTransform rightHand = new();
 
         [SerializeField]
-        private List<ItemTransform> statedTransforms = new List<ItemTransform>();
+        private RelativeTransform leftHand = new();
 
+        [SerializeField]
+        private RelativeTransform freeObject = new();
 
         public RelativeTransform GetRelativeTransfrom(ItemTransformState state)
         {
-           var itemTransform = statedTransforms.Find(t => t.state == state);
-            return itemTransform == null ? @default : itemTransform.transform;
+            return state switch
+            {
+                ItemTransformState.InRightHand => rightHand,
+                ItemTransformState.InLeftHand => leftHand,
+                ItemTransformState.FreeObject => freeObject,
+                _ => freeObject
+            };
         }
     }
 

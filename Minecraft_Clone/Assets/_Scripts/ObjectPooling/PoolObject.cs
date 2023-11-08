@@ -9,7 +9,10 @@ namespace ObjectPooling
 
         public void ReturnToPool()
         {
-            OnReturn?.Invoke();
+            if(OnReturn != null) 
+                OnReturn();
+            else
+                Destroy(gameObject);
         }
     }
 }

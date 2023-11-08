@@ -12,7 +12,7 @@ namespace Minecraft.ProceduralTerrain
 
         public NoiseGenerator_SO treeNoiseGenerator;
 
-        public Structure treeStructure;
+        public Structure_SO treeStructure;
 
         public float treeThreshold = 0.8f;
 

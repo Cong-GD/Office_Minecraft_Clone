@@ -28,15 +28,6 @@ public class AtlasPacker : EditorWindow
 
         blockSize = EditorGUILayout.IntField("Block Size", blockSize);
         atlasSizeInBlock = EditorGUILayout.IntField("Atlas Size In Block", atlasSizeInBlock);
-        if (rawTexture != null)
-        {
-            GUILayout.BeginScrollView(Vector2.zero);
-            foreach (Texture2D tex in rawTexture)
-            {
-                GUILayout.Label(tex);
-            }
-            GUILayout.EndScrollView();
-        }
         GUILayout.Label(atlas);
 
         if (GUILayout.Button("Load Textures"))

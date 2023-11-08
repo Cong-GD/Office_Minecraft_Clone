@@ -2,13 +2,11 @@
 using NaughtyAttributes;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Minecraft/Block Data")]
-public class BlockData_SO : ScriptableObject, IItem
+[CreateAssetMenu(menuName = "Minecraft/Item/Block Data")]
+public class BlockData_SO : BaseItem_SO
 {
 
-
-
-    [field: SerializeField] 
+    [field: Header("Block data"), SerializeField] 
     public BlockType BlockType { get; private set; }
 
 
@@ -20,26 +18,16 @@ public class BlockData_SO : ScriptableObject, IItem
     public bool IsTransparent { get; private set; }
 
 
-    [field: SerializeField]
-    [field: ShowAssetPreview] 
-    public Sprite Icon { get; private set; }
-
-
-    [field: SerializeField] 
-    public int MaxStack { get; private set; } = 64;
-
-
     [field: SerializeField, Expandable] 
     public BlockMeshDataGenerator_SO MeshGenerator { get; private set; }
 
-    public string Name => name;
-
-    public ObjectMeshData ObjectMeshData => MeshGenerator.GetObjectMeshData();
-
-    public bool Equals(IItem other)
+    protected override Mesh CreateMesh()
     {
-        if(other is not BlockData_SO blockData)
-            return false;
-        return this == blockData;
+        return MeshGenerator.CreateMesh();
+    }
+
+    protected override Material CreateMaterial()
+    {
+        return MeshGenerator.CreateMaterial();
     }
 }

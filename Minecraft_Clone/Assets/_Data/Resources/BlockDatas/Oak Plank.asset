@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 117b7b39aba6d474d91feb72803791d2, type: 3}
+  m_Name: Oak Plank
+  m_EditorClassIdentifier: 
+  <Icon>k__BackingField: {fileID: 2079815244, guid: 4e94f503a19d0c949b9745303267f02f,
+    type: 3}
+  <MaxStack>k__BackingField: 64
+  statedTransforms:
+    rightHand:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+    leftHand:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+    freeObject:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 2, y: 2, z: 2}
+  <BlockType>k__BackingField: 3
+  <IsSolid>k__BackingField: 1
+  <IsTransparent>k__BackingField: 0
+  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 7f488de66eb42cb47af582fd1fee7cb1,
+    type: 2}

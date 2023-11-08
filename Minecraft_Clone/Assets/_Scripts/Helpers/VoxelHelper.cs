@@ -61,7 +61,7 @@ public static class VoxelHelper
         }
     }
 
-    public static void AddQuadVertices(ArrayBuffer<Vector3> vertices, Direction direction, int x, int y, int z, float size)
+    public static void AddQuadVertices(ArrayBuffer<Vector3> vertices, Direction direction, float x, float y, float z, float size)
     {
         switch (direction)
         {

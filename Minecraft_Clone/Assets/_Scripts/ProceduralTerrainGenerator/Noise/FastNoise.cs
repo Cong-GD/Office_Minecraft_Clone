@@ -168,7 +168,6 @@ namespace Minecraft
         }
 
 
-        // DLL function declarations
         [DllImport(DLL)]
         private static extern IntPtr GenerateNoiseInstance(int seed);
 

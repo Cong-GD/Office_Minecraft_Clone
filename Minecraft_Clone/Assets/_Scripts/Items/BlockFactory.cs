@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(menuName = "Item/Factory/Block")]
+[CreateAssetMenu(menuName = "Minecraft/Item/Factory/Block")]
 public class BlockFactory : ItemFactory_SO
 {
     [SerializeField] private BlockData_SO blockToCreate;
@@ -8,10 +8,8 @@ public class BlockFactory : ItemFactory_SO
     [Min(1)]
     [SerializeField] private int amount;
 
-    public override ItemSlot Create()
+    public override ItemPacked Create()
     {
-        ItemSlot slot = new ItemSlot();
-        slot.SetItem(blockToCreate, amount);
-        return slot;
+        return new ItemPacked(blockToCreate, amount);
     }
 }

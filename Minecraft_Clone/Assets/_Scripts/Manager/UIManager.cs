@@ -1,27 +1,38 @@
-﻿using System;
+﻿using Minecraft.Input;
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class UIManager : GlobalReference<UIManager>
+public class UIManager : MonoBehaviour
 {
-    [SerializeField] private PlayerInventory playerInventory;
+    [SerializeField] private UIInventory playerInventory;
 
 
-    private bool _isActive;
-
-
-    public bool IsActive
+    private void Awake()
     {
-        get => _isActive;
-        set
-        {
-            if (value == _isActive)
-                return;
-
-            _isActive = value;
-
-            playerInventory.gameObject.SetActive(value);
-        }
+        Cursor.lockState = CursorLockMode.Locked;
+        MInput.OpenInventory.performed += OpenInventory;
+        MInput.UI_Exit.performed += ExitUI;
     }
 
+    private void OnDestroy()
+    {
+        MInput.OpenInventory.performed -= OpenInventory;
+        MInput.UI_Exit.performed -= ExitUI;
+    }
+
+    private void ExitUI(InputAction.CallbackContext obj)
+    {
+        MInput.state = MInput.State.Gameplay;
+        Cursor.lockState = CursorLockMode.Locked;
+        playerInventory.gameObject.SetActive(false);
+    }
+
+    private void OpenInventory(InputAction.CallbackContext obj)
+    {
+        MInput.state = MInput.State.UI;
+        Cursor.lockState = CursorLockMode.None;
+        playerInventory.gameObject.SetActive(true);
+    }
 }

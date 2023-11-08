@@ -13,5 +13,6 @@
     Brick,
     Leaves,
     Castus,
-    Water
+    Water,
+    CraftingTable
 }

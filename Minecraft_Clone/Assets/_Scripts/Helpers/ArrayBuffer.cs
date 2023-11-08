@@ -1,6 +1,4 @@
-﻿using System;
-
-/// <summary>
+﻿/// <summary>
 /// I made this class just to deal with mesh data, it's not a collection
 /// </summary>
 public class ArrayBuffer<T> where T : struct
@@ -25,7 +23,7 @@ public class ArrayBuffer<T> where T : struct
     {
         if (_count >= _items.Length)
         {
-            Array.Resize(ref _items, _items.Length * 2);
+            System.Array.Resize(ref _items, _items.Length * 2);
         }
         _items[_count] = item;
         _count++;

@@ -1,7 +1,5 @@
-﻿using System;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class UIItemSlot : MonoBehaviour
@@ -21,7 +19,7 @@ public class UIItemSlot : MonoBehaviour
     public void SetSlot(ItemSlot slot)
     {
         ClearSlot();
-        slot.OnItemChanged += UpdateUI;
+        slot.OnItemModified += UpdateUI;
         _slot = slot;
         UpdateUI();
     }
@@ -31,22 +29,23 @@ public class UIItemSlot : MonoBehaviour
         if (_slot == null)
             return;
 
-        _slot.OnItemChanged -= UpdateUI;
+        _slot.OnItemModified -= UpdateUI;
         _slot = null;
         UpdateUI();
     }
 
     public void UpdateUI()
     {
-        if (_slot == null || _slot.Item == null)
+        if (!HasItem())
         {
             iconImage.enabled = false;
             amountText.enabled = false;
             return;
         }
+
         iconImage.enabled = true;
-        amountText.enabled = true;
-        iconImage.sprite = _slot.Item.Icon;
+        amountText.enabled = _slot.Amount < 2 ? false : true;
+        iconImage.sprite = _slot.RootItem.Icon;
         amountText.text = _slot.Amount.ToString();
     }
 }

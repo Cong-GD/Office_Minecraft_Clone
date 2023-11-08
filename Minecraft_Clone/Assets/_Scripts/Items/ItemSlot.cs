@@ -1,24 +1,35 @@
-using Minecraft.ProceduralMeshGenerate;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 
 public class ItemSlot
 {
 
-    public event Action OnItemChanged;
-    public IItem Item { get; private set; }
+    public event Action OnItemModified;
+    public BaseItem_SO RootItem { get; private set; }
     public int Amount { get; private set; }
+
+    public bool IsFullStacked => !IsEmpty() && Amount >= RootItem.MaxStack;
+
+    private Func<BaseItem_SO, bool> _slotRequiment = null;
 
     public bool IsEmpty()
     {
-        return Item is null;
+        return RootItem == null;
     }
 
-    public bool TransferTo(ItemSlot slot, int amount)
+    public bool IsMeetSlotRequiment(BaseItem_SO item)
     {
-        if(slot is null)
+        return item == null || _slotRequiment == null || _slotRequiment(item);
+    }
+
+    public void SetRequiment(Func<BaseItem_SO, bool> slotRequiment)
+    {
+        _slotRequiment = slotRequiment;
+    }
+
+
+    public bool TryTransferTo(ItemSlot slot, int amount)
+    {
+        if (slot is null)
         {
             throw new ArgumentNullException(nameof(slot));
         }
@@ -26,13 +37,16 @@ public class ItemSlot
         if (amount < 1)
             return false;
 
-        if(slot.IsEmpty())
+        if (!slot.IsMeetSlotRequiment(RootItem))
+            return false;
+
+        if (slot.IsEmpty())
         {
             TransferItemToEmptySlot(slot, amount);
             return true;
         }
-        
-        if(Item != slot.Item)
+
+        if (RootItem != slot.RootItem || slot.IsFullStacked)
             return false;
 
         TransferItemToSlotWithSameItem(slot, amount);
@@ -42,8 +56,7 @@ public class ItemSlot
 
     private void TransferItemToEmptySlot(ItemSlot slot, int amount)
     {
-        int gotAmount = TakeAmount(amount, out var item);
-        slot.SetItem(item, gotAmount);
+        slot.SetItem(TakeAmount(amount));
     }
 
     private void TransferItemToSlotWithSameItem(ItemSlot slot, int amount)
@@ -53,7 +66,7 @@ public class ItemSlot
         if (gotAmount < 1)
             return;
 
-        if(IsEmpty())
+        if (IsEmpty())
         {
             SetItem(item, gotAmount);
             return;
@@ -61,13 +74,33 @@ public class ItemSlot
         AddAmount(ref gotAmount);
     }
 
-    public void SetItem(IItem item, int amount) => SetItem(item, ref amount);
-
-    public void SetItem(IItem item, ref int amount)
+    public ItemPacked GetPacked()
     {
-        Item = item;
-        Amount = 0;
-        AddAmount(ref amount);
+        return new ItemPacked(RootItem, Amount);
+    }
+
+    public bool SetItem(ItemPacked itemPacked)
+    {
+        return SetItem(itemPacked.item, itemPacked.amount);
+    }
+
+    public bool SetItem(BaseItem_SO item, int amount = 1)
+    {
+        if (!IsMeetSlotRequiment(item))
+            return false;
+
+        if (item == null || amount < 1)
+        {
+            RootItem = null;
+            Amount = 0;
+        }
+        else
+        {
+            RootItem = item;
+            Amount = amount;
+        }
+        OnItemModified?.Invoke();
+        return true;
     }
 
     public bool AddAmount(ref int amount)
@@ -77,60 +110,64 @@ public class ItemSlot
             return false;
         }
 
-        int overload = Amount + amount - Item.MaxStack;
-        if(overload < 1)
+        int overload = Amount + amount - RootItem.MaxStack;
+        if (overload < 1)
         {
             Amount += amount;
             amount = 0;
         }
         else
         {
-            Amount = Item.MaxStack;
+            Amount = RootItem.MaxStack;
             amount = overload;
         }
-        OnItemChanged?.Invoke();
+        OnItemModified?.Invoke();
         return true;
     }
 
-    public int TakeAmount(int amount, out IItem item)
+    public ItemPacked TakeAmount(int amount)
     {
-        item = Item;
+        amount = TakeAmount(amount, out var item);
+        return new ItemPacked(item, amount);
+    }
+
+    public int TakeAmount(int amount, out BaseItem_SO item)
+    {
+        item = RootItem;
         if (IsEmpty() || amount < 1)
             return 0;
 
-        int overload = Amount - amount;
-        if(overload < 1)
-        {
-            Amount -= amount;
-        }
-        else
+        if (amount >= Amount)
         {
             amount = Amount;
+            RootItem = null;
             Amount = 0;
-        }
-        if(Amount < 1)
-        {
-            Item = null;
+            OnItemModified?.Invoke();
+            return amount;
         }
 
-        OnItemChanged?.Invoke();
+        Amount -= amount;
+        OnItemModified?.Invoke();
         return amount;
     }
     public void SwapItem(ItemSlot slot)
     {
-        if(slot is null)
+        if (slot is null)
         {
             throw new ArgumentNullException(nameof(slot));
         }
 
-        var item = slot.Item;
+        if (!slot.IsMeetSlotRequiment(RootItem) || !IsMeetSlotRequiment(slot.RootItem))
+            return;
+
+        var item = slot.RootItem;
         var amount = slot.Amount;
-        slot.Item = Item;
-        slot.Amount = amount;
-        Item = item;
+        slot.RootItem = RootItem;
+        slot.Amount = Amount;
+        RootItem = item;
         Amount = amount;
-        OnItemChanged?.Invoke();
-        slot.OnItemChanged?.Invoke();
+        OnItemModified?.Invoke();
+        slot.OnItemModified?.Invoke();
     }
-    
+
 }

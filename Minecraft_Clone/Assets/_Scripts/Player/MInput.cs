@@ -24,16 +24,16 @@ namespace Minecraft.Input
                 switch (_state)
                 {
                     case State.None:
-                        _gamePlayInput.Disable();
-                        _uiInput.Disable();
+                        _gamePlayActions.Disable();
+                        _uiActions.Disable();
                         break;
                     case State.Gameplay:
-                        _gamePlayInput.Enable();
-                        _uiInput.Disable();
+                        _gamePlayActions.Enable();
+                        _uiActions.Disable();
                         break;
                     case State.UI:
-                        _gamePlayInput.Disable();
-                        _uiInput.Enable();
+                        _gamePlayActions.Disable();
+                        _uiActions.Enable();
                         break;
                 }
             }
@@ -41,9 +41,9 @@ namespace Minecraft.Input
 
         public static PlayerInputActions InputActions { get; private set; }
 
-        private static PlayerInputActions.GamePlayActions _gamePlayInput;
-
-        private static PlayerInputActions.UIActions _uiInput;
+        private static PlayerInputActions.GamePlayActions _gamePlayActions;
+        private static PlayerInputActions.UIActions _uiActions;
+        private static PlayerInputActions.GeneralActions _generalActions;
 
         public static InputAction Move { get; private set; }
         public static InputAction Jump { get; private set; }
@@ -54,35 +54,48 @@ namespace Minecraft.Input
         public static InputAction ScrollWheel { get; private set; }
         public static InputAction OpenInventory { get; private set; }
         public static InputAction Sprint { get; private set; }
+        public static InputAction Throw { get; private set; }
 
         public static InputAction UI_LeftClick { get; private set; }
         public static InputAction UI_RightClick { get; private set; }
         public static InputAction UI_Exit { get; private set; }
 
+        public static InputAction Pointer { get; private set; }
+        public static InputAction Shift { get; private set; }
+
+        public static Vector2 PointerPosition => Pointer.ReadValue<Vector2>();
+
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Init()
+        private static void Initialize()
         {
             InputActions = new PlayerInputActions();
 
-            _gamePlayInput = InputActions.GamePlay;
-            _uiInput = InputActions.UI;
+            _gamePlayActions = InputActions.GamePlay;
+            _uiActions = InputActions.UI;
+            _generalActions = InputActions.General;
 
-            Move = _gamePlayInput.Move;
-            Jump = _gamePlayInput.Jump;
-            Crounch = _gamePlayInput.Crounch;
-            LeftMouse = _gamePlayInput.LeftMouse;
-            RightMouse = _gamePlayInput.RightMouse;
-            Look = _gamePlayInput.Look;
-            ScrollWheel = _gamePlayInput.ScrollWheel;
-            OpenInventory = _gamePlayInput.OpenInventory;
-            Sprint = _gamePlayInput.Sprint;
+            Move = _gamePlayActions.Move;
+            Jump = _gamePlayActions.Jump;
+            Crounch = _gamePlayActions.Crounch;
+            LeftMouse = _gamePlayActions.LeftMouse;
+            RightMouse = _gamePlayActions.RightMouse;
+            Look = _gamePlayActions.Look;
+            ScrollWheel = _gamePlayActions.ScrollWheel;
+            OpenInventory = _gamePlayActions.OpenInventory;
+            Sprint = _gamePlayActions.Sprint;
+            Throw = _gamePlayActions.Throw;
 
-            UI_LeftClick = _uiInput.UI_LeftClick;
-            UI_RightClick = _uiInput.UI_RightClick;
-            UI_Exit = _uiInput.UI_Exit;
+            UI_LeftClick = _uiActions.UI_LeftClick;
+            UI_RightClick = _uiActions.UI_RightClick;
+            UI_Exit = _uiActions.UI_Exit;
+
+            Pointer = _generalActions.Pointer;
+            Shift = _generalActions.Shift;
 
             state = State.Gameplay;
+            _generalActions.Enable();
+
         }
 
     }
