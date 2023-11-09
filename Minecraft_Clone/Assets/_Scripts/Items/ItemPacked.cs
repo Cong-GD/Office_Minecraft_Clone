@@ -1,4 +1,6 @@
-﻿public readonly struct ItemPacked
+﻿using UnityEngine;
+
+public readonly struct ItemPacked
 {
     public static readonly ItemPacked Empty = new ItemPacked(null, 0);
 
@@ -8,7 +10,8 @@
     public ItemPacked(BaseItem_SO item, int amount = 1)
     {
         this.item = item;
-        this.amount = amount;
+        this.amount = Mathf.Max(0, amount);
+
     }
 
     public bool IsEmpty()

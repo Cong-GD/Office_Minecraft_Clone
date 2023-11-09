@@ -5,6 +5,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
+using UnityEngine.XR;
 
 public class InventorySystem : GlobalReference<InventorySystem>
 {
@@ -22,7 +23,7 @@ public class InventorySystem : GlobalReference<InventorySystem>
     public ItemSlot OffHand { get; private set; } = new ItemSlot();
 
     [SerializeField]
-    private MinecraftObjectRenderer handHolder;
+    private MinecraftObjectRenderer handRenderer;
 
     [field: SerializeField]
     public ItemDragingSystem DragingSystem { get; private set; }
@@ -43,15 +44,27 @@ public class InventorySystem : GlobalReference<InventorySystem>
         ItemUtility.AddItem(inventory, source);
     }
 
-    public void SetHand(ItemSlot hand)
+    public void SetRightHand(ItemSlot hand)
     {
-        RightHand = hand;
-        if (hand is null || hand.IsEmpty())
+        if(RightHand is not null)
         {
-            handHolder.Clear();
+            RightHand.OnItemModified -= RenderRightHand;
+        }
+        RightHand = hand;
+        if(RightHand is not null)
+        {
+            RightHand.OnItemModified += RenderRightHand;
+            RenderRightHand();
+        }
+    }
+
+    private void RenderRightHand()
+    {
+        if(ItemSlot.IsNullOrEmpty(RightHand))
+        {
+            handRenderer.Clear();
             return;
         }
-
-        handHolder.RenderObject(hand.RootItem.GetObjectMeshData(), ItemTransformState.InRightHand);
+        handRenderer.RenderObject(RightHand.RootItem.GetObjectMeshData(), ItemTransformState.InRightHand);
     }
 }

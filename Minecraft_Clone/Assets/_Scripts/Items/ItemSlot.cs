@@ -2,6 +2,11 @@ using System;
 
 public class ItemSlot
 {
+    public static bool IsNullOrEmpty(ItemSlot itemSlot)
+    {
+        return itemSlot is null || itemSlot.IsEmpty();
+    }
+
 
     public event Action OnItemModified;
     public BaseItem_SO RootItem { get; private set; }

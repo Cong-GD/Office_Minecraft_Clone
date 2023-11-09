@@ -1,6 +1,7 @@
 ﻿using Minecraft.Input;
 using Minecraft.ProceduralMeshGenerate;
 using NaughtyAttributes;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,9 +19,6 @@ public class PlayerInteract : MonoBehaviour
     [SerializeField]
     private LayerMask groundLayer;
 
-    [SerializeField]
-    private ObjectPooling.ObjectPool freeObejctPool;
-
     private bool destroyFound;
     private bool placeFound;
 
@@ -33,14 +31,14 @@ public class PlayerInteract : MonoBehaviour
     {
         MInput.LeftMouse.performed += OnLeftClicked;
         MInput.RightMouse.performed += OnRightClicked;
-        MInput.Throw.performed += ThrowItem;
+        MInput.Throw.performed += ProcessThrowInput;
     }
 
     private void OnDisable()
     {
         MInput.LeftMouse.performed -= OnLeftClicked;
         MInput.RightMouse.performed -= OnRightClicked;
-        MInput.Throw.performed -= ThrowItem;
+        MInput.Throw.performed -= ProcessThrowInput;
     }
 
     private void OnRightClicked(InputAction.CallbackContext context)
@@ -53,41 +51,49 @@ public class PlayerInteract : MonoBehaviour
         CheckForDestroy();
     }
 
-    private void CheckForDestroy()
+    private async void CheckForDestroy()
     {
         RayCast();
         if (!destroyFound)
             return;
 
-        // On testing
         var block = Chunk.GetBlock(destroyPos).Data();
-        var freeObject = (FreeMinecraftObject)freeObejctPool.Get();
-        freeObject.Init(new(block, 1), destroyPos, Vector3.zero);
+        if (block.BlockType == BlockType.Air)
+            return;
 
-        World.Instance.EditBlock(destroyPos, BlockType.Air);
+        var isSucceed = await World.Instance.EditBlockAsync(destroyPos, BlockType.Air);
+        if(isSucceed)
+        {
+            FreeMinecraftObject.ThrowItem(new(block, 1), destroyPos, Vector3.zero);
+        }
     }
 
-    private void CheckForPlaceBlock()
+    private async void CheckForPlaceBlock()
     {
+        var rightHand = InventorySystem.Instance.RightHand;
+        if (ItemSlot.IsNullOrEmpty(rightHand))
+            return;
+
         RayCast();
-        if (!placeFound || InventorySystem.Instance.RightHand.RootItem is not BlockData_SO blockData)
+        if (!placeFound || rightHand.RootItem is not BlockData_SO blockData)
             return;
 
         if (Physics.CheckBox(placePos + _halfOne, _halfOne, Quaternion.identity, entityLayer))
             return;
-
-        InventorySystem.Instance.RightHand.TakeAmount(1, out _);
-        World.Instance.EditBlock(placePos, blockData.BlockType);
-    }
-
-    private void ThrowItem(InputAction.CallbackContext obj)
-    {
-        var itemPacked = InventorySystem.Instance.RightHand.TakeAmount(1);
-        if (itemPacked.IsEmpty())
+        if (!World.Instance.CanEdit())
             return;
 
-        var freeObject = (FreeMinecraftObject)freeObejctPool.Get();
-        freeObject.Init(itemPacked, eye.position + eye.forward, eye.forward * 1.5f);
+        rightHand.TakeAmount(1, out _);
+        await World.Instance.EditBlockAsync(placePos, blockData.BlockType);
+    }
+
+    private void ProcessThrowInput(InputAction.CallbackContext obj)
+    {
+        if (ItemSlot.IsNullOrEmpty(InventorySystem.Instance.RightHand))
+            return;
+
+        var itemPacked = InventorySystem.Instance.RightHand.TakeAmount(1);
+        FreeMinecraftObject.ThrowItem(itemPacked, eye.position + eye.forward, eye.forward * 1.5f);
     }
 
 
@@ -120,5 +126,4 @@ public class PlayerInteract : MonoBehaviour
             Gizmos.DrawWireCube(placePos + _halfOne, Vector3.one);
         }
     }
-
 }

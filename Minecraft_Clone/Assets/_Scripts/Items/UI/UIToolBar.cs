@@ -35,7 +35,7 @@ public class UIToolBar : MonoBehaviour
     private void UpdateSelectedUI()
     {
         selectionImage.position = uiItemSlots[_currentSelected].transform.position;
-        InventorySystem.Instance.SetHand(uiItemSlots[_currentSelected].Slot);
+        InventorySystem.Instance.SetRightHand(uiItemSlots[_currentSelected].Slot);
     }
 
 }
