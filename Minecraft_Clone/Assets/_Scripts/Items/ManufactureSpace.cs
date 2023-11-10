@@ -33,6 +33,11 @@ public class ManufactureSpace
         return _materials[GetIndex(x, y)];
     }
 
+    public ItemSlot GetSlot(int index)
+    {
+        return _materials[index];
+    }
+
     public ItemPacked TakeResult()
     {
         var pack = ItemUtilities.CheckRecipe(_materials);

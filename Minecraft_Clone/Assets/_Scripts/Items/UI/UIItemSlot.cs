@@ -14,14 +14,28 @@ public class UIItemSlot : MonoBehaviour
         set => SetSlot(value);
     }
 
+    private void OnEnable()
+    {
+        UpdateUI();
+    }
+
+    private void OnDestroy()
+    {
+        SetSlot(null);
+    }
+
     public bool HasItem() => _slot != null && !_slot.IsEmpty();
 
     public void SetSlot(ItemSlot slot)
     {
         ClearSlot();
-        slot.OnItemModified += UpdateUI;
         _slot = slot;
-        UpdateUI();
+        if(slot != null)
+        {
+            slot.OnItemModified += UpdateUI;
+            UpdateUI();
+        }
+       
     }
 
     public void ClearSlot()
@@ -36,6 +50,9 @@ public class UIItemSlot : MonoBehaviour
 
     public void UpdateUI()
     {
+        if (!isActiveAndEnabled)
+            return;
+
         if (!HasItem())
         {
             iconImage.enabled = false;

@@ -36,18 +36,13 @@ public class Recipe_SO : ScriptableObject
     private List<ItemBindings> itemBindings;
 
     [SerializeField]
-    [BoxGroup("Result")]
-    private BaseItem_SO result;
-
-    [SerializeField]
-    [BoxGroup("Result")]
-    private int resultAmount;
+    private ItemPacked result;
 
     [SerializeField]
     private RecipeBinding recipeBinding;
 
 
-    public ItemPacked GetResult() => new ItemPacked(result, resultAmount);
+    public ItemPacked GetResult() => result;
 
     public IEnumerable<string> GetRecipeBindings()
     {

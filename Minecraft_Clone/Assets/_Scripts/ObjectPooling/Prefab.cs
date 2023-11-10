@@ -11,13 +11,20 @@ namespace ObjectPooling
         public int ID { get; private set; }
 
         private Action<int> destroyAction;
+        private Action<int> returnAction;
 
         public void Init(int id, Action<int> returnAction, Action<int> destroyAction)
         {
             ID = id;
             Instance = GetComponent<IPoolObject>();
-            Instance.OnReturn += () => returnAction.Invoke(ID);
+            this.returnAction = returnAction;
             this.destroyAction = destroyAction;
+            Instance.OnReturn += ReturnAction;
+        }
+
+        private void ReturnAction()
+        {
+            returnAction.Invoke(ID);
         }
 
         private void OnDestroy()

@@ -10,14 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1c1cfe0f8dd73f14c969dfbac431d54a, type: 3}
-  m_Name: PlankWood
+  m_Name: Wooden Sword
   m_EditorClassIdentifier: 
   itemBindings:
   - id: 1
-    item: {fileID: 11400000, guid: 0255e3dc7df9ab34ba1c92011c96df67, type: 2}
-  result: {fileID: 11400000, guid: a48ecbd4b96371745ba155d1df88e209, type: 2}
-  resultAmount: 4
+    item: {fileID: 11400000, guid: 4024cfa2a8502384e8a58a55c557f587, type: 2}
+  - id: 2
+    item: {fileID: 11400000, guid: a48ecbd4b96371745ba155d1df88e209, type: 2}
+  result:
+    item: {fileID: 11400000, guid: 13a29f6d0f9dfa543bf673e2c7e6fc84, type: 2}
+    amount: 1
   recipeBinding:
-    row2: {x: 0, y: 0, z: 0}
-    row1: {x: 0, y: 0, z: 0}
+    row2: {x: 2, y: 0, z: 0}
+    row1: {x: 2, y: 0, z: 0}
     row0: {x: 1, y: 0, z: 0}

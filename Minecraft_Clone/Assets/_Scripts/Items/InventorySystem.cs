@@ -15,7 +15,7 @@ public class InventorySystem : GlobalReference<InventorySystem>
     public readonly ItemSlot[] toolBarItems = ItemUtilities.NewStogare(9);
 
     [SerializeField]
-    private ItemFactory_SO[] itemFactorys;
+    private ItemPacked[] startupItem;
 
     public ItemSlot RightHand { get; private set; }
 
@@ -27,11 +27,11 @@ public class InventorySystem : GlobalReference<InventorySystem>
 
     private void Start()
     {
-        ItemSlot factorySlot = new ItemSlot();
-        foreach (var factory in itemFactorys)
+        ItemSlot slot = new ItemSlot();
+        foreach (var itemPacked in startupItem)
         {
-            factorySlot.SetItem(factory.Create());
-            AddItemToInventory(factorySlot);
+            slot.SetItem(itemPacked);
+            AddItemToInventory(slot);
         }
     }
 

@@ -24,7 +24,7 @@ public class World : MonoBehaviour
     private ObjectPool chunkRendererPool;
 
     [field: SerializeField]
-    public Transform Player { get; private set; }
+    public Rigidbody Player { get; private set; }
 
     [field: SerializeField]
     public Vector3Int PlayerCoord { get; private set; }
@@ -108,6 +108,7 @@ public class World : MonoBehaviour
                     PrepareMeshDatas(PlayerCoord);
                 }, _cancellationToken);
             }
+            SpawnPlayer();
             if (continueGenerate)
             {
                 chunkRenderPerFrame = 1;
@@ -124,12 +125,20 @@ public class World : MonoBehaviour
 
     private void Update()
     {
-        PlayerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(Player.transform.position).X_Z(0));
+        PlayerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(Player.position).X_Z(0));
 
         int renderCount = 0;
         while (renderCount++ < chunkRenderPerFrame && _preparedMeshs.TryDequeue(out var preparedMesh))
         {
             RenderMesh(preparedMesh.coord, preparedMesh.meshData);
+        }
+    }
+
+    private void SpawnPlayer()
+    {
+        if(Physics.Raycast(new Vector3(0, 250,0), Vector3.down, out var hit, 250, LayerMask.GetMask("Ground")))
+        {
+            Player.position = hit.point + Vector3.up * 5;
         }
     }
 

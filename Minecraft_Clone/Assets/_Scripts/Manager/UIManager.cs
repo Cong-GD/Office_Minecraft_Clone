@@ -6,8 +6,7 @@ using UnityEngine.InputSystem;
 
 public class UIManager : GlobalReference<UIManager>
 {
-    [SerializeField] private Canvas inventoryCanvas;
-    [SerializeField] private Canvas craftingTableCanvas;
+    [SerializeField] private UIInventory inventory;
     [SerializeField] private GameObject debuggingGameobject;
 
     [field: SerializeField]
@@ -29,22 +28,22 @@ public class UIManager : GlobalReference<UIManager>
         MInput.Debugging.performed -= ProcessDebuggingInput;
     }
 
+    public void OpenCraftingTable()
+    {
+        EnterUIMode();
+        inventory.SetState(UIInventory.State.FullCraftingTable);
+    }
+
+
     private void ProcessExitUIInput(InputAction.CallbackContext _)
     {
         ExitUIMode();
     }
+
     private void ProcessDebuggingInput(InputAction.CallbackContext obj)
     {
         debuggingGameobject.SetActive(!debuggingGameobject.activeSelf);
     }
-
-
-    public void OpenCraftingTable()
-    {
-        EnterUIMode();
-        craftingTableCanvas.enabled = true;
-    }
-
 
     private void EnterUIMode()
     {
@@ -58,13 +57,12 @@ public class UIManager : GlobalReference<UIManager>
         MInput.state = MInput.State.Gameplay;
         Cursor.lockState = CursorLockMode.Locked;
         DraggingSystem.gameObject.SetActive(false);
-        inventoryCanvas.enabled = false;
-        //craftingTableCanvas.enabled = false;
+        inventory.SetState(UIInventory.State.None);
     }
 
-    private void OpenInventory(InputAction.CallbackContext obj)
+    private void OpenInventory(InputAction.CallbackContext _)
     {
         EnterUIMode();
-        inventoryCanvas.enabled = true;
+        inventory.SetState(UIInventory.State.FullCraftingTable);
     }
 }

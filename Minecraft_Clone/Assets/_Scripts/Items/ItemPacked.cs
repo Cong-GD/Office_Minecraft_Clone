@@ -1,17 +1,20 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-public readonly struct ItemPacked
+[Serializable]
+public struct ItemPacked
 {
     public static readonly ItemPacked Empty = new ItemPacked(null, 0);
 
-    public readonly BaseItem_SO item;
-    public readonly int amount;
+    public BaseItem_SO item;
+
+    [Min(0)]
+    public int amount;
 
     public ItemPacked(BaseItem_SO item, int amount = 1)
     {
         this.item = item;
         this.amount = Mathf.Max(0, amount);
-
     }
 
     public bool IsEmpty()

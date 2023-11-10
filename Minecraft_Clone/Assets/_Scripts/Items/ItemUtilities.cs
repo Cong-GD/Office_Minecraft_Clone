@@ -25,6 +25,7 @@ public static class ItemUtilities
                 }
             }
         }
+        Debug.Log("Recipe generated: " + _recipes.Count);
     }
 
     public static ItemPacked CheckRecipe(ItemSlot[] slots)
