@@ -17,9 +17,9 @@ public class DebugCanvas : MonoBehaviour
     {
         _stringBuilder.Clear();
 
-        _stringBuilder.AppendLine($"velocity : {playerRb.velocity.XZ().magnitude:0.000}");
-        _stringBuilder.AppendLine($"world position : {playerRb.position}");
-        _stringBuilder.AppendLine($"coordinate : {Chunk.GetChunkCoord(playerRb.position)}");
+        _stringBuilder.AppendLine($"Velocity : {playerRb.velocity.XZ().magnitude:0.000}");
+        _stringBuilder.AppendLine($"World position : {playerRb.position}");
+        _stringBuilder.AppendLine($"Coordinate : {Chunk.GetChunkCoord(playerRb.position)}");
 
         debugText.SetText(_stringBuilder.ToString());
     }

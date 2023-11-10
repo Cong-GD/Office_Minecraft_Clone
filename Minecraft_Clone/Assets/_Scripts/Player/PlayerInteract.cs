@@ -1,4 +1,5 @@
-﻿using Minecraft.Input;
+﻿using Minecraft;
+using Minecraft.Input;
 using Minecraft.ProceduralMeshGenerate;
 using NaughtyAttributes;
 using UnityEditor;
@@ -19,11 +20,10 @@ public class PlayerInteract : MonoBehaviour
     [SerializeField]
     private LayerMask groundLayer;
 
-    private bool destroyFound;
-    private bool placeFound;
+    private bool isCastHit;
 
-    private Vector3Int destroyPos;
-    private Vector3Int placePos;
+    private Vector3Int hitPosition;
+    private Vector3Int adjacentHitPosition;
 
     private readonly Vector3 _halfOne = new Vector3(0.5f, 0.5f, 0.5f);
 
@@ -43,6 +43,11 @@ public class PlayerInteract : MonoBehaviour
 
     private void OnRightClicked(InputAction.CallbackContext context)
     {
+        RayCast();
+
+        if (!isCastHit || HasInteractedWithBlock())
+            return;
+
         CheckForPlaceBlock();
     }
 
@@ -51,42 +56,42 @@ public class PlayerInteract : MonoBehaviour
         CheckForDestroy();
     }
 
-    private async void CheckForDestroy()
+    private void CheckForPlaceBlock()
     {
-        RayCast();
-        if (!destroyFound)
-            return;
-
-        var block = Chunk.GetBlock(destroyPos).Data();
-        if (block.BlockType == BlockType.Air)
-            return;
-
-        var isSucceed = await World.Instance.EditBlockAsync(destroyPos, BlockType.Air);
-        if(isSucceed)
-        {
-            PickupManager.Instance.ThrowItem(new(block, 1), destroyPos + _halfOne, Vector3.zero);
-        }
-    }
-
-    private async void CheckForPlaceBlock()
-    {
-        var rightHand = InventorySystem.Instance.RightHand;
-        if (ItemSlot.IsNullOrEmpty(rightHand))
-            return;
-
-        RayCast();
-        if (!placeFound || rightHand.RootItem is not BlockData_SO blockData)
-            return;
-
-        if (Physics.CheckBox(placePos + _halfOne, _halfOne, Quaternion.identity, entityLayer))
+        if(!IsSafeForPlaceBlock(adjacentHitPosition))
             return;
 
         if (!World.Instance.CanEdit())
             return;
 
-        rightHand.TakeAmount(1, out _);
-        await World.Instance.EditBlockAsync(placePos, blockData.BlockType);
+        var rightHand = InventorySystem.Instance.RightHand;
+        if (ItemSlot.IsNullOrEmpty(rightHand))
+            return;
+
+        if (rightHand.RootItem is not BlockData_SO blockData)
+            return;
+
+        rightHand.TakeAmount(1);
+        var _ = World.Instance.EditBlockAsync(adjacentHitPosition, blockData.BlockType);
     }
+
+    private async void CheckForDestroy()
+    {
+        RayCast();
+        if (!isCastHit)
+            return;
+
+        var block = Chunk.GetBlock(hitPosition).Data();
+        if (block.BlockType == BlockType.Air)
+            return;
+
+        var isSucceed = await World.Instance.EditBlockAsync(hitPosition, BlockType.Air);
+        if (isSucceed)
+        {
+            PickupManager.Instance.ThrowItem(new(block, 1), hitPosition + _halfOne, Vector3.zero);
+        }
+    }
+
 
     private void ProcessThrowInput(InputAction.CallbackContext obj)
     {
@@ -97,6 +102,21 @@ public class PlayerInteract : MonoBehaviour
         PickupManager.Instance.ThrowItem(itemPacked, eye.position + eye.forward, eye.forward * 1.5f);
     }
 
+    private bool HasInteractedWithBlock()
+    {
+        if(MInput.Shift.IsPressed())
+            return false;
+
+        var blockHit = Chunk.GetBlock(hitPosition.x, hitPosition.y, hitPosition.z).Data();
+
+        if (blockHit is IInteractable interactable)
+        {
+            interactable.Interact();
+            return true;
+        }
+        return false;
+    }
+
 
     private void RayCast()
     {
@@ -104,27 +124,29 @@ public class PlayerInteract : MonoBehaviour
 
         if (Physics.Raycast(ray, out var hit, checkDistance, groundLayer))
         {
-            destroyPos = Vector3Int.FloorToInt(hit.point - hit.normal * 0.5f);
-            placePos = Vector3Int.FloorToInt(hit.point + hit.normal * 0.5f);
+            hitPosition = Vector3Int.FloorToInt(hit.point - hit.normal * 0.5f);
+            adjacentHitPosition = Vector3Int.FloorToInt(hit.point + hit.normal * 0.5f);
 
-            destroyFound = true;
-            placeFound = true;
+            isCastHit = true;
         }
         else
         {
-            destroyFound = false;
-            placeFound = false;
+            isCastHit = false;
         }
+    }
 
+    private bool IsSafeForPlaceBlock(Vector3Int position)
+    {
+        return !Physics.CheckBox(position + _halfOne, _halfOne, Quaternion.identity, entityLayer);
     }
 
     private void OnDrawGizmosSelected()
     {
         RayCast();
-        if (placeFound)
+        if (isCastHit)
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawWireCube(placePos + _halfOne, Vector3.one);
+            Gizmos.DrawWireCube(adjacentHitPosition + _halfOne, Vector3.one);
         }
     }
 }

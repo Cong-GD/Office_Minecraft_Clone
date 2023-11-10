@@ -4,7 +4,7 @@ using UnityEngine;
 [Serializable]
 public struct ItemPacked
 {
-    public static readonly ItemPacked Empty = new ItemPacked(null, 0);
+    public static readonly ItemPacked Empty = new (null, 0);
 
     public BaseItem_SO item;
 
@@ -17,7 +17,7 @@ public struct ItemPacked
         this.amount = Mathf.Max(0, amount);
     }
 
-    public bool IsEmpty()
+    public readonly bool IsEmpty()
     {
         return item == null || amount <= 0;
     }

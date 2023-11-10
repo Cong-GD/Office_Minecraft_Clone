@@ -63,6 +63,6 @@ public class UIManager : GlobalReference<UIManager>
     private void OpenInventory(InputAction.CallbackContext _)
     {
         EnterUIMode();
-        inventory.SetState(UIInventory.State.FullCraftingTable);
+        inventory.SetState(UIInventory.State.Inventory);
     }
 }

@@ -6,7 +6,7 @@ public class UIInventory : MonoBehaviour
     public enum State
     {
         None,
-        Normal,
+        Inventory,
         FullCraftingTable,
     }
 
@@ -68,7 +68,7 @@ public class UIInventory : MonoBehaviour
             case State.None:
                 renderingCanvas.enabled = false;
                 break;
-            case State.Normal:
+            case State.Inventory:
                 renderingCanvas.enabled = true;
                 normalCharactorInfo.SetActive(true);
                 fullCraftingTable.SetActive(false);
