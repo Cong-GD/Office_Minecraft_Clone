@@ -38,7 +38,7 @@ public class FirstPersonController : MonoBehaviour
     [ShowNonSerializedField]
     private float _moveSpeed;
 
-    private Rigidbody _rb;
+    private Rigidbody _rigidbody;
     private float _jumpAllowTime;
 
     [ShowNonSerializedField]
@@ -74,8 +74,8 @@ public class FirstPersonController : MonoBehaviour
 
     private void Start()
     {
-        _rb = GetComponent<Rigidbody>();
-        _rb.freezeRotation = true;
+        _rigidbody = GetComponent<Rigidbody>();
+        _rigidbody.freezeRotation = true;
         _moveSpeed = walkSpeed;
     }
 
@@ -127,7 +127,7 @@ public class FirstPersonController : MonoBehaviour
         float crounchMultilier = _isCrounching && IsGrounded ? this.crounchMultilier : 1f;
 
         _moveSpeed = walkSpeed * sprintMultilier * crounchMultilier;
-        _rb.AddForce(airMultilier * _moveSpeed * moveDirection, ForceMode.Force);
+        _rigidbody.AddForce(airMultilier * _moveSpeed * moveDirection, ForceMode.Force);
     }
 
     private void ResetSprintState()
@@ -137,7 +137,7 @@ public class FirstPersonController : MonoBehaviour
 
     private void ApplyGroundDrag()
     {
-        _rb.drag = IsGrounded ? groundDrag : 0f;
+        _rigidbody.drag = IsGrounded ? groundDrag : 0f;
     }
 
     private void GroundCheck()
@@ -148,14 +148,14 @@ public class FirstPersonController : MonoBehaviour
 
     private void Jump(float value)
     {
-        _rb.velocity = _rb.velocity.X_Z(0);
-        _rb.AddForce(jumpForce * value * transform.up, ForceMode.Impulse);
+        _rigidbody.velocity = _rigidbody.velocity.X_Z(0);
+        _rigidbody.AddForce(jumpForce * value * transform.up, ForceMode.Impulse);
     }
 
     private void SpeedControl()
     {
-        var flatVelocity = _rb.velocity.X_Z(0);
-        _rb.velocity = Vector3.ClampMagnitude(flatVelocity, _moveSpeed).X_Z(_rb.velocity.y);
+        var flatVelocity = _rigidbody.velocity.X_Z(0);
+        _rigidbody.velocity = Vector3.ClampMagnitude(flatVelocity, _moveSpeed).X_Z(_rigidbody.velocity.y);
     }
 
     #if UNITY_EDITOR

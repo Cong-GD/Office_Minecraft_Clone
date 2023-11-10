@@ -4,35 +4,67 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class UIManager : MonoBehaviour
+public class UIManager : GlobalReference<UIManager>
 {
-    [SerializeField] private UIInventory playerInventory;
+    [SerializeField] private Canvas inventoryCanvas;
+    [SerializeField] private Canvas craftingTableCanvas;
+    [SerializeField] private GameObject debuggingGameobject;
 
+    [field: SerializeField]
+    public ItemDragingSystem DraggingSystem { get; private set; }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Cursor.lockState = CursorLockMode.Locked;
         MInput.OpenInventory.performed += OpenInventory;
-        MInput.UI_Exit.performed += ExitUI;
+        MInput.UI_Exit.performed += ProcessExitUIInput;
+        MInput.Debugging.performed += ProcessDebuggingInput;
     }
 
     private void OnDestroy()
     {
         MInput.OpenInventory.performed -= OpenInventory;
-        MInput.UI_Exit.performed -= ExitUI;
+        MInput.UI_Exit.performed -= ProcessExitUIInput;
+        MInput.Debugging.performed -= ProcessDebuggingInput;
     }
 
-    private void ExitUI(InputAction.CallbackContext obj)
+    private void ProcessExitUIInput(InputAction.CallbackContext _)
+    {
+        ExitUIMode();
+    }
+    private void ProcessDebuggingInput(InputAction.CallbackContext obj)
+    {
+        debuggingGameobject.SetActive(!debuggingGameobject.activeSelf);
+    }
+
+
+    public void OpenCraftingTable()
+    {
+        EnterUIMode();
+        craftingTableCanvas.enabled = true;
+    }
+
+
+    private void EnterUIMode()
+    {
+        MInput.state = MInput.State.UI;
+        Cursor.lockState = CursorLockMode.None;
+        DraggingSystem.gameObject.SetActive(true);
+    }
+
+    private void ExitUIMode()
     {
         MInput.state = MInput.State.Gameplay;
         Cursor.lockState = CursorLockMode.Locked;
-        playerInventory.gameObject.SetActive(false);
+        DraggingSystem.gameObject.SetActive(false);
+        inventoryCanvas.enabled = false;
+        //craftingTableCanvas.enabled = false;
     }
 
     private void OpenInventory(InputAction.CallbackContext obj)
     {
-        MInput.state = MInput.State.UI;
-        Cursor.lockState = CursorLockMode.None;
-        playerInventory.gameObject.SetActive(true);
+        EnterUIMode();
+        inventoryCanvas.enabled = true;
     }
 }

@@ -10,6 +10,8 @@ namespace ObjectPooling
     {
         GameObject gameObject { get; }
 
+        Transform transform { get; }
+
         event Action OnReturn;
         void ReturnToPool();
     }
@@ -18,6 +20,21 @@ namespace ObjectPooling
     [CreateAssetMenu(menuName = "ObjectPool")]
     public class ObjectPool : ScriptableObject
     {
+        private static Transform _poolParent;
+        private static Transform PoolParent
+        {
+            get
+            {
+                if (_poolParent == null)
+                {
+                    _poolParent = new GameObject("Object Pool Parent").transform;
+                    _poolParent.gameObject.SetActive(false);
+                    DontDestroyOnLoad(_poolParent.gameObject);
+                }
+                return _poolParent;
+            }
+        }
+
         [SerializeField, Required] 
         private Prefab prefab;
 
@@ -52,7 +69,7 @@ namespace ObjectPooling
             }
             _active.Add(id);
             var instance = _pool[id].Instance;
-            instance.gameObject.SetActive(true);
+            instance.transform.SetParent(null);
             return instance;
         }
 
@@ -66,7 +83,8 @@ namespace ObjectPooling
 
         private void Release(int id)
         {
-            _pool[id].gameObject.SetActive(false);
+            var prefabInstance = _pool[id];
+            prefabInstance.transform.SetParent(PoolParent);
             _active.Remove(id);
             _inactive.Add(id);
         }

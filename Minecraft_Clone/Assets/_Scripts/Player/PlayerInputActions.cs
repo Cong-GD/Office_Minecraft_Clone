@@ -386,6 +386,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Debugging"",
+                    ""type"": ""Button"",
+                    ""id"": ""a2423db9-2db7-45ec-bd57-8c956b9a8307"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -408,6 +417,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Shift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4a59b922-44d1-4a16-b785-849b5ff4c2c5"",
+                    ""path"": ""<Keyboard>/f3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Debugging"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -437,6 +457,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_General = asset.FindActionMap("General", throwIfNotFound: true);
         m_General_Pointer = m_General.FindAction("Pointer", throwIfNotFound: true);
         m_General_Shift = m_General.FindAction("Shift", throwIfNotFound: true);
+        m_General_Debugging = m_General.FindAction("Debugging", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -680,12 +701,14 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private List<IGeneralActions> m_GeneralActionsCallbackInterfaces = new List<IGeneralActions>();
     private readonly InputAction m_General_Pointer;
     private readonly InputAction m_General_Shift;
+    private readonly InputAction m_General_Debugging;
     public struct GeneralActions
     {
         private @PlayerInputActions m_Wrapper;
         public GeneralActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Pointer => m_Wrapper.m_General_Pointer;
         public InputAction @Shift => m_Wrapper.m_General_Shift;
+        public InputAction @Debugging => m_Wrapper.m_General_Debugging;
         public InputActionMap Get() { return m_Wrapper.m_General; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -701,6 +724,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Shift.started += instance.OnShift;
             @Shift.performed += instance.OnShift;
             @Shift.canceled += instance.OnShift;
+            @Debugging.started += instance.OnDebugging;
+            @Debugging.performed += instance.OnDebugging;
+            @Debugging.canceled += instance.OnDebugging;
         }
 
         private void UnregisterCallbacks(IGeneralActions instance)
@@ -711,6 +737,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Shift.started -= instance.OnShift;
             @Shift.performed -= instance.OnShift;
             @Shift.canceled -= instance.OnShift;
+            @Debugging.started -= instance.OnDebugging;
+            @Debugging.performed -= instance.OnDebugging;
+            @Debugging.canceled -= instance.OnDebugging;
         }
 
         public void RemoveCallbacks(IGeneralActions instance)
@@ -751,5 +780,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     {
         void OnPointer(InputAction.CallbackContext context);
         void OnShift(InputAction.CallbackContext context);
+        void OnDebugging(InputAction.CallbackContext context);
     }
 }

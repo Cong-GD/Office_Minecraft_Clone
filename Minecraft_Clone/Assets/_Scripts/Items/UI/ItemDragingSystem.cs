@@ -24,9 +24,6 @@ public class ItemDragingSystem : MonoBehaviour
     {
         MInput.UI_LeftClick.performed += ProcessLeftClickInput;
         MInput.UI_RightClick.performed += ProcessRightClickInput;
-
-        MInput.Pointer.performed += OnPointerMoving;
-        DraggingSlot.OnItemModified += UpdateDraggingSlotPosition;
     }
 
 
@@ -34,14 +31,19 @@ public class ItemDragingSystem : MonoBehaviour
     {
         MInput.UI_LeftClick.performed -= ProcessLeftClickInput;
         MInput.UI_RightClick.performed -= ProcessRightClickInput;
-
-        MInput.Pointer.performed -= OnPointerMoving;
-        DraggingSlot.OnItemModified -= UpdateDraggingSlotPosition;
     }
 
-    private void OnPointerMoving(InputAction.CallbackContext context)
+    private void Update()
     {
         UpdateDraggingSlotPosition();
+    }
+
+    private void UpdateDraggingSlotPosition()
+    {
+        if (IsDragging)
+        {
+            uiDraggingSlot.transform.position = MInput.PointerPosition;
+        }
     }
 
     private void ProcessLeftClickInput(InputAction.CallbackContext context)
@@ -119,11 +121,4 @@ public class ItemDragingSystem : MonoBehaviour
         }
     }
 
-    private void UpdateDraggingSlotPosition()
-    {
-        if (IsDragging)
-        {
-            uiDraggingSlot.transform.position = MInput.PointerPosition;
-        }
-    }
 }

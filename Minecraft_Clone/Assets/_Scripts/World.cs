@@ -59,7 +59,7 @@ public class World : MonoBehaviour
     private readonly ConcurrentQueue<(Vector3Int coord, MeshData meshData)> _preparedMeshs = new();
     private readonly Queue<ChunkData> _activeChunkData = new();
     private readonly ConcurrentDictionary<Vector3Int, ChunkData> _hasModifierChunks = new();
-    private readonly List<ChunkData> _structuredChunks = new();
+    private readonly List<ChunkData> _haveStructuresChunks = new();
 
     private readonly Dictionary<Vector3Int, ChunkRenderer> _chunkRendererDictionary = new();
 
@@ -211,7 +211,7 @@ public class World : MonoBehaviour
                     _activeChunkData.Enqueue(chunkData);
                     if (chunkData.HasStructure())
                     {
-                        _structuredChunks.Add(chunkData);
+                        _haveStructuresChunks.Add(chunkData);
                     }
                 }
             }
@@ -233,7 +233,7 @@ public class World : MonoBehaviour
                             _activeChunkData.Enqueue(chunkData);
                             if (chunkData.HasStructure())
                             {
-                                _structuredChunks.Add(chunkData);
+                                _haveStructuresChunks.Add(chunkData);
                             }
                         }
                     }
@@ -261,7 +261,7 @@ public class World : MonoBehaviour
     private void BuildStructures()
     {
         Queue<ModifierUnit> modifiers = new Queue<ModifierUnit>();
-        foreach (var chunkData in _structuredChunks)
+        foreach (var chunkData in _haveStructuresChunks)
         {
             foreach (var (position, structure) in chunkData.structures)
             {
@@ -277,7 +277,7 @@ public class World : MonoBehaviour
                 _hasModifierChunks.TryAdd(chunkData.chunkCoord, chunkData);
             }
         }
-        _structuredChunks.Clear();
+        _haveStructuresChunks.Clear();
     }
 
     private void ApplyModification(ChunkData chunkData, ModifierUnit mod)

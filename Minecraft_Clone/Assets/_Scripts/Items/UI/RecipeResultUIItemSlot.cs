@@ -78,7 +78,7 @@ public class RecipeResultUIItemSlot : MonoBehaviour, IPointerClickHandler
         if (eventData.button != PointerEventData.InputButton.Left)
             return;
 
-        var draggingSystem = InventorySystem.Instance.DragingSystem;
+        var draggingSystem = UIManager.Instance.DraggingSystem;
         _resultSlot.SetItem(_manufactureSpace.TakeResult());
         if (_resultSlot.IsEmpty())
             return;

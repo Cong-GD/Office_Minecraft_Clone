@@ -7,9 +7,6 @@ using UnityEngine;
 public class DebugCanvas : MonoBehaviour
 {
     [SerializeField]
-    private Transform player;
-
-    [SerializeField]
     private Rigidbody playerRb;
 
     [SerializeField]
@@ -20,9 +17,9 @@ public class DebugCanvas : MonoBehaviour
     {
         _stringBuilder.Clear();
 
-        _stringBuilder.AppendLine($"Player speed: {playerRb.velocity.XZ().magnitude:0.000}");
-        _stringBuilder.AppendLine($"Player position: {player.position}");
-        _stringBuilder.AppendLine($"Player coord: {Chunk.GetChunkCoord(player.position)}");
+        _stringBuilder.AppendLine($"velocity : {playerRb.velocity.XZ().magnitude:0.000}");
+        _stringBuilder.AppendLine($"world position : {playerRb.position}");
+        _stringBuilder.AppendLine($"coordinate : {Chunk.GetChunkCoord(playerRb.position)}");
 
         debugText.SetText(_stringBuilder.ToString());
     }

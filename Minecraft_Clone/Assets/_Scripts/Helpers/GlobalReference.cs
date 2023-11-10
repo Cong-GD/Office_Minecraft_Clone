@@ -2,9 +2,6 @@
 
 public class GlobalReference<T> : MonoBehaviour where T : MonoBehaviour
 {
-    [SerializeField]
-    private bool immortal;
-
     private static T _reference;
     public static T Instance 
     {
@@ -32,9 +29,5 @@ public class GlobalReference<T> : MonoBehaviour where T : MonoBehaviour
         }
             
         _reference = (T)(MonoBehaviour)this;
-        if (immortal)
-        {
-            DontDestroyOnLoad(gameObject);
-        }
     }
 }

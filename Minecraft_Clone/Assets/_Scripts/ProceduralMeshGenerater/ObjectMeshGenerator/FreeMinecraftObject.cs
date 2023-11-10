@@ -9,33 +9,10 @@ namespace Minecraft.ProceduralMeshGenerate
 {
     public class FreeMinecraftObject : PoolObject
     {
-        private static ObjectPool _pool;
-
-        private static HashSet<FreeMinecraftObject> _activeInstance = new();
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Initialize()
-        {
-            _pool = Resources.Load<ObjectPool>("Pools/FreeMinecraftObjectPool");
-        }
-
-        public FreeMinecraftObject[] GetAllCurrentActiveObject() => _activeInstance.ToArray();
-
-        public static void ThrowItem(ItemPacked item, Vector3 position, Vector3 force)
-        {
-            if (item.IsEmpty())
-                return;
-
-            var instance = (FreeMinecraftObject)_pool.Get();
-            instance.Init(item, position, force);
-        }
-
-
         [SerializeField]
         private Vector3 objectOffset;
 
-        [SerializeField]
-        private float rotateSpeed;
+        private float _currentYRotation;
 
         [SerializeField]
         private MinecraftObjectRenderer minecraftObject;
@@ -47,48 +24,39 @@ namespace Minecraft.ProceduralMeshGenerate
 
         public float ActivatedTime { get; private set; }
 
-        private void OnEnable()
+        private void Awake()
         {
             itemHolder.OnItemModified += UpdateRenderer;
-            UpdateRenderer();
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
-            Rigidbody.velocity = Vector3.zero;
             itemHolder.OnItemModified -= UpdateRenderer;
         }
 
-
-        private void FixedUpdate()
+        public void MovePosition(Vector3 direction)
         {
-            transform.Rotate(Vector3.up, rotateSpeed * Time.fixedDeltaTime);
+            Rigidbody.MovePosition(transform.position + direction);
         }
 
-        private void Init(ItemPacked item, Vector3 position, Vector3 pushForce)
+        public void Rotate(float angle)
         {
-            _activeInstance.Add(this);
+            _currentYRotation = Mathf.Repeat(_currentYRotation + angle, 360f);
+            Rigidbody.MoveRotation(Quaternion.Euler(0, _currentYRotation, 0));
+        }
+
+        public void Init(ItemPacked item, Vector3 position, Vector3 pushForce)
+        {
             ActivatedTime = Time.time;
-            transform.position = position;
+            Rigidbody.position = position;
             Rigidbody.velocity = pushForce;
             itemHolder.SetItem(item);
         }
 
-        public void GoOff()
-        {
-            itemHolder.SetItem(ItemPacked.Empty);
-            _activeInstance.Remove(this);
-            ReturnToPool();
-        }
-
-        public void AddToIventory()
+        public bool AddToIventory()
         {
             InventorySystem.Instance.AddItemToInventory(itemHolder);
-            if (itemHolder.IsEmpty())
-            {
-                _activeInstance.Remove(this);
-                ReturnToPool();
-            }
+            return itemHolder.IsEmpty();
         }
 
         private void UpdateRenderer()

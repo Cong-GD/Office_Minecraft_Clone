@@ -64,7 +64,7 @@ public class PlayerInteract : MonoBehaviour
         var isSucceed = await World.Instance.EditBlockAsync(destroyPos, BlockType.Air);
         if(isSucceed)
         {
-            FreeMinecraftObject.ThrowItem(new(block, 1), destroyPos, Vector3.zero);
+            PickupManager.Instance.ThrowItem(new(block, 1), destroyPos + _halfOne, Vector3.zero);
         }
     }
 
@@ -80,6 +80,7 @@ public class PlayerInteract : MonoBehaviour
 
         if (Physics.CheckBox(placePos + _halfOne, _halfOne, Quaternion.identity, entityLayer))
             return;
+
         if (!World.Instance.CanEdit())
             return;
 
@@ -93,7 +94,7 @@ public class PlayerInteract : MonoBehaviour
             return;
 
         var itemPacked = InventorySystem.Instance.RightHand.TakeAmount(1);
-        FreeMinecraftObject.ThrowItem(itemPacked, eye.position + eye.forward, eye.forward * 1.5f);
+        PickupManager.Instance.ThrowItem(itemPacked, eye.position + eye.forward, eye.forward * 1.5f);
     }
 
 

@@ -63,6 +63,8 @@ namespace Minecraft.Input
         public static InputAction Pointer { get; private set; }
         public static InputAction Shift { get; private set; }
 
+        public static InputAction Debugging { get; private set; }
+
         public static Vector2 PointerPosition => Pointer.ReadValue<Vector2>();
 
 
@@ -92,6 +94,7 @@ namespace Minecraft.Input
 
             Pointer = _generalActions.Pointer;
             Shift = _generalActions.Shift;
+            Debugging = _generalActions.Debugging;
 
             state = State.Gameplay;
             _generalActions.Enable();

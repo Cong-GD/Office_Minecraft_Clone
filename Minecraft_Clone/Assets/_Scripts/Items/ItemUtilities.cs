@@ -5,7 +5,7 @@ using System.Numerics;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public static class ItemUtility
+public static class ItemUtilities
 {
     private static Dictionary<string, Recipe_SO> _recipes;
 

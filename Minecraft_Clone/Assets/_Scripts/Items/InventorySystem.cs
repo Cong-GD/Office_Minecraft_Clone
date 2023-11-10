@@ -10,10 +10,9 @@ using UnityEngine.XR;
 public class InventorySystem : GlobalReference<InventorySystem>
 {
     
-    public readonly ItemSlot[] inventory = ItemUtility.NewStogare(27);
+    public readonly ItemSlot[] inventory = ItemUtilities.NewStogare(27);
 
-    public readonly ItemSlot[] toolBarItems = ItemUtility.NewStogare(9);
-
+    public readonly ItemSlot[] toolBarItems = ItemUtilities.NewStogare(9);
 
     [SerializeField]
     private ItemFactory_SO[] itemFactorys;
@@ -25,8 +24,6 @@ public class InventorySystem : GlobalReference<InventorySystem>
     [SerializeField]
     private MinecraftObjectRenderer handRenderer;
 
-    [field: SerializeField]
-    public ItemDragingSystem DragingSystem { get; private set; }
 
     private void Start()
     {
@@ -40,8 +37,8 @@ public class InventorySystem : GlobalReference<InventorySystem>
 
     public void AddItemToInventory(ItemSlot source)
     {
-        ItemUtility.AddItem(toolBarItems, source);
-        ItemUtility.AddItem(inventory, source);
+        ItemUtilities.AddItem(toolBarItems, source);
+        ItemUtilities.AddItem(inventory, source);
     }
 
     public void SetRightHand(ItemSlot hand)
