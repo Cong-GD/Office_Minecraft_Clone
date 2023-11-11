@@ -53,6 +53,16 @@ public static class ItemUtilities
         return storage;
     }
 
+    public static ItemSlot[] NewStogare(int count, IItemSlotRequiment slotRequiment)
+    {
+        ItemSlot[] storage = new ItemSlot[count];
+        for (int i = 0; i < count; i++)
+        {
+            storage[i] = new ItemSlot(slotRequiment);
+        }
+        return storage;
+    }
+
     public static void AddItem(ReadOnlySpan<ItemSlot> target, ItemSlot source)
     {
         if (target == null || source.IsEmpty())

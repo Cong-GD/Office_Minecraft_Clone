@@ -14,7 +14,12 @@ public class ItemSlot
 
     public bool IsFullStacked => !IsEmpty() && Amount >= RootItem.MaxStack;
 
-    private Func<BaseItem_SO, bool> _slotRequiment = null;
+    private readonly IItemSlotRequiment _slotRequiment;
+
+    public ItemSlot(IItemSlotRequiment slotRequiment = null)
+    {
+        _slotRequiment = slotRequiment ?? IItemSlotRequiment.Empty;
+    }
 
     public bool IsEmpty()
     {
@@ -23,14 +28,8 @@ public class ItemSlot
 
     public bool IsMeetSlotRequiment(BaseItem_SO item)
     {
-        return item == null || _slotRequiment == null || _slotRequiment(item);
+        return item == null || _slotRequiment.CheckRequiment(item);
     }
-
-    public void SetRequiment(Func<BaseItem_SO, bool> slotRequiment)
-    {
-        _slotRequiment = slotRequiment;
-    }
-
 
     public bool TryTransferTo(ItemSlot slot, int amount)
     {

@@ -4,55 +4,46 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class RecipeResultUIItemSlot : MonoBehaviour, IPointerClickHandler
+public class ResultUIItemSlot : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI amountText;
 
-    private ItemSlot _displaySlot;
-    private ManufactureSpace _manufactureSpace;
-
+    private ItemSlot _displaySlot = new();
+    private IResultGiver _resultGiver;
     private ItemSlot _resultSlot = new();
 
     public bool HasItem() => _displaySlot != null && !_displaySlot.IsEmpty();
 
-    private void Start()
+    private void Awake()
     {
-        SetDisplaySlot(new ItemSlot());
+        _displaySlot.OnItemModified += UpdateUI;
     }
 
     private void OnDestroy()
     {
-        SetManufactureSpace(null);
+        SetResultGiver(null);
     }
 
-    public void SetManufactureSpace(ManufactureSpace manufactureSpace)
+    public void SetResultGiver(IResultGiver resultGiver)
     {
-        if (_manufactureSpace != null)
+        if (_resultGiver != null)
         {
-            _manufactureSpace.OnCheckedResult -= OnManufactureResultChecked;
+            _resultGiver.OnCheckedResult -= OnManufactureResultChecked;
+            _displaySlot.SetItem(ItemPacked.Empty);
         }
 
-        if(manufactureSpace != null)
+        if(resultGiver != null)
         {
-            manufactureSpace.OnCheckedResult += OnManufactureResultChecked;
+            resultGiver.OnCheckedResult += OnManufactureResultChecked;
+            _displaySlot.SetItem(resultGiver.PeekResult());
         }
-        _manufactureSpace = manufactureSpace;
+        _resultGiver = resultGiver;
     }
 
     private void OnManufactureResultChecked(ItemPacked itemPacked)
     {
         _displaySlot.SetItem(itemPacked);
-    }
-
-    private void SetDisplaySlot(ItemSlot slot)
-    {
-        _displaySlot = slot;
-        if (_displaySlot != null)
-        {
-            _displaySlot.OnItemModified += UpdateUI;
-        }
-        UpdateUI();
     }
 
     private void UpdateUI()
@@ -72,14 +63,14 @@ public class RecipeResultUIItemSlot : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if(_manufactureSpace == null) 
+        if(_resultGiver == null) 
             return;
 
         if (eventData.button != PointerEventData.InputButton.Left)
             return;
 
         var draggingSystem = UIManager.Instance.DraggingSystem;
-        _resultSlot.SetItem(_manufactureSpace.TakeResult());
+        _resultSlot.SetItem(_resultGiver.TakeResult());
         if (_resultSlot.IsEmpty())
             return;
         
@@ -87,5 +78,6 @@ public class RecipeResultUIItemSlot : MonoBehaviour, IPointerClickHandler
         if (!_resultSlot.IsEmpty())
             InventorySystem.Instance.AddItemToInventory(_resultSlot);
 
+        _displaySlot.SetItem(_resultGiver.PeekResult());
     }
 }

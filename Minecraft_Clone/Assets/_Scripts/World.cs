@@ -139,6 +139,7 @@ public class World : MonoBehaviour
         if(Physics.Raycast(new Vector3(0, 250,0), Vector3.down, out var hit, 250, LayerMask.GetMask("Ground")))
         {
             Player.position = hit.point + Vector3.up * 5;
+            Player.velocity = Vector3.zero;
         }
     }
 
@@ -383,7 +384,7 @@ public class World : MonoBehaviour
             {
                 chunkRenderer = (ChunkRenderer)chunkRendererPool.Get();
                 chunkRenderer.SetChunkData(chunkData);
-                chunkRenderer.transform.SetParent(transform);
+                 chunkRenderer.transform.SetParent(transform);
                 _chunkRendererDictionary[coord] = chunkRenderer;
                 chunkRenderer.RenderMesh(meshData);
             }

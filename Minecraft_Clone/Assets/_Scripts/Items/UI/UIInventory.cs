@@ -8,6 +8,7 @@ public class UIInventory : MonoBehaviour
         None,
         Inventory,
         FullCraftingTable,
+        BlastFurnace
     }
 
     [SerializeField] 
@@ -19,30 +20,34 @@ public class UIInventory : MonoBehaviour
     [SerializeField] 
     private GameObject fullCraftingTable;
 
+    [SerializeField]
+    private UIBlastFurnace uiBlastFurnace;
+
     [SerializeField] 
     private Transform toolBarParent;
 
     [SerializeField] 
     private Transform inventoryParent;
 
-    [SerializeField, BoxGroup("Crafting Slots")]
-    private UIItemSlot craftingSlot00, craftingSlot10, craftingSlot01, craftingSlot11;
+    [SerializeField]
+    private UIItemSlot[] craftingSlot;
 
     [SerializeField]
     private UIItemSlot[] fullCraftingSlots;
 
     [SerializeField]
-    private RecipeResultUIItemSlot craftingResultSlot;
+    private ResultUIItemSlot craftingResultSlot;
 
     [SerializeField]
-    private RecipeResultUIItemSlot fullCraftingResultSlot;
+    private ResultUIItemSlot fullCraftingResultSlot;
 
     private UIItemSlot[] inventorySlots;
     private UIItemSlot[] toolBarSlot;
 
     private ManufactureSpace _manufactureSpace = new();
+    
 
-    private void Awake()
+    private void Start()
     {
         var inventorySystem = InventorySystem.Instance;
 
@@ -63,36 +68,38 @@ public class UIInventory : MonoBehaviour
 
     public void SetState(State state)
     {
+        renderingCanvas.enabled = state != State.None;
+        uiBlastFurnace.gameObject.SetActive(false);
+        normalCharactorInfo.SetActive(false);
+        fullCraftingTable.SetActive(false);
+
         switch (state)
         {
-            case State.None:
-                renderingCanvas.enabled = false;
-                break;
             case State.Inventory:
-                renderingCanvas.enabled = true;
                 normalCharactorInfo.SetActive(true);
-                fullCraftingTable.SetActive(false);
                 break;
             case State.FullCraftingTable:
-                renderingCanvas.enabled = true;
-                normalCharactorInfo.SetActive(false);
                 fullCraftingTable.SetActive(true);
+                break;
+            case State.BlastFurnace:
+                uiBlastFurnace.SetFurnace(new BlastFurnace());
+                uiBlastFurnace.gameObject.SetActive(true);
                 break;
         }
     }
 
     private void SetupCraftingSlot()
     {
-        craftingSlot00.Slot = _manufactureSpace.GetSlot(0, 0);
-        craftingSlot10.Slot = _manufactureSpace.GetSlot(1, 0);
-        craftingSlot01.Slot = _manufactureSpace.GetSlot(0, 1);
-        craftingSlot11.Slot = _manufactureSpace.GetSlot(1, 1);
+        craftingSlot[0].Slot = _manufactureSpace.GetSlot(0, 0);
+        craftingSlot[1].Slot = _manufactureSpace.GetSlot(1, 0);
+        craftingSlot[2].Slot = _manufactureSpace.GetSlot(0, 1);
+        craftingSlot[3].Slot = _manufactureSpace.GetSlot(1, 1);
         for (int i = 0; i < ManufactureSpace.GRID_SIZE * ManufactureSpace.GRID_SIZE; i++)
         {
             fullCraftingSlots[i].Slot = _manufactureSpace.GetSlot(i);
         }
 
-        craftingResultSlot.SetManufactureSpace(_manufactureSpace);
-        fullCraftingResultSlot.SetManufactureSpace(_manufactureSpace);
+        craftingResultSlot.SetResultGiver(_manufactureSpace);
+        fullCraftingResultSlot.SetResultGiver(_manufactureSpace);
     }
 }

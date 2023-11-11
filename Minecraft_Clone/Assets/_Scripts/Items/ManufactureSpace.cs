@@ -1,6 +1,7 @@
 ﻿using System;
+using UnityEngine.UIElements;
 
-public class ManufactureSpace
+public class ManufactureSpace : IResultGiver
 {
     public const int GRID_SIZE = 3;
 
@@ -10,6 +11,8 @@ public class ManufactureSpace
 
     public event Action<ItemPacked> OnCheckedResult;
 
+    private ItemPacked _currentResult;
+
     public ManufactureSpace()
     {
         for (int i = 0; i < GRID_SIZE * GRID_SIZE; i++)
@@ -17,7 +20,7 @@ public class ManufactureSpace
             _materials[i].OnItemModified += CheckForRecipe;
         }
     }
-    
+
     ~ManufactureSpace()
     {
         for (int i = 0; i < GRID_SIZE * GRID_SIZE; i++)
@@ -38,18 +41,23 @@ public class ManufactureSpace
         return _materials[index];
     }
 
+    public ItemPacked PeekResult()
+    {
+        return _currentResult;
+    }
     public ItemPacked TakeResult()
     {
-        var pack = ItemUtilities.CheckRecipe(_materials);
-        if (pack.IsEmpty())
-            return pack;
+        if (_currentResult.IsEmpty())
+            return _currentResult;
 
+        var pack = _currentResult;
         _canCheckRecipe = false;
         foreach (var slot in _materials)
         {
             slot.TakeAmount(1);
         }
         _canCheckRecipe = true;
+
         CheckForRecipe();
         return pack;
     }
@@ -59,7 +67,7 @@ public class ManufactureSpace
         if (!_canCheckRecipe)
             return;
 
-        var pack = ItemUtilities.CheckRecipe(_materials);
-        OnCheckedResult?.Invoke(pack);
+        _currentResult = ItemUtilities.CheckRecipe(_materials);
+        OnCheckedResult?.Invoke(_currentResult);
     }
 }

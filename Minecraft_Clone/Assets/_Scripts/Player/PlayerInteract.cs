@@ -1,8 +1,6 @@
 ﻿using Minecraft;
 using Minecraft.Input;
-using Minecraft.ProceduralMeshGenerate;
 using NaughtyAttributes;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -58,7 +56,7 @@ public class PlayerInteract : MonoBehaviour
 
     private void CheckForPlaceBlock()
     {
-        if(!IsSafeForPlaceBlock(adjacentHitPosition))
+        if (!IsSafeForPlaceBlock(adjacentHitPosition))
             return;
 
         if (!World.Instance.CanEdit())
@@ -104,7 +102,7 @@ public class PlayerInteract : MonoBehaviour
 
     private bool HasInteractedWithBlock()
     {
-        if(MInput.Shift.IsPressed())
+        if (MInput.Shift.IsPressed())
             return false;
 
         var blockHit = Chunk.GetBlock(hitPosition.x, hitPosition.y, hitPosition.z).Data();

@@ -20,6 +20,7 @@ public enum ChunkState : byte
 public class ChunkData
 {
     public readonly BlockType[] blocks = new BlockType[TOTAL_BLOCK_IN_CHUNK];
+
     public Vector3Int worldPosition;
     public Vector3Int chunkCoord;
 

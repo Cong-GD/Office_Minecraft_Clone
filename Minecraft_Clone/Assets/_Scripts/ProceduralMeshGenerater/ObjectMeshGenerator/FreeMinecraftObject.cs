@@ -1,11 +1,8 @@
-﻿using NaughtyAttributes;
+﻿using Minecraft.ProceduralMeshGenerate;
 using ObjectPooling;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-namespace Minecraft.ProceduralMeshGenerate
+namespace Minecraft
 {
     public class FreeMinecraftObject : PoolObject
     {

@@ -1,32 +1,31 @@
 ﻿using System;
 using System.Diagnostics;
+using UnityEngine;
 
 public class TimeExcute : IDisposable
 {
 
-    public static TimeExcute Start(string message, params object[] args)
+    public static TimeExcute Start(string message)
     {
 #if UNITY_EDITOR
-        return new TimeExcute(message, args);
+        return new TimeExcute(message);
 #else
         return null;
 #endif  
     }
 
-    private readonly string _message;
-    private readonly object[] _args;
+    private readonly string _jobName;
     private readonly Stopwatch _stopwatch;
 
-    private TimeExcute(string message, params object[] args)
+    private TimeExcute(string message)
     {
-        _message  = message;
-        _args = args;
+        _jobName  = message;
         _stopwatch = Stopwatch.StartNew();
     }
 
     public void Dispose()
     {
         _stopwatch.Stop();
-        UnityEngine.Debug.Log($"{string.Format(_message, _args)} in {_stopwatch.ElapsedMilliseconds} ms");
+        UnityEngine.Debug.Log($"{_jobName} in {_stopwatch.ElapsedMilliseconds} ms".RichText(Color.yellow));
     }
 }
