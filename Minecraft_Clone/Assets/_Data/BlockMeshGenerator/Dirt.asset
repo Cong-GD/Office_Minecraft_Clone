@@ -12,18 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: beda1ae8aa00c254ca90adf9a7d03186, type: 3}
   m_Name: Dirt
   m_EditorClassIdentifier: 
-  materialPrefab: {fileID: 2100000, guid: 0ae68b4f062066141a83dfa4b5a03c73, type: 2}
-  statedTransforms:
-    default:
-      <position>k__BackingField: {x: 0, y: 0, z: 0}
-      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 1, y: 1, z: 1}
-    statedTransforms:
-    - state: 2
-      transform:
-        <position>k__BackingField: {x: 0, y: 0, z: 0}
-        <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-        <scale>k__BackingField: {x: 2, y: 2, z: 2}
+  itemMaterialPrefab: {fileID: 2100000, guid: 0ae68b4f062066141a83dfa4b5a03c73, type: 2}
   up: 1
   down: 1
   left: 1

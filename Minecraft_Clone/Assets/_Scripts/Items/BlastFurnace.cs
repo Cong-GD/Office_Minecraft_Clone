@@ -2,8 +2,9 @@
 using System.Collections;
 using TMPro.EditorUtilities;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public class BlastFurnace : IResultGiver
+public class BlastFurnace : IResultGiver, IBlockState
 {
     private class BurnAbleRequiment : IItemSlotRequiment
     {
@@ -24,13 +25,13 @@ public class BlastFurnace : IResultGiver
 
     public readonly ItemSlot burnSlot = new (_cachedBurnAbleRequiment);
 
-    private readonly ItemSlot _resultSlot = new();
 
-    public float BurnGrogressValue => IsBurning ? (Time.time - _startBurnTime) / _burnTime : 0f;
-    public float CookGrogressValue => IsCooking ? (Time.time - _startCookTime) / _cookTime : 0f;
+    public float BurnProgressValue => IsBurning ? (Time.time - _startBurnTime) / _burnTime : 0f;
+    public float CookProgressValue => IsCooking ? (Time.time - _startCookTime) / _cookTime : 0f;
 
     public bool IsBurning { get; private set; }
     public bool IsCooking { get; private set; }
+
 
     private float _startBurnTime;
     private float _startCookTime;
@@ -38,14 +39,17 @@ public class BlastFurnace : IResultGiver
     private float _cookTime;
 
     private BaseItem_SO _cookingItem;
+    private readonly ItemSlot _resultSlot = new();
 
     private Coroutine _cookingCoroutine;
     private Coroutine _burningCoroutine;
+    private Vector3Int _position;
 
-    public BlastFurnace()
+    public BlastFurnace(Vector3Int position)
     {
         cookSlot.OnItemModified += ValidateState;
         burnSlot.OnItemModified += ValidateState;
+        _position = position;
     }
 
     ~BlastFurnace()
@@ -55,6 +59,18 @@ public class BlastFurnace : IResultGiver
         cookSlot.OnItemModified -= ValidateState;
         burnSlot.OnItemModified -= ValidateState;
     }
+
+    public bool Validate()
+    {
+        if(Chunk.GetBlock(_position) != BlockType.Furnace)
+        {
+            Debug.Log("A furnace has been destroyed");
+
+            return false;
+        }
+        return true;
+    }
+
     public ItemPacked PeekResult()
     {
         return _resultSlot.GetPacked();
@@ -150,7 +166,7 @@ public class BlastFurnace : IResultGiver
         {
             _resultSlot.AddAmount(ref cookResult.amount);
         }   
-        OnCheckedResult(_resultSlot.GetPacked());
+        OnCheckedResult?.Invoke(_resultSlot.GetPacked());
         ValidateState();
     }
 }

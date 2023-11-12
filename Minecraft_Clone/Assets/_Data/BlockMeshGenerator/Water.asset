@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ecbd4f20c5bdef42b1dc963f4d7282d, type: 3}
   m_Name: Water
   m_EditorClassIdentifier: 
+  itemMaterialPrefab: {fileID: 2100000, guid: 3a7f4eb1536838841938d793039995bb, type: 2}
   up: 33
   down: 33
   left: 33

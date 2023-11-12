@@ -12,6 +12,8 @@ public class PlayerInteract : MonoBehaviour
     [Min(1f)]
     public float checkDistance;
 
+    public float dropForce = 1f;
+
     [SerializeField]
     private LayerMask entityLayer;
 
@@ -24,6 +26,8 @@ public class PlayerInteract : MonoBehaviour
     private Vector3Int adjacentHitPosition;
 
     private readonly Vector3 _halfOne = new Vector3(0.5f, 0.5f, 0.5f);
+
+    public Direction face;
 
     private void OnEnable()
     {
@@ -70,7 +74,9 @@ public class PlayerInteract : MonoBehaviour
             return;
 
         rightHand.TakeAmount(1);
-        var _ = World.Instance.EditBlockAsync(adjacentHitPosition, blockData.BlockType);
+        var direction = GetDirectionWithPlayer(hitPosition + _halfOne);
+        face = direction;
+        var _ = World.Instance.EditBlockAsync(adjacentHitPosition, blockData.BlockType, direction);
     }
 
     private async void CheckForDestroy()
@@ -82,14 +88,22 @@ public class PlayerInteract : MonoBehaviour
         var block = Chunk.GetBlock(hitPosition).Data();
         if (block.BlockType == BlockType.Air)
             return;
-
-        var isSucceed = await World.Instance.EditBlockAsync(hitPosition, BlockType.Air);
+        var isSucceed = await World.Instance.EditBlockAsync(hitPosition, BlockType.Air, Direction.Backward);
         if (isSucceed)
         {
-            PickupManager.Instance.ThrowItem(new(block, 1), hitPosition + _halfOne, Vector3.zero);
+            PickupManager.Instance.ThrowItem(new(block, 1), hitPosition + _halfOne, (Vector3.up + Random.insideUnitSphere) * dropForce);
         }
     }
 
+    private Direction GetDirectionWithPlayer(Vector3 pos)
+    {
+        var direction = Vector2Int.RoundToInt((eye.position - pos).XZ().normalized);
+
+        if(direction.x == 0)
+            return direction.y >= 0 ? Direction.Forward : Direction.Backward;
+
+        return direction.x >= 0 ? Direction.Right : Direction.Left;
+    }
 
     private void ProcessThrowInput(InputAction.CallbackContext obj)
     {
@@ -105,11 +119,11 @@ public class PlayerInteract : MonoBehaviour
         if (MInput.Shift.IsPressed())
             return false;
 
-        var blockHit = Chunk.GetBlock(hitPosition.x, hitPosition.y, hitPosition.z).Data();
+        var blockHit = Chunk.GetBlock(hitPosition).Data();
 
         if (blockHit is IInteractable interactable)
         {
-            interactable.Interact();
+            interactable.Interact(hitPosition);
             return true;
         }
         return false;

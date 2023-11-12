@@ -14,5 +14,6 @@
     Leaves,
     Castus,
     Water,
-    CraftingTable
+    CraftingTable,
+    Furnace
 }

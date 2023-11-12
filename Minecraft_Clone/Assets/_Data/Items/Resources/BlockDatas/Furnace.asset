@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c4288fb8a8d11c4c933b2b7562050e2, type: 3}
-  m_Name: Sand
+  m_Script: {fileID: 11500000, guid: 72374aa368b8d1d40bfa05e0211105f2, type: 3}
+  m_Name: Furnace
   m_EditorClassIdentifier: 
-  <Icon>k__BackingField: {fileID: -1788489609, guid: 4e94f503a19d0c949b9745303267f02f,
+  <Icon>k__BackingField: {fileID: 988166721, guid: 4e94f503a19d0c949b9745303267f02f,
     type: 3}
   <MaxStack>k__BackingField: 64
   statedTransforms:
@@ -28,12 +28,8 @@ MonoBehaviour:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
       <scale>k__BackingField: {x: 2, y: 2, z: 2}
-  <BlockType>k__BackingField: 9
+  <BlockType>k__BackingField: 15
   <IsSolid>k__BackingField: 1
   <IsTransparent>k__BackingField: 0
-  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 0b7aaf81f82ba344fbc24aca6aa0d97d,
+  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 3a4d012f15df1664eaa9bef62ab3e524,
     type: 2}
-  <CookDuration>k__BackingField: 2
-  <CookResult>k__BackingField:
-    item: {fileID: 11400000, guid: 036a619f7b10a744089650f25603f329, type: 2}
-    amount: 1

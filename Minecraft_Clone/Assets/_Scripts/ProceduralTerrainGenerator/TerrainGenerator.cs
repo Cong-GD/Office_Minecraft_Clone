@@ -7,17 +7,18 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 using static WorldSettings;
 using UnityEngine.XR;
-
-[Serializable]
-public class BiomeData
-{
-    [Range(0f, 1f)]
-    public float temperatureStartThreshold, temperatureEndThreshold;
-    public BiomeGenerator biome;
-}
+using NaughtyAttributes;
 
 public class TerrainGenerator : MonoBehaviour
 {
+    [Serializable]
+    public class BiomeData
+    {
+        [MinMaxSlider(0f, 1f)]
+        public Vector2 temperatureThreshold;
+        public BiomeGenerator biome;
+    }
+
     [SerializeField] private NoiseGenerator_SO biomeTemperateNoiseGenerator;
     [SerializeField] private BiomeData[] biomeGeneratorsData = Array.Empty<BiomeData>();
     [SerializeField] private int waterLevel = 140;
@@ -79,7 +80,6 @@ public class TerrainGenerator : MonoBehaviour
                 {
                     terrainHeight += biomeDistance.Key.GetSurfaceHeightNoise(worldX, worldZ) * ((sum - biomeDistance.Value) / sum);
                 }
-                //terrainHeight /= sum;
 
                 if(terrainHeight >= MAP_HEIGHT_IN_BLOCK)
                 {
@@ -101,7 +101,7 @@ public class TerrainGenerator : MonoBehaviour
         float noiseValue = _tempoNoiseInstance.GetNoise(worldX, worldZ);
         foreach (var data in biomeGeneratorsData)
         {
-            if (noiseValue >= data.temperatureStartThreshold && noiseValue < data.temperatureEndThreshold)
+            if (noiseValue >= data.temperatureThreshold.x && noiseValue < data.temperatureThreshold.y)
             {
                 return data.biome;
             }

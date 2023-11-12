@@ -34,6 +34,13 @@ public class UIManager : GlobalReference<UIManager>
         inventory.SetState(UIInventory.State.FullCraftingTable);
     }
 
+    public void OpenBlastFurnace(BlastFurnace blastFurnace)
+    {
+        EnterUIMode();
+        inventory.SetFurnace(blastFurnace);
+        inventory.SetState(UIInventory.State.BlastFurnace);
+    }
+
 
     private void ProcessExitUIInput(InputAction.CallbackContext _)
     {
@@ -63,6 +70,6 @@ public class UIManager : GlobalReference<UIManager>
     private void OpenInventory(InputAction.CallbackContext _)
     {
         EnterUIMode();
-        inventory.SetState(UIInventory.State.BlastFurnace);
+        inventory.SetState(UIInventory.State.Inventory);
     }
 }

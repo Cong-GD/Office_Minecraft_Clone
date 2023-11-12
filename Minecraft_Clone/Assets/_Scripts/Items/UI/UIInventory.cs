@@ -1,4 +1,5 @@
 ﻿using NaughtyAttributes;
+using System;
 using UnityEngine;
 
 public class UIInventory : MonoBehaviour
@@ -82,7 +83,6 @@ public class UIInventory : MonoBehaviour
                 fullCraftingTable.SetActive(true);
                 break;
             case State.BlastFurnace:
-                uiBlastFurnace.SetFurnace(new BlastFurnace());
                 uiBlastFurnace.gameObject.SetActive(true);
                 break;
         }
@@ -101,5 +101,10 @@ public class UIInventory : MonoBehaviour
 
         craftingResultSlot.SetResultGiver(_manufactureSpace);
         fullCraftingResultSlot.SetResultGiver(_manufactureSpace);
+    }
+
+    internal void SetFurnace(BlastFurnace blastFurnace)
+    {
+        uiBlastFurnace.SetFurnace(blastFurnace);
     }
 }

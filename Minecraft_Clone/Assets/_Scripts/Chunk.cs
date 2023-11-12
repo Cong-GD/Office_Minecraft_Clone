@@ -107,19 +107,6 @@ public static class Chunk
                         chunkData.worldPosition.z + localZ);
     }
 
-    public static void SetBlock(ChunkData chunkData, int localX, int localY, int localZ, BlockType blockType)
-    {
-        if (IsPositionInChunk(localX, localY, localZ))
-        {
-            chunkData.blocks[GetBlockIndex(localX, localY, localZ)] = blockType;
-        }
-
-        SetBlock(chunkData.worldPosition.x + localX,
-                 chunkData.worldPosition.y + localY,
-                 chunkData.worldPosition.z + localZ,
-                 blockType);
-    }
-
     public static BlockType GetBlock(Vector3Int worldPos)
     {
         return GetBlock(worldPos.x, worldPos.y, worldPos.z);
@@ -131,31 +118,51 @@ public static class Chunk
 
         if (World.Instance.TryGetChunkData(chunkCoord, out var chunkData))
         {
-            return chunkData.blocks[
-                GetBlockIndex(worldX - chunkData.worldPosition.x,
+            return chunkData.GetBlock(
+                         worldX - chunkData.worldPosition.x,
                          worldY - chunkData.worldPosition.y,
-                         worldZ - chunkData.worldPosition.z)];
+                         worldZ - chunkData.worldPosition.z);
         }
 
         return BlockType.Air;
     }
 
-    public static void SetBlock(Vector3Int worldPos, BlockType blockType)
+    public static Direction GetDirection(Vector3Int worldPosition)
     {
-        SetBlock(worldPos.x, worldPos.y, worldPos.z, blockType);
+        return GetDirection(worldPosition.x, worldPosition.y, worldPosition.z);
     }
 
-    public static void SetBlock(int worldX, int worldY, int worldZ, BlockType blockType)
+    public static Direction GetDirection(int worldX, int worldY, int worldZ)
     {
         var chunkCoord = GetChunkCoord(worldX, worldY, worldZ);
 
         if (World.Instance.TryGetChunkData(chunkCoord, out var chunkData))
         {
-            chunkData.blocks[
-                GetBlockIndex(worldX - chunkData.worldPosition.x,
+            return chunkData.GetDirection(
+                         worldX - chunkData.worldPosition.x,
                          worldY - chunkData.worldPosition.y,
-                         worldZ - chunkData.worldPosition.z)] = blockType;
+                         worldZ - chunkData.worldPosition.z);
+        }
 
+        return Direction.Forward;
+    }
+
+    public static void SetBlock(Vector3Int worldPos, BlockType blockType, Direction direction = Direction.Forward)
+    {
+        SetBlock(worldPos.x, worldPos.y, worldPos.z, blockType, direction);
+    }
+
+    public static void SetBlock(int worldX, int worldY, int worldZ, BlockType blockType, Direction direction = Direction.Forward)
+    {
+        var chunkCoord = GetChunkCoord(worldX, worldY, worldZ);
+
+        if (World.Instance.TryGetChunkData(chunkCoord, out var chunkData))
+        {
+            chunkData.SetBlock(
+                         worldX - chunkData.worldPosition.x,
+                         worldY - chunkData.worldPosition.y,
+                         worldZ - chunkData.worldPosition.z, 
+                         blockType, direction);
         }
     }
 

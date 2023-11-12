@@ -53,5 +53,80 @@ namespace Minecraft.ProceduralMeshGenerate
                 _ => 0
             };
         }
+
+        protected int GetUvIndex(Direction face, Direction blockDirection)
+        {
+            switch (blockDirection)
+            {
+                case Direction.Forward:
+                    return face switch
+                    {
+                        Direction.Up => up,
+                        Direction.Forward => forward,
+                        Direction.Backward => backward,
+                        Direction.Right => right,
+                        Direction.Left => left,
+                        Direction.Down => down,
+                        _ => 0
+                    };
+                case Direction.Backward:
+                    return face switch
+                    {
+                        Direction.Up => up,
+                        Direction.Forward => backward,
+                        Direction.Backward => forward,
+                        Direction.Right => left,
+                        Direction.Left => right,
+                        Direction.Down => down,
+                        _ => 0
+                    };
+                case Direction.Left:
+                    return face switch
+                    {
+                        Direction.Up => up,
+                        Direction.Forward => right,
+                        Direction.Backward => left,
+                        Direction.Right => backward,
+                        Direction.Left => forward,
+                        Direction.Down => down,
+                        _ => 0
+                    };
+                case Direction.Right:
+                    return face switch
+                    {
+                        Direction.Up => up,
+                        Direction.Forward => left,
+                        Direction.Backward => right,
+                        Direction.Right => forward,
+                        Direction.Left => backward,
+                        Direction.Down => down,
+                        _ => 0
+                    };
+                case Direction.Up:
+                    return face switch
+                    {
+                        Direction.Up => up,
+                        Direction.Forward => forward,
+                        Direction.Backward => backward,
+                        Direction.Right => right,
+                        Direction.Left => left,
+                        Direction.Down => down,
+                        _ => 0
+                    };
+                case Direction.Down:
+                    return face switch
+                    {
+                        Direction.Up => up,
+                        Direction.Forward => forward,
+                        Direction.Backward => backward,
+                        Direction.Right => right,
+                        Direction.Left => left,
+                        Direction.Down => down,
+                        _ => 0
+                    };
+                default:
+                    return 0;
+            }
+        }
     }
 }

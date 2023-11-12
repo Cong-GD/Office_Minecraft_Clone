@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -65,7 +66,7 @@ public static class ItemUtilities
 
     public static void AddItem(ReadOnlySpan<ItemSlot> target, ItemSlot source)
     {
-        if (target == null || source.IsEmpty())
+        if (target.IsEmpty || source.IsEmpty())
             return;
 
         foreach (ItemSlot slot in target)

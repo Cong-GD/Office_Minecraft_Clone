@@ -313,7 +313,8 @@ public class World : MonoBehaviour
             mod.x - modifyChunk.worldPosition.x,
             mod.y - modifyChunk.worldPosition.y,
             mod.z - modifyChunk.worldPosition.z,
-            mod.blockType);
+            mod.blockType,
+            mod.direction);
     }
 
     private IEnumerable<ChunkData> GetChunkNeedToPrepareMesh(Vector3Int playerCoord)
@@ -335,7 +336,7 @@ public class World : MonoBehaviour
 
     private void PrepareMeshDatas(Vector3Int playerCoord)
     {
-        using var _ = TimeExcute.Start("Prepare mesh datas");
+        using var timer = TimeExcute.Start("Prepare mesh datas");
         if (_parallelOptions.MaxDegreeOfParallelism == 1)
         {
             var chunkNeedToPrepareMesh = GetChunkNeedToPrepareMesh(playerCoord).ToArray();
@@ -378,18 +379,16 @@ public class World : MonoBehaviour
                 chunkRenderer.ReturnToPool();
             }
         }
-        else
+        else if(meshData.HasDataToRender())
         {
-            if (meshData.HasDataToRender())
-            {
-                chunkRenderer = (ChunkRenderer)chunkRendererPool.Get();
-                chunkRenderer.SetChunkData(chunkData);
-                 chunkRenderer.transform.SetParent(transform);
-                _chunkRendererDictionary[coord] = chunkRenderer;
-                chunkRenderer.RenderMesh(meshData);
-            }
+            chunkRenderer = (ChunkRenderer)chunkRendererPool.Get();
+            chunkRenderer.SetChunkData(chunkData);
+            chunkRenderer.transform.SetParent(transform);
+            _chunkRendererDictionary[coord] = chunkRenderer;
+            chunkRenderer.RenderMesh(meshData);
         }
 
+        chunkData.ValidateBlockState();
         ThreadSafePool<MeshData>.Release(meshData);
         chunkData.state = ChunkState.Rendering;
     }
@@ -437,13 +436,13 @@ public class World : MonoBehaviour
         return !_isEditing;
     }
 
-    public async Task<bool> EditBlockAsync(Vector3Int worldPosition, BlockType blockType)
+    public async Task<bool> EditBlockAsync(Vector3Int worldPosition, BlockType blockType, Direction direction)
     {
         if(!CanEdit()) 
             return false;
 
         _isEditing = true;
-        Chunk.SetBlock(worldPosition, blockType);
+        Chunk.SetBlock(worldPosition, blockType, direction);
         var chunkToUpdate = Chunk.GetAdjacentChunkCoords(worldPosition);
 
         var meshDatas = await Task.Run(() =>

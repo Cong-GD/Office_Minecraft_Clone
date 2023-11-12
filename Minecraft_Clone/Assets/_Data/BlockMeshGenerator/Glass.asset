@@ -12,13 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09c94d1dafa3e9946b674c9be25a7e50, type: 3}
   m_Name: Glass
   m_EditorClassIdentifier: 
-  materialPrefab: {fileID: 2100000, guid: 3a7f4eb1536838841938d793039995bb, type: 2}
-  statedTransforms:
-    default:
-      <position>k__BackingField: {x: 0, y: 0, z: 0}
-      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 1, y: 1, z: 1}
-    statedTransforms: []
+  itemMaterialPrefab: {fileID: 2100000, guid: 3a7f4eb1536838841938d793039995bb, type: 2}
   up: 18
   down: 18
   left: 18

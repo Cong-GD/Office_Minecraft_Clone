@@ -9,13 +9,13 @@ namespace Minecraft.ProceduralMeshGenerate
     public abstract class BlockMeshDataGenerator_SO : ScriptableObject
     {
         [SerializeField]
-        private Material materialPrefab;
+        private Material itemMaterialPrefab;
 
         public abstract void GetMeshData(ChunkData chunkData, MeshData meshData, int x, int y, int z);
 
         public Material CreateMaterial()
         {
-            var material = new Material(materialPrefab);
+            var material = new Material(itemMaterialPrefab);
             ObjectManager.AddToManagingList(material);
             return material;
         }

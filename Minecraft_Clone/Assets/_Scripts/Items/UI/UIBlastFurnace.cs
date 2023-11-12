@@ -20,9 +20,9 @@ public class UIBlastFurnace : MonoBehaviour
     [ProgressBar("Cook Progress", 1f, EColor.Blue)]
     public float cookProgress;
 
-    public float BurnProgress => _furnace != null && _furnace.IsBurning ? _furnace.BurnGrogressValue : 0f;
+    public float BurnProgress => _furnace != null && _furnace.IsBurning ? _furnace.BurnProgressValue : 0f;
 
-    public float CookProgress => _furnace != null && _furnace.IsCooking ? _furnace.CookGrogressValue : 0f;
+    public float CookProgress => _furnace != null && _furnace.IsCooking ? _furnace.CookProgressValue : 0f;
 
     private void OnDisable()
     {
