@@ -6,33 +6,42 @@ namespace Minecraft.ProceduralTerrain.Structures
     [CreateAssetMenu(menuName = "Minecraft/Structure/Tree")]
     public class TreeStructure_SO : Structure_SO
     {
-        public int maxTreeHeight = 12;
-        public int minTreeHeight = 5;
+        [SerializeField]
+        private int maxTreeSize = 10;
+
+        [SerializeField]
+        private int minTreeSize = 5;
+
+        [SerializeField]
+        private float noiseScale = 0.01f;
 
         [SerializeField] private BlockType body;
         [SerializeField] private BlockType leaves;
 
         public override void GetModifications(Queue<ModifierUnit> modifiers, Vector3Int position)
         {
-            int height = position.y + 5;//(int)(minTreeHeight + (maxTreeHeight - minTreeHeight) * Noise.Get2DPerlin(position.XZ(), 250f, 3f)) + position.y;
-            for (int y = position.y; y < height; y++)
+            position.Parse(out int worldX, out int worldY, out int worldZ);
+            var noiseValue = Mathf.PerlinNoise(worldX + 0.1f * noiseScale, worldY + 0.1f * noiseScale);
+            int size = Mathf.RoundToInt(MyMath.RemapValue01(noiseValue, minTreeSize, maxTreeSize));
+            int whereLeavesStart = worldY + size;
+            for (int y = worldY; y < whereLeavesStart; y++)
             {
-                modifiers.Enqueue(new ModifierUnit(position.x, y, position.z, body));
+                modifiers.Enqueue(new ModifierUnit(worldX, y, worldZ, body));
             }
-            int endX = position.x + 3;
-            int endY = height + 4;
-            int endZ = position.z + 3;
-            for (int x = position.x - 2; x < endX; x++)
+            size = size / 2 + 1;
+            int whereLeavesEnd = whereLeavesStart + size;
+
+            for (int y = whereLeavesStart; y < whereLeavesEnd; y++)
             {
-                for (int y = height; y < endY; y++)
+                for (int x = worldX - size; x <= worldX + size; x++)
                 {
-                    for (int z = position.z - 2; z < endZ; z++)
+                    for (int z = worldZ - size; z <= worldZ + size; z++)
                     {
                         modifiers.Enqueue(new ModifierUnit(x, y, z, leaves));
                     }
                 }
+                size--;
             }
-
         }
     }
 }

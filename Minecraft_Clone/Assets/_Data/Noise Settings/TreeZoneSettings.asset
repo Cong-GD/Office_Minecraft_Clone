@@ -12,27 +12,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0aae6c0dff6f0f4b934d6ea85cb4dce, type: 3}
   m_Name: TreeZoneSettings
   m_EditorClassIdentifier: 
-  seedOffset: 0
-  noiseType: 0
-  rotationType3d: 0
-  frequency: 0.01
-  cellularField:
-    cellularDistanceFunction: 0
-    cellularReturnType: 0
-    cellularJitterModifier: 1
-  fractalType: 0
-  octaves: 5
-  gain: 0.5
-  lucunarity: 2
-  weightedStrength: 0
-  pingpongStrength: 2
-  useDomainWrapper: 0
+  noiseSettings:
+    seedOffset: 248
+    noiseType: 3
+    rotationType3d: 0
+    frequency: 0.01
+    cellularField:
+      cellularDistanceFunction: 0
+      cellularReturnType: 0
+      cellularJitterModifier: 1
+    fractalType: 0
+    octaves: 5
+    gain: 0.5
+    lucunarity: 2
+    weightedStrength: 0
+    pingpongStrength: 2
+  useDomainWrapper: 1
   domainWrapper:
     seed: 0
     domainWrappingType: 0
     domainFractalType: 0
     frequency: 0.01
-    amplitude: 1
+    amplitude: 100
     octaves: 3
     gain: 0.5
     lucunarity: 2

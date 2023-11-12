@@ -142,7 +142,7 @@ public class BlastFurnace : IResultGiver, IBlockState
         var burnItem = burnSlot.TakeAmount(1).item;
         _burnTime = ((IBurnAbleItem)burnItem).BurnDuration;
         _startBurnTime = Time.time;
-        yield return Wait.ForSeconds(_burnTime);
+        yield return Wait.ForSeconds(_burnTime + 0.05f);
         IsBurning = false;
         ValidateState();
     }

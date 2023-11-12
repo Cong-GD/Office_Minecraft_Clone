@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c4288fb8a8d11c4c933b2b7562050e2, type: 3}
+  m_Script: {fileID: 11500000, guid: 382e89229febdfe4dafeb08b9c6f74ed, type: 3}
   m_Name: Oak Plank
   m_EditorClassIdentifier: 
   <Icon>k__BackingField: {fileID: 2079815244, guid: 4e94f503a19d0c949b9745303267f02f,
@@ -33,7 +33,4 @@ MonoBehaviour:
   <IsTransparent>k__BackingField: 0
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 7f488de66eb42cb47af582fd1fee7cb1,
     type: 2}
-  <CookDuration>k__BackingField: 0
-  <CookResult>k__BackingField:
-    item: {fileID: 0}
-    amount: 0
+  <BurnDuration>k__BackingField: 2

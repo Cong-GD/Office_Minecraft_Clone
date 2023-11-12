@@ -7,7 +7,7 @@ namespace Minecraft.ProceduralMeshGenerate
     {
         public override void GetMeshData(ChunkData chunkData, MeshData meshData, int x, int y, int z)
         {
-            bool isTransparent = IsLeavesTransparent(chunkData, x, y, z);
+            //bool isTransparent = IsLeavesTransparent(chunkData, x, y, z);
 
             for (int i = 0; i < FACES_COUNT; i++)
             {
@@ -19,27 +19,29 @@ namespace Minecraft.ProceduralMeshGenerate
                 if (!nextBlockData.IsTransparent)
                     continue;
 
-                if (nextBlockData.BlockType == BlockType.Leaves)
-                {
-                    bool isNextTransparent = IsLeavesTransparent(chunkData, nextX, nextY, nextZ);
-                    if (isTransparent && isNextTransparent || !isNextTransparent)
-                        continue;
+                //if (nextBlockData.BlockType == BlockType.Leaves)
+                //{
+                //    bool isNextTransparent = IsLeavesTransparent(chunkData, nextX, nextY, nextZ);
+                //    if (isTransparent && isNextTransparent || !isNextTransparent)
+                //        continue;
 
-                }
+                //}
 
                 VoxelHelper.AddQuadVertices(meshData.vertices, sixDirections[i], x, y, z);
 
                 for (int j = 0; j < 4; j++)
                     meshData.normals.Add(sixDirectionVectors[i]);
 
-                if (isTransparent)
-                {
-                    VoxelHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
-                }
-                else
-                {
-                    VoxelHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
-                }
+                //if (isTransparent)
+                //{
+                //    VoxelHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
+                //}
+                //else
+                //{
+                //    VoxelHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
+                //}
+
+                VoxelHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
 
                 if (!nextBlockData.IsSolid)
                     VoxelHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);
@@ -47,8 +49,6 @@ namespace Minecraft.ProceduralMeshGenerate
                 VoxelHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
 
             }
-
-
         }
 
         private bool IsLeavesTransparent(ChunkData chunkData, int x, int y, int z)

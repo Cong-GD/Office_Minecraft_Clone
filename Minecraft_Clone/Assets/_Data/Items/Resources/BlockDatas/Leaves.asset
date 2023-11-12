@@ -30,6 +30,6 @@ MonoBehaviour:
       <scale>k__BackingField: {x: 2, y: 2, z: 2}
   <BlockType>k__BackingField: 11
   <IsSolid>k__BackingField: 1
-  <IsTransparent>k__BackingField: 1
+  <IsTransparent>k__BackingField: 0
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 6f1f3654c8f9c6c419b5aa8a681efd06,
     type: 2}

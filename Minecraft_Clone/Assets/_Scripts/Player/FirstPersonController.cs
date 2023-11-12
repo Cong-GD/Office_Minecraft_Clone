@@ -1,22 +1,15 @@
-﻿using Minecraft;
+﻿using Minecraft.Input;
 using NaughtyAttributes;
-using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Windows;
-
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
-using Minecraft.Input;
-using UnityEngine.Assertions.Must;
 
 public class FirstPersonController : MonoBehaviour
 {
-    [SerializeField, Required] 
+    [SerializeField, Required]
     private Transform orientation;
+
+    [field: SerializeField]
+    public Rigidbody Rigidbody { get; private set; }
 
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 2f;
@@ -26,19 +19,19 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float jumpCooldown = 0.1f;
     [SerializeField] private float airMultilier = 0.4f;
     [SerializeField] private float groundDrag = 5f;
+    [SerializeField] private float airDrag = 1f;
 
     [Header("Ground check")]
     [SerializeField] private float groundOffset;
     [SerializeField] private float groundRadius;
     [SerializeField] private LayerMask groundLayer;
 
-    [ShowNonSerializedField]
+
     private Vector2 _moveInput;
 
     [ShowNonSerializedField]
     private float _moveSpeed;
 
-    private Rigidbody _rigidbody;
     private float _jumpAllowTime;
 
     [ShowNonSerializedField]
@@ -72,18 +65,11 @@ public class FirstPersonController : MonoBehaviour
         MInput.Crounch.canceled -= ProcessCronchInput;
     }
 
-    private void Start()
-    {
-        _rigidbody = GetComponent<Rigidbody>();
-        _rigidbody.freezeRotation = true;
-        _moveSpeed = walkSpeed;
-    }
-
     private void Update()
     {
         GroundCheck();
         ResetSprintState();
-        ApplyGroundDrag();
+        ApplyVelocityDrag();
         SpeedControl();
     }
 
@@ -123,21 +109,21 @@ public class FirstPersonController : MonoBehaviour
     {
         var moveDirection = orientation.forward * _moveInput.y + orientation.right * _moveInput.x;
         float airMultilier = !IsGrounded ? 10f * this.airMultilier : 10f;
-        float sprintMultilier = _isSprinting ?  this.sprintMultilier : 1f;
+        float sprintMultilier = _isSprinting ? this.sprintMultilier : 1f;
         float crounchMultilier = _isCrounching && IsGrounded ? this.crounchMultilier : 1f;
 
         _moveSpeed = walkSpeed * sprintMultilier * crounchMultilier;
-        _rigidbody.AddForce(airMultilier * _moveSpeed * moveDirection, ForceMode.Force);
+        Rigidbody.AddForce(airMultilier * _moveSpeed * moveDirection, ForceMode.Force);
     }
 
     private void ResetSprintState()
     {
-        _isSprinting = _isSprinting && _moveInput != Vector2.zero; 
+        _isSprinting = _isSprinting && _moveInput != Vector2.zero;
     }
 
-    private void ApplyGroundDrag()
+    private void ApplyVelocityDrag()
     {
-        _rigidbody.drag = IsGrounded ? groundDrag : 0f;
+        Rigidbody.drag = IsGrounded ? groundDrag : airDrag;
     }
 
     private void GroundCheck()
@@ -148,17 +134,17 @@ public class FirstPersonController : MonoBehaviour
 
     private void Jump(float value)
     {
-        _rigidbody.velocity = _rigidbody.velocity.X_Z(0);
-        _rigidbody.AddForce(jumpForce * value * transform.up, ForceMode.Impulse);
+        Rigidbody.velocity = Rigidbody.velocity.X_Z(0);
+        Rigidbody.AddForce(jumpForce * value * transform.up, ForceMode.Impulse);
     }
 
     private void SpeedControl()
     {
-        var flatVelocity = _rigidbody.velocity.X_Z(0);
-        _rigidbody.velocity = Vector3.ClampMagnitude(flatVelocity, _moveSpeed).X_Z(_rigidbody.velocity.y);
+        var flatVelocity = Rigidbody.velocity.X_Z(0);
+        Rigidbody.velocity = Vector3.ClampMagnitude(flatVelocity, _moveSpeed).X_Z(Rigidbody.velocity.y);
     }
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
 
     private void OnDrawGizmosSelected()
     {
@@ -170,5 +156,5 @@ public class FirstPersonController : MonoBehaviour
             new Vector3(transform.position.x, transform.position.y - groundOffset, transform.position.z),
             groundRadius);
     }
-    #endif
+#endif
 }
