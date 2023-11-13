@@ -1,7 +1,7 @@
 ﻿using Minecraft;
 using UnityEngine;
 
-public class FurnaceBlock_SO : BlockData_SO, IInteractable
+public class BlastFurnace_SO : BlockData_SO, IInteractable
 {
     public void Interact(Vector3Int worldPosition)
     {

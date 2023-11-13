@@ -88,6 +88,7 @@ public class PlayerInteract : MonoBehaviour
         var block = Chunk.GetBlock(hitPosition).Data();
         if (block.BlockType == BlockType.Air)
             return;
+
         var isSucceed = await World.Instance.EditBlockAsync(hitPosition, BlockType.Air, Direction.Backward);
         if (isSucceed)
         {

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 382e89229febdfe4dafeb08b9c6f74ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 0a73e99d00359d745b5d399ee215a664, type: 3}
   m_Name: Oak Plank
   m_EditorClassIdentifier: 
   <Icon>k__BackingField: {fileID: 2079815244, guid: 4e94f503a19d0c949b9745303267f02f,
@@ -28,9 +28,16 @@ MonoBehaviour:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
       <scale>k__BackingField: {x: 2, y: 2, z: 2}
+  <CanBurn>k__BackingField: 1
+  <BurnDuration>k__BackingField: 5
+  <CanSmelt>k__BackingField: 0
+  <SmeltDuration>k__BackingField: 0
+  <SmeltResult>k__BackingField:
+    item: {fileID: 0}
+    amount: 0
   <BlockType>k__BackingField: 3
   <IsSolid>k__BackingField: 1
   <IsTransparent>k__BackingField: 0
+  <HardNess>k__BackingField: 0
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 7f488de66eb42cb47af582fd1fee7cb1,
     type: 2}
-  <BurnDuration>k__BackingField: 2

@@ -17,12 +17,12 @@ public class UIBlastFurnace : MonoBehaviour
     [ProgressBar("Burn Progress", 1f, EColor.Red)]
     public float burnProgress;
 
-    [ProgressBar("Cook Progress", 1f, EColor.Blue)]
-    public float cookProgress;
+    [ProgressBar("Smelt Progress", 1f, EColor.Blue)]
+    public float smeltProgress;
 
     public float BurnProgress => _furnace != null ? _furnace.BurnProgressValue : 0f;
 
-    public float CookProgress => _furnace != null ? _furnace.CookProgressValue : 0f;
+    public float SmeltProgress => _furnace != null ? _furnace.SmeltProgressValue : 0f;
 
     private void OnDisable()
     {
@@ -32,7 +32,7 @@ public class UIBlastFurnace : MonoBehaviour
     private void Update()
     {
         burnProgress = BurnProgress;
-        cookProgress = CookProgress;
+        smeltProgress = SmeltProgress;
     }
 
     public void SetFurnace(BlastFurnace furnace)
@@ -43,7 +43,7 @@ public class UIBlastFurnace : MonoBehaviour
 
         _furnace = furnace;
         burnSlot.SetSlot(_furnace.burnSlot);
-        cookSlot.SetSlot(_furnace.cookSlot);
+        cookSlot.SetSlot(_furnace.smeltSlot);
         resultSlot.SetResultGiver(_furnace);
     }
 

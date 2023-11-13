@@ -22,6 +22,33 @@ public abstract class BaseItem_SO : ScriptableObject
     [NonSerialized]
     private Material _cachedMaterial;
 
+
+    [field: Tooltip("Is this item can be used as burn fuel")]
+    [field: SerializeField]
+    [field: BoxGroup("Smelt And Burn")]
+    public bool CanBurn { get; private set; }
+
+    [field: SerializeField, Min(0f)]
+    [field: BoxGroup("Smelt And Burn"), ShowIf("CanBurn")]
+    public float BurnDuration { get; private set; } 
+
+
+
+    [field: Tooltip("Is this item can be smelted into something")]
+    [field: SerializeField]
+    [field: BoxGroup("Smelt And Burn")]
+    public bool CanSmelt { get; private set; }
+
+
+    [field: SerializeField, Min(0f)]
+    [field: BoxGroup("Smelt And Burn"), ShowIf("CanSmelt")]
+    public float SmeltDuration { get; private set; }
+
+
+    [field: SerializeField]
+    [field: BoxGroup("Smelt And Burn"), ShowIf("CanSmelt")]
+    public ItemPacked SmeltResult { get; private set; }
+
     public ObjectMeshData GetObjectMeshData()
     {
         if (_cachedMesh == null)

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 117b7b39aba6d474d91feb72803791d2, type: 3}
+  m_Script: {fileID: 11500000, guid: 0a73e99d00359d745b5d399ee215a664, type: 3}
   m_Name: Cobble Stone
   m_EditorClassIdentifier: 
   <Icon>k__BackingField: {fileID: 1931926793, guid: 4e94f503a19d0c949b9745303267f02f,
@@ -28,8 +28,16 @@ MonoBehaviour:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
       <scale>k__BackingField: {x: 2, y: 2, z: 2}
+  <CanBurn>k__BackingField: 0
+  <BurnDuration>k__BackingField: 0
+  <CanSmelt>k__BackingField: 1
+  <SmeltDuration>k__BackingField: 5
+  <SmeltResult>k__BackingField:
+    item: {fileID: 11400000, guid: 2d5538fd15e906c4186c043253bae404, type: 2}
+    amount: 1
   <BlockType>k__BackingField: 5
   <IsSolid>k__BackingField: 1
   <IsTransparent>k__BackingField: 0
+  <HardNess>k__BackingField: 0
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: b1b40cf61f28b3d4794105e1162b473b,
     type: 2}

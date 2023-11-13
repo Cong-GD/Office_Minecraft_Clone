@@ -1,36 +1,34 @@
 ﻿using System;
 using System.Collections;
-using TMPro.EditorUtilities;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class BlastFurnace : IResultGiver, IBlockState
 {
     private class BurnAbleRequiment : IItemSlotRequiment
     {
-        public bool CheckRequiment(BaseItem_SO item) => item is IBurnAbleItem;
+        public bool CheckRequiment(BaseItem_SO item) => item.CanBurn;
     }
 
-    private class CookAbleRequiment : IItemSlotRequiment
+    private class SmeltAbleRequiment : IItemSlotRequiment
     {
-        public bool CheckRequiment(BaseItem_SO item) => item is ICookAbleItem;
+        public bool CheckRequiment(BaseItem_SO item) => item.CanSmelt;
     }
 
     private static readonly IItemSlotRequiment _cachedBurnAbleRequiment = new BurnAbleRequiment();
-    private static readonly IItemSlotRequiment _cachedCookAbleRequiment = new CookAbleRequiment();
+    private static readonly IItemSlotRequiment _cachedSmeltAbleRequiment = new SmeltAbleRequiment();
 
     public event Action<ItemPacked> OnCheckedResult;
 
-    public readonly ItemSlot cookSlot = new (_cachedCookAbleRequiment);
+    public readonly ItemSlot smeltSlot = new(_cachedSmeltAbleRequiment);
 
-    public readonly ItemSlot burnSlot = new (_cachedBurnAbleRequiment);
+    public readonly ItemSlot burnSlot = new(_cachedBurnAbleRequiment);
 
 
     public float BurnProgressValue => IsBurning ? (Time.time - _startBurnTime) / _burnTime : 0f;
-    public float CookProgressValue => IsCooking ? (Time.time - _startCookTime) / _cookTime : 0f;
+    public float SmeltProgressValue => IsSmelting ? (Time.time - _startCookTime) / _cookTime : 0f;
 
     public bool IsBurning { get; private set; }
-    public bool IsCooking { get; private set; }
+    public bool IsSmelting { get; private set; }
 
 
     private float _startBurnTime;
@@ -38,34 +36,34 @@ public class BlastFurnace : IResultGiver, IBlockState
     private float _burnTime;
     private float _cookTime;
 
-    private BaseItem_SO _cookingItem;
+    private BaseItem_SO _smeltItem;
     private readonly ItemSlot _resultSlot = new();
 
-    private Coroutine _cookingCoroutine;
+    private Coroutine _smeltCoroutine;
     private Coroutine _burningCoroutine;
     private Vector3Int _position;
 
     public BlastFurnace(Vector3Int position)
     {
-        cookSlot.OnItemModified += ValidateState;
+        smeltSlot.OnItemModified += ValidateState;
         burnSlot.OnItemModified += ValidateState;
         _position = position;
     }
 
     ~BlastFurnace()
     {
-        CoroutineHelper.Stop(_cookingCoroutine);
+        CoroutineHelper.Stop(_smeltCoroutine);
         CoroutineHelper.Stop(_burningCoroutine);
-        cookSlot.OnItemModified -= ValidateState;
+        smeltSlot.OnItemModified -= ValidateState;
         burnSlot.OnItemModified -= ValidateState;
     }
 
     public bool Validate()
     {
-        if(Chunk.GetBlock(_position) != BlockType.Furnace)
+        if (Chunk.GetBlock(_position) != BlockType.Furnace)
         {
             Debug.Log("A furnace has been destroyed");
-
+            // Do something on desroy
             return false;
         }
         return true;
@@ -89,19 +87,19 @@ public class BlastFurnace : IResultGiver, IBlockState
         CheckForCooking();
     }
 
-    private void CancelCooking()
+    private void CancelSmelting()
     {
-        if (!IsCooking)
+        if (!IsSmelting)
             return;
 
-        IsCooking = false;
-        CoroutineHelper.Stop(_cookingCoroutine);
+        IsSmelting = false;
+        CoroutineHelper.Stop(_smeltCoroutine);
     }
 
 
     private void CheckForBurning()
     {
-        if(!IsBurning && !burnSlot.IsEmpty() && IsValidCookMaterial())
+        if (!IsBurning && !burnSlot.IsEmpty() && IsValidSmeltMaterial())
         {
             CoroutineHelper.Start(BurningCoroutine(), out _burningCoroutine);
         }
@@ -109,26 +107,26 @@ public class BlastFurnace : IResultGiver, IBlockState
 
     private void CheckForCooking()
     {
-        if(IsCooking)
+        if (IsSmelting)
         {
-            if (!IsBurning || !IsValidCookMaterial())
-                CancelCooking();
+            if (!IsBurning || !IsValidSmeltMaterial())
+                CancelSmelting();
         }
-        else if(IsBurning && IsValidCookMaterial())
+        else if (IsBurning && IsValidSmeltMaterial())
         {
-            CoroutineHelper.Start(CookingCoroutine(), out _cookingCoroutine);
+            CoroutineHelper.Start(SmeltingCoroutine(), out _smeltCoroutine);
         }
     }
 
-    private bool IsValidCookMaterial()
+    private bool IsValidSmeltMaterial()
     {
-        if (cookSlot.IsEmpty())
+        if (smeltSlot.IsEmpty())
             return false;
 
         if (_resultSlot.IsEmpty())
             return true;
 
-        var resultPack = ((ICookAbleItem)cookSlot.RootItem).CookResult;
+        var resultPack = smeltSlot.RootItem.SmeltResult;
         if (_resultSlot.RootItem != resultPack.item)
             return false;
 
@@ -140,32 +138,32 @@ public class BlastFurnace : IResultGiver, IBlockState
     {
         IsBurning = true;
         var burnItem = burnSlot.TakeAmount(1).item;
-        _burnTime = ((IBurnAbleItem)burnItem).BurnDuration;
+        _burnTime = burnItem.BurnDuration;
         _startBurnTime = Time.time;
         yield return Wait.ForSeconds(_burnTime + 0.05f);
         IsBurning = false;
         ValidateState();
     }
 
-    private IEnumerator CookingCoroutine()
+    private IEnumerator SmeltingCoroutine()
     {
-        _cookingItem = cookSlot.RootItem;
-        _cookTime = ((ICookAbleItem)_cookingItem).CookDuration;
+        _smeltItem = smeltSlot.RootItem;
+        _cookTime = _smeltItem.SmeltDuration;
         _startCookTime = Time.time;
-        IsCooking = true;
+        IsSmelting = true;
         yield return Wait.ForSeconds(_cookTime);
-        IsCooking = false;
+        IsSmelting = false;
 
-        var cookResult = ((ICookAbleItem)_cookingItem).CookResult;
-        cookSlot.TakeAmount(1);
+        var cookResult = _smeltItem.SmeltResult;
+        smeltSlot.TakeAmount(1);
         if (_resultSlot.IsEmpty())
         {
             _resultSlot.SetItem(cookResult);
         }
-        else if(_resultSlot.RootItem == cookResult.item)
+        else if (_resultSlot.RootItem == cookResult.item)
         {
             _resultSlot.AddAmount(ref cookResult.amount);
-        }   
+        }
         OnCheckedResult?.Invoke(_resultSlot.GetPacked());
         ValidateState();
     }

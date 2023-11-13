@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 469237278572b6c45adf68d10bb86a45, type: 3}
   m_Name: OakTree
   m_EditorClassIdentifier: 
-  maxTreeHeight: 12
-  minTreeHeight: 5
+  maxTreeSize: 20
+  minTreeSize: 3
+  noiseScale: 0.01
   body: 2
   leaves: 11

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46ba51360bfe8f848922f0cde1919247, type: 3}
+  m_Script: {fileID: 11500000, guid: 424ac4f8189c7c64cb3c2fb13725ada6, type: 3}
   m_Name: Charcoal
   m_EditorClassIdentifier: 
   <Icon>k__BackingField: {fileID: 21300000, guid: f4175119212a4f849a0ca49cddba0851,
@@ -28,8 +28,14 @@ MonoBehaviour:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
       <scale>k__BackingField: {x: 1, y: 1, z: 1}
+  <CanBurn>k__BackingField: 0
+  <BurnDuration>k__BackingField: 16
+  <CanSmelt>k__BackingField: 0
+  <SmeltDuration>k__BackingField: 0
+  <SmeltResult>k__BackingField:
+    item: {fileID: 0}
+    amount: 0
   meshGenerator:
     texture2D: {fileID: 2800000, guid: f4175119212a4f849a0ca49cddba0851, type: 3}
     materialPrefab: {fileID: 2100000, guid: b556ba27a63fc234080a5458cd5f464d, type: 2}
     size: 0.02
-  <BurnDuration>k__BackingField: 16

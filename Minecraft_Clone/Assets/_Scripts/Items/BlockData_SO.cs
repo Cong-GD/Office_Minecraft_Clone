@@ -17,6 +17,9 @@ public class BlockData_SO : BaseItem_SO
     [field: SerializeField] 
     public bool IsTransparent { get; private set; }
 
+    [field: SerializeField]
+    public float HardNess {  get; private set; }
+
 
     [field: SerializeField, Expandable] 
     public BlockMeshDataGenerator_SO MeshGenerator { get; private set; }
