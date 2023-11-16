@@ -24,7 +24,7 @@ public class BlastFurnace : IResultGiver, IBlockState
     public readonly ItemSlot burnSlot = new(_cachedBurnAbleRequiment);
 
 
-    public float BurnProgressValue => IsBurning ? (Time.time - _startBurnTime) / _burnTime : 0f;
+    public float BurnProgressValue => IsBurning ? 1f - (Time.time - _startBurnTime) / _burnTime : 0f;
     public float SmeltProgressValue => IsSmelting ? (Time.time - _startCookTime) / _cookTime : 0f;
 
     public bool IsBurning { get; private set; }

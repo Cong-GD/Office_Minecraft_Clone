@@ -1,4 +1,6 @@
-﻿public static class MyMath
+﻿using System;
+
+public static class MyMath
 {
     public static float RemapValue(float value, float initialMin, float initialMax, float outputMin, float outputMax)
     {

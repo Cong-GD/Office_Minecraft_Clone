@@ -1,15 +1,25 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MeshData
 {
-    public ArrayBuffer<Vector3> vertices = new(5000);
-    public ArrayBuffer<Vector3> normals = new(5000);
-    public ArrayBuffer<Vector2> uvs = new(5000);
-    public ArrayBuffer<int> triangles = new(5000);
-    public ArrayBuffer<int> colliderTriangles = new(5000);
-    public ArrayBuffer<int> transparentTriangles = new(5000);
+    public Vector3Int position;
+
+    public MyNativeList<Vector3> vertices = new(5000);
+    public MyNativeList<Vector3> normals = new(5000);
+    public MyNativeList<Vector2> uvs = new(5000);
+    public MyList<int> triangles = new(5000);
+    public MyList<int> colliderTriangles = new(5000);
+    public MyList<int> transparentTriangles = new(5000);
+
+    ~MeshData()
+    {
+        vertices.Dispose();
+        normals.Dispose();
+        uvs.Dispose();
+    }
 
     public void Clear()
     {

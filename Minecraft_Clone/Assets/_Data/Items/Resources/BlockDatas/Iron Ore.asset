@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a73e99d00359d745b5d399ee215a664, type: 3}
+  m_Name: Iron Ore
+  m_EditorClassIdentifier: 
+  <Icon>k__BackingField: {fileID: -1674761300, guid: 4e94f503a19d0c949b9745303267f02f,
+    type: 3}
+  <MaxStack>k__BackingField: 64
+  relativeTransforms:
+    rightHand:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 1.2, y: 1.2, z: 1.5}
+    leftHand:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+    freeObject:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 2, y: 2, z: 2}
+  <CanBurn>k__BackingField: 0
+  <BurnDuration>k__BackingField: 0
+  <CanSmelt>k__BackingField: 1
+  <SmeltDuration>k__BackingField: 5
+  <SmeltResult>k__BackingField:
+    item: {fileID: 11400000, guid: 717e651c58a55ce4ab6ce36a466278cd, type: 2}
+    amount: 1
+  <BlockType>k__BackingField: 16
+  <IsSolid>k__BackingField: 1
+  <IsTransparent>k__BackingField: 0
+  <Hardness>k__BackingField: 1
+  <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 697e22c954a65fc478db2bf173bff0cb,
+    type: 2}

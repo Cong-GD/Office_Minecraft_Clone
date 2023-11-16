@@ -1,0 +1,265 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+
+public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IList<T>, IEnumerable<T> where T : unmanaged
+{
+    private const int DEFAULT_CAPACITY = 4;
+    private const int MAX_SIZE = 10000000;
+
+    private T* _buffer = null;
+
+    private int _count = 0;
+
+    private int _capacity = 0;
+
+    public int Count => _count;
+
+    public int Capacity => _capacity;
+
+    public bool IsReadOnly => false;
+
+    public MyNativeList()
+    {
+
+    }
+
+    public MyNativeList(int capacity)
+    {
+        if (capacity < 0)
+            throw new ArgumentOutOfRangeException("Capacity can't less than 0");
+
+        _capacity = capacity;
+        _buffer = Allocate(_capacity);
+        _count = 0;
+    }
+
+    ~MyNativeList()
+    {
+        FreeMemory();
+    }
+
+    public NativeArray<T> AsNativeArray()
+    {
+        var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(_buffer, _count, Allocator.None);
+        NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.GetTempUnsafePtrSliceHandle());
+        return nativeArray;
+    }
+
+    public T this[int index]
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
+        {
+            if ((uint)index >= _count)
+                throw new IndexOutOfRangeException();
+
+            return _buffer[index];
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        set
+        {
+            if ((uint)index >= _count)
+                throw new IndexOutOfRangeException();
+
+            _buffer[index] = value;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Add(T item)
+    {
+        if (_count == _capacity)
+        {
+            EnsureCapacity(_count + 1);
+        }
+        _buffer[_count] = item;
+        _count++;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Clear()
+    {
+        _count = 0;
+    }
+
+    private void EnsureCapacity(int minSize)
+    {
+        if (_capacity <= minSize)
+        {
+            int newCapacity = _capacity == 0 ? DEFAULT_CAPACITY : _capacity * 2;
+            if ((uint)newCapacity > MAX_SIZE) newCapacity = MAX_SIZE;
+            if (newCapacity < minSize) newCapacity = minSize;
+
+            T* newBuffer = Allocate(newCapacity);
+            UnsafeUtility.MemCpy(newBuffer, _buffer, _count * sizeof(T));
+            FreeMemory();
+            _capacity = newCapacity;
+            _buffer = newBuffer;
+        }
+    }
+
+    private static T* Allocate(int length)
+    {
+        if (length < 1)
+            return null;
+
+        return (T*)Marshal.AllocHGlobal(sizeof(T) * length);
+    }
+
+    private void FreeMemory()
+    {
+        if (_buffer != null)
+        {
+            Marshal.FreeHGlobal((IntPtr)_buffer);
+            _buffer = null;
+        }
+    }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        return new Enumerator(this);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public bool Contains(T item)
+    {
+        for (int i = 0; i < _count; i++)
+        {
+            if (_buffer[i].Equals(item))
+                return true;
+        }
+        return false;
+    }
+
+    public void CopyTo(T[] array, int arrayIndex)
+    {
+        if (array == null)
+            throw new ArgumentNullException("array");
+
+        int end = Mathf.Min(array.Length, _capacity);
+        for (int i = arrayIndex, j = 0; i < end && j < end; ++i, ++j)
+        {
+            array[i] = _buffer[j];
+        }
+    }
+
+    public bool Remove(T item)
+    {
+        int index = IndexOf(item);
+        if (index == -1)
+            return false;
+        RemoveAt(index);
+        return true;
+    }
+
+    public int IndexOf(T item)
+    {
+        for (int i = 0; i < _count; ++i)
+        {
+            if (item.Equals(_buffer[i]))
+                return i;
+        }
+        return -1;
+    }
+
+    public void Insert(int index, T item)
+    {
+        if ((uint)index >= _count)
+            throw new IndexOutOfRangeException();
+
+        if (_count == _capacity)
+            EnsureCapacity(_capacity + 1);
+
+        for (int i = _count; i > index; --i)
+        {
+            _buffer[i] = _buffer[i - 1];
+        }
+        _buffer[index] = item;
+        ++_count;
+    }
+
+    public void RemoveAt(int index)
+    {
+        if ((uint)index >= _count)
+            throw new IndexOutOfRangeException();
+
+        int end = _count - 1;
+        for (int i = index; i < end; i++)
+        {
+            _buffer[i] = _buffer[i + 1];
+        }
+        --_count;
+    }
+
+    public void Dispose()
+    {
+        FreeMemory();
+        _count = 0;
+        _capacity = 0;
+    }
+
+    public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
+    {
+        private readonly T* _buffer;
+        private int _index;
+        private readonly int _count;
+
+        public Enumerator(MyNativeList<T> buffer)
+        {
+            _buffer = buffer._buffer;
+            _count = buffer._count;
+            _index = -1;
+        }
+
+        public T Current
+        {
+            get
+            {
+                if ((uint)_index >= _count)
+                    throw new InvalidOperationException();
+
+                return _buffer[_index];
+
+            }
+        }
+
+        object IEnumerator.Current
+        {
+            get
+            {
+                if ((uint)_index >= _count)
+                    throw new InvalidOperationException();
+
+                return _buffer[_index];
+
+            }
+        }
+
+        public void Dispose() { }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+            {
+                return false;
+            }
+            _index++;
+            return true;
+        }
+
+        public void Reset()
+        {
+            _index = -1;
+        }
+    }
+}

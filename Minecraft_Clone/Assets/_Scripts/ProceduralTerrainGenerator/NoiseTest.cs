@@ -1,8 +1,9 @@
 ﻿using Minecraft;
 using NaughtyAttributes;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Mathematics;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshRenderer))]
@@ -11,6 +12,7 @@ public class NoiseTest : MonoBehaviour
     [Expandable]
     public NoiseGenerator_SO noiseGen;
 
+    [Delayed]
     public int width, height;
     public MeshRenderer meshRenderer;
     public Gradient gradient;
@@ -54,9 +56,53 @@ public class NoiseTest : MonoBehaviour
         PrintToTexture();
     }
 
+    [Button]
+    public unsafe void Test()
+    {
+        var list = new MyNativeList<float3>();
+        list.Add(new(1, 1, 1)); 
+        list.Add(new(1, 0, 1));
+        list.Add(new(1, 1, 0));
+        list.Add(new(1, 12, 0));
+        list.Add(new(1, 11, 0));
+        list.Add(new(1, 14, 0));
+        list.Add(new(1, 11, 0));
+
+        // it's work
+        foreach (var item in list)
+        {
+            Debug.Log(item);
+        }
+        try
+        {
+            var array = list.AsNativeArray();
+            Debug.Log(array);
+            // still work
+            Debug.Log(array.Length);
+            var atomic = AtomicSafetyHandle.Create();
+            AtomicSafetyHandle.SetAllowReadOrWriteAccess(atomic, true);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, atomic);
+
+            Debug.Log(array == null);
+            var ptr = NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array);
+
+            Debug.Log(ptr == null);
+            Debug.Log(*(float3*)ptr);
+
+            Debug.Log(array[0]);
+
+
+        }
+        catch(System.Exception e)
+        {
+            Debug.LogException(e);
+        }
+
+        list.Dispose();
+    }
 
     [Button]
-    [Conditional("UNITY_EDITOR")]
+    [System.Diagnostics.Conditional("UNITY_EDITOR")]
     public void PrintToTexture()
     {
         for (int x = 0; x < width; x++)
@@ -73,7 +119,7 @@ public class NoiseTest : MonoBehaviour
 
 
     [Button]
-    [Conditional("UNITY_EDITOR")]
+    [System.Diagnostics.Conditional("UNITY_EDITOR")]
     public void WriteResult()
     {
         const string path = "Assets/_Data/Testing/PerlinTest.csv";

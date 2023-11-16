@@ -1,5 +1,6 @@
 ﻿using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIBlastFurnace : MonoBehaviour
 {
@@ -14,25 +15,41 @@ public class UIBlastFurnace : MonoBehaviour
 
     private BlastFurnace _furnace;
 
-    [ProgressBar("Burn Progress", 1f, EColor.Red)]
-    public float burnProgress;
+    [SerializeField]
+    private RectTransform burnProgressBar;
 
-    [ProgressBar("Smelt Progress", 1f, EColor.Blue)]
-    public float smeltProgress;
+    [SerializeField]
+    private RectTransform smeltProgressBar;
+
+    [SerializeField]
+    private Image burnProgressImage;
+
+    [SerializeField]
+    private Image smeltProgressImage;
 
     public float BurnProgress => _furnace != null ? _furnace.BurnProgressValue : 0f;
 
     public float SmeltProgress => _furnace != null ? _furnace.SmeltProgressValue : 0f;
 
+    private void OnEnable()
+    {
+        TransformHelper.CopyRectTransform(burnProgressBar, burnProgressImage.rectTransform);
+        TransformHelper.CopyRectTransform(smeltProgressBar, smeltProgressImage.rectTransform);
+        burnProgressImage.gameObject.SetActive(true);
+        smeltProgressImage.gameObject.SetActive(true);
+    }
+
     private void OnDisable()
     {
         ClearFurnace();
+        burnProgressImage.gameObject.SetActive(false);
+        smeltProgressImage.gameObject.SetActive(false);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        burnProgress = BurnProgress;
-        smeltProgress = SmeltProgress;
+        burnProgressImage.fillAmount = BurnProgress;
+        smeltProgressImage.fillAmount = SmeltProgress;
     }
 
     public void SetFurnace(BlastFurnace furnace)

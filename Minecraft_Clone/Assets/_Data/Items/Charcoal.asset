@@ -15,11 +15,11 @@ MonoBehaviour:
   <Icon>k__BackingField: {fileID: 21300000, guid: f4175119212a4f849a0ca49cddba0851,
     type: 3}
   <MaxStack>k__BackingField: 64
-  statedTransforms:
+  relativeTransforms:
     rightHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+      <scale>k__BackingField: {x: 1.2, y: 1.2, z: 1.5}
     leftHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
@@ -27,8 +27,8 @@ MonoBehaviour:
     freeObject:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 1, y: 1, z: 1}
-  <CanBurn>k__BackingField: 0
+      <scale>k__BackingField: {x: 2, y: 2, z: 2}
+  <CanBurn>k__BackingField: 1
   <BurnDuration>k__BackingField: 16
   <CanSmelt>k__BackingField: 0
   <SmeltDuration>k__BackingField: 0

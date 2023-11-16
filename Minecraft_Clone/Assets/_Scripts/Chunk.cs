@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
 using UnityEngine;
 using static WorldSettings;
 
@@ -8,9 +9,9 @@ public static class Chunk
 {
     public static MeshData GetMeshData(ChunkData chunkData)
     {
-        MeshData meshData = ThreadSafePool<MeshData>.Get(); //ConcurrentPool.GetMeshData();
+        MeshData meshData = ThreadSafePool<MeshData>.Get();
         meshData.Clear();
-
+        meshData.position = chunkData.chunkCoord;
         for (int x = 0; x < CHUNK_WIDTH; x++)
         {
             for (int y = 0; y < CHUNK_DEPTH; y++)
@@ -32,18 +33,18 @@ public static class Chunk
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsPositionInChunk(Vector3Int localPos)
     {
-        return localPos.x > -1 && localPos.x < CHUNK_WIDTH
-            && localPos.y > -1 && localPos.y < CHUNK_DEPTH
-            && localPos.z > -1 && localPos.z < CHUNK_WIDTH;
+        return (uint)localPos.x < CHUNK_WIDTH
+            && (uint)localPos.y < CHUNK_DEPTH
+            && (uint)localPos.z < CHUNK_WIDTH;
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsPositionInChunk(int localX, int localY, int localZ)
     {
-        return localX > -1 && localX < CHUNK_WIDTH
-            && localY > -1 && localY < CHUNK_DEPTH
-            && localZ > -1 && localZ < CHUNK_WIDTH;
+        return (uint)localX < CHUNK_WIDTH
+            && (uint)localY < CHUNK_DEPTH
+            && (uint)localZ < CHUNK_WIDTH;
     }
 
 
@@ -69,27 +70,21 @@ public static class Chunk
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsValidChunkCoordY(int y)
     {
-        return y > -1 && y < MAP_HEIGHT_IN_CHUNK;
+        return (uint)y < MAP_HEIGHT_IN_CHUNK;
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsValidWorldY(int y)
     {
-        return y > -1 && y < MAP_HEIGHT_IN_BLOCK;
+        return (uint)y < MAP_HEIGHT_IN_BLOCK;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsValidLocalY(int y)
     {
-        return y > -1 && y < CHUNK_DEPTH;
+        return (uint)y < CHUNK_DEPTH;
     }
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetBlockIndex(int localX, int localY, int localZ)
-        => (localZ * CHUNK_WIDTH * CHUNK_DEPTH) + (localY * CHUNK_WIDTH) + localX;
-
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsPositionInRange(Vector3Int center, Vector3Int position, int range)
@@ -100,7 +95,7 @@ public static class Chunk
     public static BlockType GetBlock(ChunkData chunkData, int localX, int localY, int localZ)
     {
         if (IsPositionInChunk(localX, localY, localZ))
-            return chunkData.blocks[GetBlockIndex(localX, localY, localZ)];
+            return chunkData.GetBlockUncheck(localX, localY, localZ);
 
         return GetBlock(chunkData.worldPosition.x + localX,
                         chunkData.worldPosition.y + localY,
@@ -118,7 +113,7 @@ public static class Chunk
 
         if (World.Instance.TryGetChunkData(chunkCoord, out var chunkData))
         {
-            return chunkData.GetBlock(
+            return chunkData.GetBlockUncheck(
                          worldX - chunkData.worldPosition.x,
                          worldY - chunkData.worldPosition.y,
                          worldZ - chunkData.worldPosition.z);
@@ -138,7 +133,7 @@ public static class Chunk
 
         if (World.Instance.TryGetChunkData(chunkCoord, out var chunkData))
         {
-            return chunkData.GetDirection(
+            return chunkData.GetDirectionUncheck(
                          worldX - chunkData.worldPosition.x,
                          worldY - chunkData.worldPosition.y,
                          worldZ - chunkData.worldPosition.z);
@@ -158,7 +153,7 @@ public static class Chunk
 
         if (World.Instance.TryGetChunkData(chunkCoord, out var chunkData))
         {
-            chunkData.SetBlock(
+            chunkData.SetBlockUncheck(
                          worldX - chunkData.worldPosition.x,
                          worldY - chunkData.worldPosition.y,
                          worldZ - chunkData.worldPosition.z, 
@@ -186,13 +181,17 @@ public static class Chunk
         }
     }
 
-    public static HashSet<Vector3Int> GetAdjacentChunkCoords(Vector3Int worldPosition)
+    public static IEnumerable<Vector3Int> GetAdjacentChunkCoords(Vector3Int worldPosition)
     {
-        HashSet<Vector3Int> set = new();
+        Vector3Int center = GetChunkCoord(worldPosition);
+        yield return center;
         foreach (var direction in VectorExtensions.SixDirectionsVector3Int)
         {
-            set.Add(GetChunkCoord(worldPosition + direction));
+            var newCoord = GetChunkCoord(worldPosition + direction);
+            if (newCoord != center)
+            {
+                yield return newCoord;
+            }
         }
-        return set;
     }
 }

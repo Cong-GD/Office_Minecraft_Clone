@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using UnityEngine;
 
 public enum Direction : byte
 {
@@ -19,3 +20,4 @@ public static class DirectionExtensions
             Direction.Left,
     }.AsReadOnly();
 }
+

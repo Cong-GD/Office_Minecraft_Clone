@@ -15,7 +15,7 @@ MonoBehaviour:
   <Icon>k__BackingField: {fileID: 21300000, guid: 1c7cc6a4a45c9c043be144435f69f9cf,
     type: 3}
   <MaxStack>k__BackingField: 1
-  statedTransforms:
+  relativeTransforms:
     rightHand:
       <position>k__BackingField: {x: -0.05, y: -0.15, z: 0}
       <rotation>k__BackingField: {x: 4, y: 100, z: 56}
@@ -28,6 +28,13 @@ MonoBehaviour:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
       <scale>k__BackingField: {x: 1.2, y: 1.2, z: 1.5}
+  <CanBurn>k__BackingField: 0
+  <BurnDuration>k__BackingField: 0
+  <CanSmelt>k__BackingField: 0
+  <SmeltDuration>k__BackingField: 0
+  <SmeltResult>k__BackingField:
+    item: {fileID: 0}
+    amount: 0
   meshGenerator:
     texture2D: {fileID: 2800000, guid: 1c7cc6a4a45c9c043be144435f69f9cf, type: 3}
     materialPrefab: {fileID: 2100000, guid: b556ba27a63fc234080a5458cd5f464d, type: 2}

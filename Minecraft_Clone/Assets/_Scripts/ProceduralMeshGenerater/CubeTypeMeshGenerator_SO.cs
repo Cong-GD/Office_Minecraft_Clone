@@ -23,9 +23,9 @@ namespace Minecraft.ProceduralMeshGenerate
         {
             Mesh mesh = new Mesh();
             ObjectManager.AddToManagingList(mesh);
-            ArrayBuffer<Vector3> vertices = new();
-            ArrayBuffer<int> triangles = new();
-            ArrayBuffer<Vector2> uvs = new();
+            MyList<Vector3> vertices = new();
+            MyList<int> triangles = new();
+            MyList<Vector2> uvs = new();
             for (int i = 0; i < FACES_COUNT; i++)
             {
                 VoxelHelper.AddQuadVertices(vertices, sixDirections[i], 0, 0, 0, 0.1f);

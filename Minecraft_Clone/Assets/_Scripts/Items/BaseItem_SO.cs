@@ -10,11 +10,14 @@ public abstract class BaseItem_SO : ScriptableObject
     [field: ShowAssetPreview]
     public Sprite Icon { get; private set; }
 
+
     [field: SerializeField, Min(1)]
     public int MaxStack { get; private set; } = 64;
 
+
     [SerializeField]
-    private ItemRelaviteTransforms statedTransforms;
+    private ItemRelaviteTransforms relativeTransforms;
+
 
     [NonSerialized]
     private Mesh _cachedMesh;
@@ -61,7 +64,7 @@ public abstract class BaseItem_SO : ScriptableObject
             _cachedMaterial = CreateMaterial();
         }
 
-        return new ObjectMeshData(_cachedMesh, _cachedMaterial, statedTransforms);
+        return new ObjectMeshData(_cachedMesh, _cachedMaterial, relativeTransforms);
     }
 
 

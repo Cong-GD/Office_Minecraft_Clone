@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 91e096173928df542af90cc9ef062982, type: 3}
-  m_Name: Furnace
+  m_Name: Blast Furnace
   m_EditorClassIdentifier: 
   <Icon>k__BackingField: {fileID: 988166721, guid: 4e94f503a19d0c949b9745303267f02f,
     type: 3}
   <MaxStack>k__BackingField: 64
-  statedTransforms:
+  relativeTransforms:
     rightHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+      <scale>k__BackingField: {x: 1.2, y: 1.2, z: 1.5}
     leftHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}

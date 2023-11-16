@@ -1,8 +1,12 @@
 ﻿using Minecraft;
 using Minecraft.Input;
 using NaughtyAttributes;
+using System;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Collections.LowLevel.Unsafe;
+
 
 public class PlayerInteract : MonoBehaviour
 {
@@ -13,6 +17,9 @@ public class PlayerInteract : MonoBehaviour
     public float checkDistance;
 
     public float dropForce = 1f;
+
+    [SerializeField]
+    private int destroyInputReceiveDelayInMilisecond;
 
     [SerializeField]
     private LayerMask entityLayer;
@@ -27,20 +34,27 @@ public class PlayerInteract : MonoBehaviour
 
     private readonly Vector3 _halfOne = new Vector3(0.5f, 0.5f, 0.5f);
 
-    public Direction face;
+    private RepeatingCancellationTokenSource _destroyCancelationTokenSource = new();
 
     private void OnEnable()
     {
-        MInput.LeftMouse.performed += OnLeftClicked;
-        MInput.RightMouse.performed += OnRightClicked;
+        MInput.Destroy.performed += OnLeftClicked;
+        MInput.Destroy.canceled += OnLeftClicked;
+        MInput.Build.performed += OnRightClicked;
         MInput.Throw.performed += ProcessThrowInput;
     }
 
     private void OnDisable()
     {
-        MInput.LeftMouse.performed -= OnLeftClicked;
-        MInput.RightMouse.performed -= OnRightClicked;
+        MInput.Destroy.performed -= OnLeftClicked;
+        MInput.Destroy.canceled -= OnLeftClicked;
+        MInput.Build.performed -= OnRightClicked;
         MInput.Throw.performed -= ProcessThrowInput;
+    }
+
+    private void OnDestroy()
+    {
+        _destroyCancelationTokenSource.Destroy();
     }
 
     private void OnRightClicked(InputAction.CallbackContext context)
@@ -55,7 +69,22 @@ public class PlayerInteract : MonoBehaviour
 
     private void OnLeftClicked(InputAction.CallbackContext context)
     {
-        CheckForDestroy();
+        if (context.performed)
+        {
+            try
+            {
+                CheckForDestroy();
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("End destroying blocks");
+            }
+
+        }
+        else
+        {
+            _destroyCancelationTokenSource.Reset();
+        }
     }
 
     private void CheckForPlaceBlock()
@@ -75,12 +104,12 @@ public class PlayerInteract : MonoBehaviour
 
         rightHand.TakeAmount(1);
         var direction = GetDirectionWithPlayer(hitPosition + _halfOne);
-        face = direction;
         var _ = World.Instance.EditBlockAsync(adjacentHitPosition, blockData.BlockType, direction);
     }
 
     private async void CheckForDestroy()
     {
+        
         RayCast();
         if (!isCastHit)
             return;
@@ -92,7 +121,7 @@ public class PlayerInteract : MonoBehaviour
         var isSucceed = await World.Instance.EditBlockAsync(hitPosition, BlockType.Air, Direction.Backward);
         if (isSucceed)
         {
-            PickupManager.Instance.ThrowItem(new(block, 1), hitPosition + _halfOne, (Vector3.up + Random.insideUnitSphere) * dropForce);
+            PickupManager.Instance.ThrowItem(new(block, 1), hitPosition + _halfOne, (Vector3.up + UnityEngine.Random.insideUnitSphere) * dropForce);
         }
     }
 
@@ -100,7 +129,7 @@ public class PlayerInteract : MonoBehaviour
     {
         var direction = Vector2Int.RoundToInt((eye.position - pos).XZ().normalized);
 
-        if(direction.x == 0)
+        if (direction.x == 0)
             return direction.y >= 0 ? Direction.Forward : Direction.Backward;
 
         return direction.x >= 0 ? Direction.Right : Direction.Left;

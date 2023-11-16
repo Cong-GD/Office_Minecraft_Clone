@@ -1,4 +1,6 @@
-﻿public enum BlockType : byte
+﻿// This enum is add only
+// Don't set value for this enum or reorder it, that will generate a lot of problem or bug
+public enum BlockType : byte
 {
     Air,
     Bedrock,
@@ -15,5 +17,6 @@
     Castus,
     Water,
     CraftingTable,
-    Furnace
+    Furnace,
+    IronOre
 }

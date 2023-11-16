@@ -18,7 +18,7 @@ public static class VoxelHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AddQuadVertices(ArrayBuffer<Vector3> vertices,Direction direction, int x, int y, int z)
+    public static void AddQuadVertices(ICollection<Vector3> vertices,Direction direction, int x, int y, int z)
     {
         switch (direction)
         {
@@ -61,7 +61,7 @@ public static class VoxelHelper
         }
     }
 
-    public static void AddQuadVertices(ArrayBuffer<Vector3> vertices, Direction direction, float x, float y, float z, float size)
+    public static void AddQuadVertices(ICollection<Vector3> vertices, Direction direction, float x, float y, float z, float size)
     {
         switch (direction)
         {
@@ -105,7 +105,7 @@ public static class VoxelHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AddQuadUvs(ArrayBuffer<Vector2> uvs, int uvIndex)
+    public static void AddQuadUvs(ICollection<Vector2> uvs, int uvIndex)
     {
         float yPos = uvIndex / ATLAS_SIZE * NOMALIZED_UV_VALUE;
         float xPos = uvIndex % ATLAS_SIZE * NOMALIZED_UV_VALUE;
@@ -117,7 +117,7 @@ public static class VoxelHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AddQuadTriangle(ArrayBuffer<int> triangles, int verticesCount)
+    public static void AddQuadTriangle(ICollection<int> triangles, int verticesCount)
     {
         triangles.Add(verticesCount - 4);
         triangles.Add(verticesCount - 3);

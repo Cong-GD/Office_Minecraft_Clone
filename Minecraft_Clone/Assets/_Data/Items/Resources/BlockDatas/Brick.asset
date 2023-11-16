@@ -15,11 +15,11 @@ MonoBehaviour:
   <Icon>k__BackingField: {fileID: 1974819784, guid: 4e94f503a19d0c949b9745303267f02f,
     type: 3}
   <MaxStack>k__BackingField: 64
-  statedTransforms:
+  relativeTransforms:
     rightHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+      <scale>k__BackingField: {x: 1.2, y: 1.2, z: 1.5}
     leftHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
@@ -38,6 +38,6 @@ MonoBehaviour:
   <BlockType>k__BackingField: 10
   <IsSolid>k__BackingField: 1
   <IsTransparent>k__BackingField: 0
-  <HardNess>k__BackingField: 0
+  <Hardness>k__BackingField: 1
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: f76fe529cb6fd384487ba7fb29261cff,
     type: 2}

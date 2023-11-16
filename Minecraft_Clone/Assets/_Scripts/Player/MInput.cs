@@ -48,8 +48,8 @@ namespace Minecraft.Input
         public static InputAction Move { get; private set; }
         public static InputAction Jump { get; private set; }
         public static InputAction Crounch { get; private set; }
-        public static InputAction LeftMouse { get; private set; }
-        public static InputAction RightMouse { get; private set; }
+        public static InputAction Destroy { get; private set; }
+        public static InputAction Build { get; private set; }
         public static InputAction Look { get; private set; }
         public static InputAction ScrollWheel { get; private set; }
         public static InputAction OpenInventory { get; private set; }
@@ -80,8 +80,8 @@ namespace Minecraft.Input
             Move = _gamePlayActions.Move;
             Jump = _gamePlayActions.Jump;
             Crounch = _gamePlayActions.Crounch;
-            LeftMouse = _gamePlayActions.LeftMouse;
-            RightMouse = _gamePlayActions.RightMouse;
+            Destroy = _gamePlayActions.LeftMouse;
+            Build = _gamePlayActions.RightMouse;
             Look = _gamePlayActions.Look;
             ScrollWheel = _gamePlayActions.ScrollWheel;
             OpenInventory = _gamePlayActions.OpenInventory;

@@ -19,9 +19,9 @@ namespace Minecraft.ProceduralMeshGenerate
             private Color[] colors;
             private float size;
 
-            private readonly ArrayBuffer<Vector3> vertices = new (100);
-            private readonly ArrayBuffer<int> triangles = new (100);
-            private readonly ArrayBuffer<Vector2> uvs = new (100);
+            private readonly MyList<Vector3> vertices = new (100);
+            private readonly MyList<int> triangles = new (100);
+            private readonly MyList<Vector2> uvs = new (100);
 
             public void GetMesh(Mesh mesh, Texture2D texture2D, float size)
             {

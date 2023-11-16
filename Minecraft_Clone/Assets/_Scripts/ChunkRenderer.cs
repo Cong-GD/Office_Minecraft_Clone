@@ -1,6 +1,7 @@
 ﻿using ObjectPooling;
 using System;
 using System.Threading.Tasks;
+using Unity.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
@@ -51,18 +52,25 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
 
         mesh.Clear();
         mesh.subMeshCount = 2;
-        mesh.SetVertices(meshData.vertices.Items, 0, meshData.vertices.Count);
+        //mesh.SetVertices(meshData.vertices.Items, 0, meshData.vertices.Count);
+        //mesh.SetTriangles(meshData.triangles.Items, 0, meshData.triangles.Count, 0);
+        //mesh.SetTriangles(meshData.transparentTriangles.Items, 0, meshData.transparentTriangles.Count, 1);
+        //mesh.SetUVs(0, meshData.uvs.Items, 0, meshData.uvs.Count);
+        //mesh.SetNormals(meshData.normals.Items, 0, meshData.normals.Count);
+
+        mesh.SetVertices(meshData.vertices.AsNativeArray());
         mesh.SetTriangles(meshData.triangles.Items, 0, meshData.triangles.Count, 0);
         mesh.SetTriangles(meshData.transparentTriangles.Items, 0, meshData.transparentTriangles.Count, 1);
-        mesh.SetUVs(0, meshData.uvs.Items, 0, meshData.uvs.Count);
-        mesh.SetNormals(meshData.normals.Items, 0, meshData.normals.Count);
+        mesh.SetUVs(0, meshData.uvs.AsNativeArray());
+        mesh.SetNormals(meshData.normals.AsNativeArray());
 
         meshCollider.sharedMesh = null;
         if (meshData.colliderTriangles.Count == 0)
             return;
 
         colliderMesh.Clear();
-        colliderMesh.SetVertices(meshData.vertices.Items, 0, meshData.vertices.Count);
+        //colliderMesh.SetVertices(meshData.vertices.Items, 0, meshData.vertices.Count);
+        colliderMesh.SetVertices(meshData.vertices.AsNativeArray());
         colliderMesh.SetTriangles(meshData.colliderTriangles.Items, 0, meshData.colliderTriangles.Count, 0);
         meshCollider.sharedMesh = colliderMesh;
     }

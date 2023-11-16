@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using static WorldSettings;
 using UnityEngine.XR;
 using NaughtyAttributes;
+using System.Runtime.CompilerServices;
 
 public class TerrainGenerator : MonoBehaviour
 {
@@ -17,6 +18,12 @@ public class TerrainGenerator : MonoBehaviour
         [MinMaxSlider(0f, 1f)]
         public Vector2 temperatureThreshold;
         public BiomeGenerator biome;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsSuit(float noiseValue)
+        {
+            return noiseValue >= temperatureThreshold.x && noiseValue < temperatureThreshold.y;
+        }
     }
 
     [SerializeField] private NoiseGenerator_SO biomeTemperateNoiseGenerator;
@@ -24,36 +31,59 @@ public class TerrainGenerator : MonoBehaviour
     [SerializeField] private int waterLevel = 140;
     [SerializeField] private int biomeSelectRange = 2;
     [SerializeField] private int biomeSize = 150;
-    private NoiseInstance _tempoNoiseInstance;
 
-    private Dictionary<Vector2Int, BiomeGenerator> _biomeCenters = new Dictionary<Vector2Int, BiomeGenerator>();
+    private NoiseInstance _tempoNoiseInstance;
+    private int _totalBiomes;
+    private int _nearBiomeCount;
+    private BiomeGenerator[] _biomeLookupArray;
+
+    private Vector2[] _biomePositions;
+    private int[] _biomeIndexes;
+    private int _gridSize;
+    private object _biomeCalculationThreadLock = new object();
+    
 
     private void Awake()
     {
         WorldSettings.waterLevel = waterLevel;
         _tempoNoiseInstance = biomeTemperateNoiseGenerator.GetNoiseInstance();
+        _totalBiomes = biomeGeneratorsData.Length;
+        _biomeLookupArray = biomeGeneratorsData.Select(data => data.biome).ToArray();
+
+        _gridSize = biomeSelectRange * 2 + 1;
+        _biomePositions = new Vector2[_gridSize * _gridSize];
+        _biomeIndexes = new int[_gridSize * _gridSize];
     }
 
-    public void CalculateBiomeCenter(float centerX, float centorZ)
+    public void CalculateBiomeCenter(int centerX, int centerZ)
     {
-        lock (_biomeCenters)
+        lock (_biomeCalculationThreadLock)
         {
-            _biomeCenters.Clear();
-            int xOrigin = Mathf.RoundToInt(centerX / biomeSize) * biomeSize;
-            int zOrigin = Mathf.RoundToInt(centorZ / biomeSize) * biomeSize;
+            var xCenter = Mathf.RoundToInt((float)centerX / biomeSize) * biomeSize;
+            var zCenter = Mathf.RoundToInt((float)centerZ / biomeSize) * biomeSize;
 
-            int startX = xOrigin - biomeSize * biomeSelectRange;
-            int endX = xOrigin + biomeSize * biomeSelectRange + 1;
-            int startZ = zOrigin - biomeSize * biomeSelectRange;
-            int endZ = zOrigin + biomeSize * biomeSelectRange + 1;
+            int startX = xCenter - biomeSize * biomeSelectRange;
+            int startZ = zCenter - biomeSize * biomeSelectRange;
 
-            for (int x = startX; x < endX; x += biomeSize)
+            Span<bool> flags = stackalloc bool[_totalBiomes];
+
+            for (int x = 0; x < _gridSize; x++)
             {
-                for (int z = startZ; z < endZ; z += biomeSize)
+                for (int z = 0; z < _gridSize; z++)
                 {
-                    _biomeCenters[new Vector2Int(x, z)] = SelectectBiome(x, z);
+                    int worldX = x * biomeSize + startX;
+                    int worldZ = z * biomeSize + startZ;
+                    int id = SelectBiomeId(worldX, worldZ);
+                    flags[id] = true;
+                    _biomePositions[z * _gridSize + x] = new Vector2(worldX, worldZ);
+                    _biomeIndexes[z * _gridSize + x] = id;
                 }
-            } 
+            }
+            _nearBiomeCount = 0;
+            foreach (var flag in flags)
+            {
+                _nearBiomeCount += flag ? 1 : 0;
+            }
         }
     }
 
@@ -62,7 +92,6 @@ public class TerrainGenerator : MonoBehaviour
         ChunkData chunkData = GetChunkData();
         chunkData.state = ChunkState.Creating;
         chunkData.SetChunkCoord(chunkCoord);
-        var biomeDistances = ThreadSafePool<Dictionary<BiomeGenerator, float>>.Get();
 
         for (int x = 0; x < CHUNK_WIDTH; x++)
         {
@@ -70,65 +99,65 @@ public class TerrainGenerator : MonoBehaviour
             {
                 int worldX = chunkData.worldPosition.x + x;
                 int worldZ = chunkData.worldPosition.z + z;
-                var biome = SelectectBiome(worldX, worldZ);
-                biomeDistances.Clear();
-                GetBiomeDistance(biomeDistances, worldX, worldZ);
-                float sum = biomeDistances.Values.Sum(v => v) / 2;
-
+                var biome = Biome(SelectBiomeId(worldX, worldZ));
+                Span<float> distances = stackalloc float[_totalBiomes];
+                GetBiomeDistance(distances, worldX, worldZ, out var sum);
                 float terrainHeight = 0f;
-                foreach (var biomeDistance in biomeDistances)
-                {
-                    terrainHeight += biomeDistance.Key.GetSurfaceHeightNoise(worldX, worldZ) * ((sum - biomeDistance.Value) / sum);
-                }
 
-                if(terrainHeight >= MAP_HEIGHT_IN_BLOCK)
+                for (int i = 0; i < _totalBiomes; i++)
                 {
-                    Debug.Log($"{terrainHeight}, {sum}, {biomeDistances.Count}");
+                    var distance = distances[i];
+                    if (distance > 0f)
+                    {
+                        float weight = 1f - distance / sum;
+                        float surfaceHeight = Biome(i).GetSurfaceHeightNoise(worldX, worldZ);
+                        terrainHeight += surfaceHeight * weight;
+                    }
                 }
 
                 biome.ProcessChunkCollumn(chunkData, x, z, Mathf.RoundToInt(terrainHeight));
             }
         }
-
-        biomeDistances.Clear();
-        ThreadSafePool<Dictionary<BiomeGenerator, float>>.Release(biomeDistances);
         chunkData.state = ChunkState.Generated;
         return chunkData;
     }
 
-    private BiomeGenerator SelectectBiome(int worldX, int worldZ)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private BiomeGenerator Biome(int biomeId)
     {
-        float noiseValue = _tempoNoiseInstance.GetNoise(worldX, worldZ);
-        foreach (var data in biomeGeneratorsData)
-        {
-            if (noiseValue >= data.temperatureThreshold.x && noiseValue < data.temperatureThreshold.y)
-            {
-                return data.biome;
-            }
-        }
-        return biomeGeneratorsData[0].biome;
+        return _biomeLookupArray[biomeId];
     }
 
-    private void GetBiomeDistance(Dictionary<BiomeGenerator, float> biomeDistances, int x, int z)
+    private int SelectBiomeId(int worldX, int worldZ)
     {
-        var pos = new Vector2Int(x, z);
+        float noiseValue = _tempoNoiseInstance.GetNoise(worldX, worldZ);
 
-        foreach (var biomeCenter in _biomeCenters)
+        for (int i = 0; i < _totalBiomes; i++)
         {
-            var distance = Vector2Int.Distance(biomeCenter.Key, pos);
+            if (biomeGeneratorsData[i].IsSuit(noiseValue))
+                return i;
+        }
+        return 0;
+    }
 
-            if (biomeDistances.TryGetValue(biomeCenter.Value, out var currentDistance))
+    private void GetBiomeDistance(Span<float> distances, int x, int z, out float sum)
+    {
+        var pos = new Vector2(x + 0.1f, z + 0.1f);
+        for (int i = 0; i < _biomeIndexes.Length; i++)
+        {
+            int biomeId = _biomeIndexes[i];
+            float distance = Vector2.Distance(pos, _biomePositions[i]);
+            if (distances[biomeId] == 0f || distance < distances[biomeId])
             {
-                if (currentDistance > distance)
-                {
-                    biomeDistances[biomeCenter.Value] = distance;
-                }
-            }
-            else
-            {
-                biomeDistances[biomeCenter.Value] = distance;
+                distances[biomeId] = distance;
             }
         }
+        sum = 0f;
+        for (int i = 0; i < _totalBiomes; i++)
+        {
+            sum += distances[i];
+        }
+        sum /= 2f;
     }
 
 
@@ -156,13 +185,13 @@ public class TerrainGenerator : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (!Application.isPlaying || _biomeCenters is null)
+        if (!Application.isPlaying || _biomeIndexes is null)
             return;
 
         Gizmos.color = Color.blue;
-        lock (_biomeCenters)
+        lock (_biomeCalculationThreadLock)
         {
-            foreach (var vec2 in _biomeCenters.Keys)
+            foreach (var vec2 in _biomePositions)
             {
                 var pos = new Vector3(vec2.x, 0, vec2.y);
                 Gizmos.DrawLine(pos, pos + Vector3.up * CHUNK_DEPTH);
