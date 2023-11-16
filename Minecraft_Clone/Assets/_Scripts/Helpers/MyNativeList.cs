@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
-public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IList<T>, IEnumerable<T> where T : unmanaged
+public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IEnumerable<T> where T : unmanaged
 {
     private const int DEFAULT_CAPACITY = 4;
-    private const int MAX_SIZE = 10000000;
+    private static readonly int _maxSize = int.MaxValue / sizeof(T);
 
     private T* _buffer = null;
 
@@ -35,8 +36,7 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IList<T>, IEn
             throw new ArgumentOutOfRangeException("Capacity can't less than 0");
 
         _capacity = capacity;
-        _buffer = Allocate(_capacity);
-        _count = 0;
+        _buffer = Allocate(capacity);
     }
 
     ~MyNativeList()
@@ -51,7 +51,7 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IList<T>, IEn
         return nativeArray;
     }
 
-    public T this[int index]
+    public ref T this[int index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
@@ -59,15 +59,7 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IList<T>, IEn
             if ((uint)index >= _count)
                 throw new IndexOutOfRangeException();
 
-            return _buffer[index];
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set
-        {
-            if ((uint)index >= _count)
-                throw new IndexOutOfRangeException();
-
-            _buffer[index] = value;
+            return ref *(_buffer + index);
         }
     }
 
@@ -93,7 +85,7 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IList<T>, IEn
         if (_capacity <= minSize)
         {
             int newCapacity = _capacity == 0 ? DEFAULT_CAPACITY : _capacity * 2;
-            if ((uint)newCapacity > MAX_SIZE) newCapacity = MAX_SIZE;
+            if ((uint)newCapacity > _maxSize) newCapacity = _maxSize;
             if (newCapacity < minSize) newCapacity = minSize;
 
             T* newBuffer = Allocate(newCapacity);
@@ -146,7 +138,7 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IList<T>, IEn
         if (array == null)
             throw new ArgumentNullException("array");
 
-        int end = Mathf.Min(array.Length, _capacity);
+        int end = Mathf.Min(array.Length, _count);
         for (int i = arrayIndex, j = 0; i < end && j < end; ++i, ++j)
         {
             array[i] = _buffer[j];

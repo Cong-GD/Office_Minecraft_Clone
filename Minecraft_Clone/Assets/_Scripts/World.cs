@@ -80,7 +80,7 @@ public class World : MonoBehaviour
 
         Instance = this;
         WorldSeed = seed;
-        ThreadSafePool<MeshData>.Capacity = 200;
+        ThreadSafePool<MeshData>.Capacity = 50;
 
         _cancellationToken = destroyCancellationToken;
         _parallelOptions = new ParallelOptions()

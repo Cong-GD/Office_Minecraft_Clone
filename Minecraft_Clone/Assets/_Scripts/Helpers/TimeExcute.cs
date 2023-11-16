@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class TimeExcute : IDisposable
 {
-
     public static TimeExcute Start(string message)
     {
 #if UNITY_EDITOR

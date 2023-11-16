@@ -57,51 +57,6 @@ public class NoiseTest : MonoBehaviour
     }
 
     [Button]
-    public unsafe void Test()
-    {
-        var list = new MyNativeList<float3>();
-        list.Add(new(1, 1, 1)); 
-        list.Add(new(1, 0, 1));
-        list.Add(new(1, 1, 0));
-        list.Add(new(1, 12, 0));
-        list.Add(new(1, 11, 0));
-        list.Add(new(1, 14, 0));
-        list.Add(new(1, 11, 0));
-
-        // it's work
-        foreach (var item in list)
-        {
-            Debug.Log(item);
-        }
-        try
-        {
-            var array = list.AsNativeArray();
-            Debug.Log(array);
-            // still work
-            Debug.Log(array.Length);
-            var atomic = AtomicSafetyHandle.Create();
-            AtomicSafetyHandle.SetAllowReadOrWriteAccess(atomic, true);
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, atomic);
-
-            Debug.Log(array == null);
-            var ptr = NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array);
-
-            Debug.Log(ptr == null);
-            Debug.Log(*(float3*)ptr);
-
-            Debug.Log(array[0]);
-
-
-        }
-        catch(System.Exception e)
-        {
-            Debug.LogException(e);
-        }
-
-        list.Dispose();
-    }
-
-    [Button]
     [System.Diagnostics.Conditional("UNITY_EDITOR")]
     public void PrintToTexture()
     {

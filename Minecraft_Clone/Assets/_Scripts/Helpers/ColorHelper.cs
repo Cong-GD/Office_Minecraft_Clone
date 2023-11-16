@@ -15,3 +15,4 @@ public static class ColorHelper
         return $"<color=#{ToRGBHex(color)}>{s}</color>";
     }
 }
+

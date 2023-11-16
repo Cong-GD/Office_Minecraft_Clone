@@ -16,15 +16,20 @@ public static class BlockDataHelper
         var blockTypeCount = Enum.GetNames(typeof(BlockType)).Length;
 
         _blockDataMap = new BlockData_SO[blockTypeCount];
-        foreach (var item in blockResources)
+        foreach (var block in blockResources)
         {
-            _blockDataMap[(byte)item.BlockType] = item;
+            if (_blockDataMap[(byte)block.BlockType] != null)
+            {
+                Debug.LogError($"Block type: {block.BlockType} is duplicated");
+            }
+
+            _blockDataMap[(byte)block.BlockType] = block;
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BlockData_SO Data(this BlockType type)
+    public static BlockData_SO Data(this BlockType blockType)
     {
-        return _blockDataMap[(byte)type];
+        return _blockDataMap[(byte)blockType];
     }
 }

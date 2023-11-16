@@ -18,7 +18,7 @@ public static class Chunk
             {
                 for(int z = 0; z < CHUNK_WIDTH; z++)
                 {
-                    chunkData.GetBlock(x, y, z)
+                    chunkData.GetBlockUncheck(x, y, z)
                             .Data()
                             .MeshGenerator
                             .GetMeshData(chunkData, meshData, x, y, z);

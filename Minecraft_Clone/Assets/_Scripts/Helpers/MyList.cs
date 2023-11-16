@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using UnityEngine;
 
-public class MyList<T> : IList<T>, ICollection<T>, IEnumerable<T> where T : struct
+public class MyList<T> : ICollection<T>, IEnumerable<T> where T : struct
 {
     private const int DEFAULT_CAPACITY = 4;
-    private const int MAX_SIZE = 10000000;
+    private static readonly int _maxSize = int.MaxValue / Marshal.SizeOf<T>();
 
     private T[] _items;
 
@@ -30,11 +33,10 @@ public class MyList<T> : IList<T>, ICollection<T>, IEnumerable<T> where T : stru
         if (capacity < 0)
             throw new ArgumentOutOfRangeException("Cappacity can't less than 0");
 
-        _items = _count == 0 ? Array.Empty<T>() : new T[capacity];
-        _count = 0;
+        _items = capacity == 0 ? Array.Empty<T>() : new T[capacity];
     }
 
-    public T this[int index]
+    public ref T this[int index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
@@ -42,15 +44,7 @@ public class MyList<T> : IList<T>, ICollection<T>, IEnumerable<T> where T : stru
             if ((uint)index >= _count)
                 throw new IndexOutOfRangeException();
 
-            return _items[index];
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set
-        {
-            if ((uint)index >= _count)
-                throw new IndexOutOfRangeException();
-
-            _items[index] = value;
+            return ref _items[index];
         }
     }
 
@@ -61,6 +55,7 @@ public class MyList<T> : IList<T>, ICollection<T>, IEnumerable<T> where T : stru
         {
             EnsureCapacity(_items.Length + 1);
         }
+
         _items[_count] = item;
         _count++;
     }
@@ -76,7 +71,7 @@ public class MyList<T> : IList<T>, ICollection<T>, IEnumerable<T> where T : stru
         if (_items.Length < min)
         {
             int newCapacity = _items.Length == 0 ? DEFAULT_CAPACITY : _items.Length * 2;
-            if ((uint)newCapacity > MAX_SIZE) newCapacity = MAX_SIZE;
+            if ((uint)newCapacity > _maxSize) newCapacity = _maxSize;
             if (newCapacity < min) newCapacity = min;
             Array.Resize(ref _items, newCapacity);
         }
