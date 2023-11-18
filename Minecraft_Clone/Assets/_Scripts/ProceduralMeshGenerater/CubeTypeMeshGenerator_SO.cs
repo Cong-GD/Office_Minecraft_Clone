@@ -28,9 +28,9 @@ namespace Minecraft.ProceduralMeshGenerate
             MyList<Vector2> uvs = new();
             for (int i = 0; i < FACES_COUNT; i++)
             {
-                VoxelHelper.AddQuadVertices(vertices, sixDirections[i], 0, 0, 0, 0.1f);
-                VoxelHelper.AddQuadTriangle(triangles, vertices.Count);
-                VoxelHelper.AddQuadUvs(uvs, GetUvIndex(sixDirections[i]));
+                MeshDrawerHelper.AddQuadVertices(vertices, sixDirections[i], 0, 0, 0, 0.1f);
+                MeshDrawerHelper.AddQuadTriangle(triangles, vertices.Count);
+                MeshDrawerHelper.AddQuadUvs(uvs, GetUvIndex(sixDirections[i]));
             }
             mesh.SetVertices(vertices.Items, 0, vertices.Count);
             mesh.SetTriangles(triangles.Items, 0, triangles.Count, 0);

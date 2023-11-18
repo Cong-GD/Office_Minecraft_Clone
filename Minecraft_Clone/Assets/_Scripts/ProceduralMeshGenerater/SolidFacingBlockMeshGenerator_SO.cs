@@ -18,16 +18,16 @@ namespace Minecraft.ProceduralMeshGenerate
                 if (!adjacentBlockData.IsTransparent)
                     continue;
 
-                VoxelHelper.AddQuadVertices(meshData.vertices, sixDirections[i], x, y, z);
-                VoxelHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i], face));
+                MeshDrawerHelper.AddQuadVertices(meshData.vertices, sixDirections[i], x, y, z);
+                MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i], face));
 
                 for (int j = 0; j < 4; j++)
                     meshData.normals.Add(sixDirectionVectors[i]);
 
-                VoxelHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
+                MeshDrawerHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
 
                 if (!adjacentBlockData.IsSolid)
-                    VoxelHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);
+                    MeshDrawerHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);
             }
         }
     }

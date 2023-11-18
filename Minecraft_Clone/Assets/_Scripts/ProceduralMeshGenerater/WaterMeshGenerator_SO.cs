@@ -20,13 +20,13 @@ namespace Minecraft.ProceduralMeshGenerate
                 if (adjacentBlockData.BlockType != BlockType.Glass && adjacentBlockData.IsSolid)
                     continue;
 
-                VoxelHelper.AddQuadVertices(meshData.vertices, sixDirections[i], localX, localY, localZ);
+                MeshDrawerHelper.AddQuadVertices(meshData.vertices, sixDirections[i], localX, localY, localZ);
 
                 for (int j = 0; j < 4; j++)
                     meshData.normals.Add(sixDirectionVectors[i]);
 
-                VoxelHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
-                VoxelHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
+                MeshDrawerHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
+                MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
             }
         }
     }

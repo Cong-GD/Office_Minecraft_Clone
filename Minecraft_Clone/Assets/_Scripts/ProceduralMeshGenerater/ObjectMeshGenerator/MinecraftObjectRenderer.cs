@@ -21,20 +21,17 @@ namespace Minecraft.ProceduralMeshGenerate
 
             meshFilter.sharedMesh = objectMeshData.mesh;
             meshRenderer.sharedMaterial = objectMeshData.material;
-            objectMeshData.itemTransforms.GetRelativeTransfrom(state).Apply(transform);
+            objectMeshData.itemTransforms?.GetRelativeTransfrom(state).Apply(transform);
         }
 
         public void SetTransformState(ItemTransformState state)
         {
-            if (objectMeshData == null)
-                return;
-
-            objectMeshData.itemTransforms.GetRelativeTransfrom(state).Apply(transform);
+            objectMeshData.itemTransforms?.GetRelativeTransfrom(state).Apply(transform);
         }
 
         public void Clear()
         {
-            objectMeshData = null;
+            objectMeshData = default;
             meshFilter.sharedMesh = null;
             meshRenderer.sharedMaterial = null;
         }

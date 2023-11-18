@@ -71,8 +71,8 @@ namespace Minecraft.ProceduralMeshGenerate
                     if (vectors[i].z == 0 && !Istransparent(nearX, nearY))
                         continue;
 
-                    VoxelHelper.AddQuadVertices(vertices, directions[i], x * size, y * size, 0, size);
-                    VoxelHelper.AddQuadTriangle(triangles, vertices.Count);
+                    MeshDrawerHelper.AddQuadVertices(vertices, directions[i], x * size, y * size, 0, size);
+                    MeshDrawerHelper.AddQuadTriangle(triangles, vertices.Count);
                     AddQuadUvs(x, y);
                 }
             } 

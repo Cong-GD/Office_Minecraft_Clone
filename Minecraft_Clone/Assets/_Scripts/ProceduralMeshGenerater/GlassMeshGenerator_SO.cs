@@ -17,17 +17,17 @@ namespace Minecraft.ProceduralMeshGenerate
                 if (!adjacentBlockData.IsTransparent || adjacentBlockData.BlockType == BlockType.Glass)
                     continue;
 
-                VoxelHelper.AddQuadVertices(meshData.vertices, sixDirections[i], localX, localY, localZ);
+                MeshDrawerHelper.AddQuadVertices(meshData.vertices, sixDirections[i], localX, localY, localZ);
 
                 for (int j = 0; j < 4; j++)
                     meshData.normals.Add(sixDirectionVectors[i]);
 
-                VoxelHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
+                MeshDrawerHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
 
                 if (!adjacentBlockData.IsSolid)
-                    VoxelHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);
+                    MeshDrawerHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);
 
-                VoxelHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
+                MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
 
             }
         }

@@ -9,7 +9,7 @@ using UnityEngine.Experimental.GlobalIllumination;
 
 namespace Minecraft.ProceduralMeshGenerate
 {
-    public class ObjectMeshData
+    public struct ObjectMeshData
     {
         
         public readonly Mesh mesh;

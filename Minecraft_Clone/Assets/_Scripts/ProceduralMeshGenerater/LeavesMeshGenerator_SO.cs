@@ -27,7 +27,7 @@ namespace Minecraft.ProceduralMeshGenerate
 
                 //}
 
-                VoxelHelper.AddQuadVertices(meshData.vertices, sixDirections[i], x, y, z);
+                MeshDrawerHelper.AddQuadVertices(meshData.vertices, sixDirections[i], x, y, z);
 
                 for (int j = 0; j < 4; j++)
                     meshData.normals.Add(sixDirectionVectors[i]);
@@ -41,12 +41,12 @@ namespace Minecraft.ProceduralMeshGenerate
                 //    VoxelHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
                 //}
 
-                VoxelHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
+                MeshDrawerHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
 
                 if (!nextBlockData.IsSolid)
-                    VoxelHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);
+                    MeshDrawerHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);
 
-                VoxelHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
+                MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
 
             }
         }
