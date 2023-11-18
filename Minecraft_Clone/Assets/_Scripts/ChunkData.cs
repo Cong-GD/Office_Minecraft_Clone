@@ -29,8 +29,8 @@ public class ChunkData
 #endif
 {
     /// <summary>
-    /// This is an read only field, please don't modify this value
-    /// Because of performance issue i can't make this as get only property
+    /// This is an read only field, please don't modify this value,
+    /// because of performance issue i can't make this as get only property
     /// </summary>
     public Vector3Int worldPosition;
 
@@ -57,7 +57,7 @@ public class ChunkData
     public ChunkData()
     {
         _blocks = (BlockType*)Marshal.AllocHGlobal(TOTAL_BLOCK_IN_CHUNK * (sizeof(BlockType) + sizeof(Direction)));
-        _blockDirections = (Direction*)(_blocks + (TOTAL_BLOCK_IN_CHUNK * sizeof(BlockType)));
+        _blockDirections = (Direction*)(_blocks + TOTAL_BLOCK_IN_CHUNK);
     }
     ~ChunkData()
     {

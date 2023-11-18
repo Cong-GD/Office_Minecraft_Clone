@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public static class Wait
@@ -61,5 +62,15 @@ public static class Wait
     public static WaitWhile While(Func<bool> predicate)
     {
         return new WaitWhile(predicate);
+    }
+
+    public static WaitUntil ForTask<T>(Task<T> task)
+    {
+        return new WaitUntil(() => task.IsCompleted);
+    }
+
+    public static WaitUntil ForTask(Task task)
+    {
+        return new WaitUntil(() => task.IsCompleted);
     }
 }

@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   noiseSettings:
     seedOffset: 1
-    noiseType: 2
+    noiseType: 1
     rotationType3d: 2
-    frequency: 0.1
+    frequency: 1.53
     cellularField:
       cellularDistanceFunction: 0
       cellularReturnType: 1

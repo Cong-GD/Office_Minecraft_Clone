@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 424ac4f8189c7c64cb3c2fb13725ada6, type: 3}
+  m_Script: {fileID: 11500000, guid: fca4d29a31bd2b94eb7cf306a37d1221, type: 3}
   m_Name: Wooden Axe
   m_EditorClassIdentifier: 
   <Icon>k__BackingField: {fileID: 21300000, guid: 6988c86725a265346a43a8f5e571f9e6,
@@ -39,3 +39,5 @@ MonoBehaviour:
     texture2D: {fileID: 2800000, guid: 6988c86725a265346a43a8f5e571f9e6, type: 3}
     materialPrefab: {fileID: 2100000, guid: b556ba27a63fc234080a5458cd5f464d, type: 2}
     size: 0.02
+  <ToolTier>k__BackingField: 2
+  <ToolType>k__BackingField: 8

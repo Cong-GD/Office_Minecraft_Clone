@@ -1,22 +1,28 @@
 ﻿using Minecraft;
 using Minecraft.Input;
 using NaughtyAttributes;
-using System;
-using Unity.Mathematics;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Unity.Collections.LowLevel.Unsafe;
-
 
 public class PlayerInteract : MonoBehaviour
 {
     [SerializeField, Required]
     private Transform eye;
 
+    [SerializeField]
+    private PlayerData_SO playerData;
+
+    [SerializeField]
+    private ProgressDisplayer diggingProgressDisplayer;
+
     [Min(1f)]
     public float checkDistance;
 
     public float dropForce = 1f;
+
+    [SerializeField]
+    private float buildInputCoolTime = 0.3f;
 
     [SerializeField]
     private int destroyInputReceiveDelayInMilisecond;
@@ -32,59 +38,61 @@ public class PlayerInteract : MonoBehaviour
     private Vector3Int hitPosition;
     private Vector3Int adjacentHitPosition;
 
+    private bool _isDigging;
+    private float _allowReceiveBuildInputTime;
+
     private readonly Vector3 _halfOne = new Vector3(0.5f, 0.5f, 0.5f);
 
-    private RepeatingCancellationTokenSource _destroyCancelationTokenSource = new();
+    private bool AllowReceiveBuildInput => Time.time > _allowReceiveBuildInputTime;
+
+    public bool IsCastHit => isCastHit;
+    public Vector3Int HitPosition => hitPosition;
+    public Vector3Int AdjacentHitPosition => adjacentHitPosition;
 
     private void OnEnable()
     {
-        MInput.Destroy.performed += OnLeftClicked;
-        MInput.Destroy.canceled += OnLeftClicked;
-        MInput.Build.performed += OnRightClicked;
         MInput.Throw.performed += ProcessThrowInput;
     }
 
     private void OnDisable()
     {
-        MInput.Destroy.performed -= OnLeftClicked;
-        MInput.Destroy.canceled -= OnLeftClicked;
-        MInput.Build.performed -= OnRightClicked;
         MInput.Throw.performed -= ProcessThrowInput;
     }
 
-    private void OnDestroy()
-    {
-        _destroyCancelationTokenSource.Destroy();
-    }
-
-    private void OnRightClicked(InputAction.CallbackContext context)
+    private void Update()
     {
         RayCast();
-
-        if (!isCastHit || HasInteractedWithBlock())
-            return;
-
-        CheckForPlaceBlock();
+        ProcessDestroyInput();
+        ProcessBuildInput();
     }
 
-    private void OnLeftClicked(InputAction.CallbackContext context)
+    private void ProcessDestroyInput()
     {
-        if (context.performed)
+        if (MInput.Destroy.IsPressed() && !_isDigging && isCastHit)
         {
-            try
-            {
-                CheckForDestroy();
-            }
-            catch (OperationCanceledException)
-            {
-                Debug.Log("End destroying blocks");
-            }
+            StartCoroutine(DiggingCoroutine());
+        }
+    }
 
-        }
-        else
+    private void ProcessBuildInput()
+    {
+        if (!MInput.Build.IsPressed() || !AllowReceiveBuildInput)
+            return;
+
+        StartBuildInputCoolDown();
+
+        if (!isCastHit)
+            return;
+
+        if (!HasInteractedWithBlock())
         {
-            _destroyCancelationTokenSource.Reset();
+            CheckForPlaceBlock();
         }
+    }
+
+    private void StartBuildInputCoolDown()
+    {
+        _allowReceiveBuildInputTime = Time.time + buildInputCoolTime;
     }
 
     private void CheckForPlaceBlock()
@@ -96,7 +104,7 @@ public class PlayerInteract : MonoBehaviour
             return;
 
         var rightHand = InventorySystem.Instance.RightHand;
-        if (ItemSlot.IsNullOrEmpty(rightHand))
+        if (rightHand.IsNullOrEmpty())
             return;
 
         if (rightHand.RootItem is not BlockData_SO blockData)
@@ -107,22 +115,40 @@ public class PlayerInteract : MonoBehaviour
         var _ = World.Instance.EditBlockAsync(adjacentHitPosition, blockData.BlockType, direction);
     }
 
-    private async void CheckForDestroy()
+    private IEnumerator DiggingCoroutine()
     {
-        
-        RayCast();
-        if (!isCastHit)
-            return;
-
+        var hitPosition = this.hitPosition;
         var block = Chunk.GetBlock(hitPosition).Data();
         if (block.BlockType == BlockType.Air)
-            return;
+            yield break;
 
-        var isSucceed = await World.Instance.EditBlockAsync(hitPosition, BlockType.Air, Direction.Backward);
-        if (isSucceed)
+        _isDigging = true;
+        ITool toolInHand = InventorySystem.Instance.RightHand.GetTool();
+        diggingProgressDisplayer.Enable();
+        float progress = 0f;
+        while (MInput.Destroy.IsPressed())
         {
-            PickupManager.Instance.ThrowItem(new(block, 1), hitPosition + _halfOne, (Vector3.up + UnityEngine.Random.insideUnitSphere) * dropForce);
+            DiggingCalculation(toolInHand, block, ref progress);
+            if (progress >= 1f || hitPosition != this.hitPosition)
+                break;
+
+            diggingProgressDisplayer.SetValue(progress);
+            yield return null;
         }
+        diggingProgressDisplayer.Disable();
+        _isDigging = false;
+        if (progress < 1f)
+            yield break;
+
+        var task = World.Instance.EditBlockAsync(hitPosition, BlockType.Air, Direction.Backward);
+        yield return Wait.ForTask(task);
+
+        var isSuccess = task.Result;
+        if (isSuccess)
+        {
+            Vector3 randomForce = Vector3.up + Random.insideUnitSphere * dropForce;
+            PickupManager.Instance.ThrowItem(block.GetHarvestResult(toolInHand), hitPosition + _halfOne, randomForce);
+        }  
     }
 
     private Direction GetDirectionWithPlayer(Vector3 pos)
@@ -137,10 +163,11 @@ public class PlayerInteract : MonoBehaviour
 
     private void ProcessThrowInput(InputAction.CallbackContext obj)
     {
-        if (ItemSlot.IsNullOrEmpty(InventorySystem.Instance.RightHand))
+        var rightHand = InventorySystem.Instance.RightHand;
+        if (rightHand.IsNullOrEmpty())
             return;
 
-        var itemPacked = InventorySystem.Instance.RightHand.TakeAmount(1);
+        var itemPacked = rightHand.TakeAmount(1);
         PickupManager.Instance.ThrowItem(itemPacked, eye.position + eye.forward, eye.forward * 1.5f);
     }
 
@@ -182,13 +209,32 @@ public class PlayerInteract : MonoBehaviour
         return !Physics.CheckBox(position + _halfOne, _halfOne, Quaternion.identity, entityLayer);
     }
 
+
+    private void DiggingCalculation(ITool tool, BlockData_SO block, ref float progress)
+    {
+        bool isBestTool = block.BestTool == tool.ToolType;
+        bool canHarvest = block.CanHarvestBy(tool);
+
+        float speedMultilier = 1f;
+        if(isBestTool && canHarvest)
+            speedMultilier = tool.GetToolMultilier();
+
+        if (!playerData.isGrounded)
+            speedMultilier /= 5f;
+
+        float damage = speedMultilier / block.Hardness;
+        damage *= canHarvest ? 1f : 0.3f;
+        damage *= Time.deltaTime;
+
+        progress = Mathf.Clamp01(progress + damage);
+    }
+
     private void OnDrawGizmosSelected()
     {
-        RayCast();
         if (isCastHit)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireCube(adjacentHitPosition + _halfOne, Vector3.one);
-        }
+        } 
     }
 }

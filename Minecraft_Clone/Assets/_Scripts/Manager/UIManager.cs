@@ -34,7 +34,7 @@ public class UIManager : GlobalReference<UIManager>
         inventory.SetState(UIInventory.State.FullCraftingTable);
     }
 
-    public void OpenBlastFurnace(BlastFurnace blastFurnace)
+    public void OpenBlastFurnace(Furnace blastFurnace)
     {
         EnterUIMode();
         inventory.SetFurnace(blastFurnace);

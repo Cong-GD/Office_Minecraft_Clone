@@ -156,39 +156,23 @@ public class MyList<T> : ICollection<T>, IEnumerable<T> where T : struct
         private readonly T[] _items;
         private int _index;
         private readonly int _count;
+        private T _value;
 
         public Enumerator(MyList<T> buffer)
         {
             _items = buffer._items;
             _count = buffer._count;
             _index = -1;
+            _value = default;
         }
 
-        public T Current
-        {
-            get
-            {
-                if ((uint)_index >= _count)
-                    throw new InvalidOperationException();
+        public readonly T Current => _value;
 
-                return _items[_index];
+        readonly object IEnumerator.Current => _value;
 
-            }
-        }
-
-        object IEnumerator.Current
-        {
-            get
-            {
-                if ((uint)_index >= _count)
-                    throw new InvalidOperationException();
-
-                return _items[_index];
-
-            }
-        }
-
+#pragma warning disable IDE0251 // Make member 'readonly'
         public void Dispose() { }
+#pragma warning restore IDE0251 // Make member 'readonly'
 
         public bool MoveNext()
         {
@@ -197,6 +181,7 @@ public class MyList<T> : ICollection<T>, IEnumerable<T> where T : struct
                 return false;
             }
             _index++;
+            _value = _items[_index];
             return true;
         }
 

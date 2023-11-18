@@ -38,6 +38,12 @@ MonoBehaviour:
   <BlockType>k__BackingField: 16
   <IsSolid>k__BackingField: 1
   <IsTransparent>k__BackingField: 0
-  <Hardness>k__BackingField: 1
+  <Hardness>k__BackingField: 3
+  <BestTool>k__BackingField: 4
+  <HarvestableTier>k__BackingField: 60
+  <HarvestableTool>k__BackingField: 4
+  <HarvestResult>k__BackingField:
+    item: {fileID: 11400000}
+    amount: 1
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 697e22c954a65fc478db2bf173bff0cb,
     type: 2}

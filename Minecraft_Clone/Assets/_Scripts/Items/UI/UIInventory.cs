@@ -22,7 +22,7 @@ public class UIInventory : MonoBehaviour
     private GameObject fullCraftingTable;
 
     [SerializeField]
-    private UIBlastFurnace uiBlastFurnace;
+    private UIFurnace uiBlastFurnace;
 
     [SerializeField] 
     private Transform toolBarParent;
@@ -103,7 +103,7 @@ public class UIInventory : MonoBehaviour
         fullCraftingResultSlot.SetResultGiver(_manufactureSpace);
     }
 
-    internal void SetFurnace(BlastFurnace blastFurnace)
+    internal void SetFurnace(Furnace blastFurnace)
     {
         uiBlastFurnace.SetFurnace(blastFurnace);
     }

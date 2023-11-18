@@ -57,7 +57,7 @@ public class InventorySystem : GlobalReference<InventorySystem>
 
     private void RenderRightHand()
     {
-        if(ItemSlot.IsNullOrEmpty(RightHand))
+        if(RightHand.IsNullOrEmpty())
         {
             handRenderer.Clear();
             return;

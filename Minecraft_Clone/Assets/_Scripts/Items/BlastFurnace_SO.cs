@@ -13,11 +13,11 @@ public class BlastFurnace_SO : BlockData_SO, IInteractable
 
         if (!chunkData.blockStates.TryGetValue(worldPosition, out var blockState))
         {
-            blockState = new BlastFurnace(worldPosition);
+            blockState = new Furnace(worldPosition);
             chunkData.blockStates[worldPosition] = blockState;
         }
 
-        if (blockState is not BlastFurnace furnace)
+        if (blockState is not Furnace furnace)
             throw new System.Exception($"Unexpected behaviour when open furnace at {worldPosition}");
 
         UIManager.Instance.OpenBlastFurnace(furnace);

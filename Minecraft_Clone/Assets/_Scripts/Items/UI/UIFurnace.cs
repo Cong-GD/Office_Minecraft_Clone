@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIBlastFurnace : MonoBehaviour
+public class UIFurnace : MonoBehaviour
 {
     [SerializeField]
     private UIItemSlot burnSlot;
@@ -13,19 +13,13 @@ public class UIBlastFurnace : MonoBehaviour
     [SerializeField]
     private ResultUIItemSlot resultSlot;
 
-    private BlastFurnace _furnace;
+    private Furnace _furnace;
 
     [SerializeField]
-    private RectTransform burnProgressBar;
+    private ProgressDisplayer burnProgress;
 
     [SerializeField]
-    private RectTransform smeltProgressBar;
-
-    [SerializeField]
-    private Image burnProgressImage;
-
-    [SerializeField]
-    private Image smeltProgressImage;
+    private ProgressDisplayer smeltProgress;
 
     public float BurnProgress => _furnace != null ? _furnace.BurnProgressValue : 0f;
 
@@ -33,26 +27,24 @@ public class UIBlastFurnace : MonoBehaviour
 
     private void OnEnable()
     {
-        TransformHelper.CopyRectTransform(burnProgressBar, burnProgressImage.rectTransform);
-        TransformHelper.CopyRectTransform(smeltProgressBar, smeltProgressImage.rectTransform);
-        burnProgressImage.gameObject.SetActive(true);
-        smeltProgressImage.gameObject.SetActive(true);
+        burnProgress.Enable();
+        smeltProgress.Enable();
     }
 
     private void OnDisable()
     {
         ClearFurnace();
-        burnProgressImage.gameObject.SetActive(false);
-        smeltProgressImage.gameObject.SetActive(false);
+        burnProgress.Disable();
+        smeltProgress.Disable();
     }
 
     private void FixedUpdate()
     {
-        burnProgressImage.fillAmount = BurnProgress;
-        smeltProgressImage.fillAmount = SmeltProgress;
+        burnProgress.SetValue(BurnProgress);
+        smeltProgress.SetValue(SmeltProgress);
     }
 
-    public void SetFurnace(BlastFurnace furnace)
+    public void SetFurnace(Furnace furnace)
     {
         ClearFurnace();
         if (furnace == null)

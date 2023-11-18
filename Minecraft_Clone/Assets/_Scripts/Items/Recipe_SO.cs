@@ -155,7 +155,7 @@ public class Recipe_SO : ScriptableObject
     private string ToHashString(int itemId)
     {
         var binding = itemBindings.Find(x => x.id == itemId);
-        return binding == null ? string.Empty : binding.item.name;
+        return binding == null ? "(null)" : binding.item.GetName();
     }
 
     private void ThrowIfInvalidBinding(RecipeBinding recipeBinding)

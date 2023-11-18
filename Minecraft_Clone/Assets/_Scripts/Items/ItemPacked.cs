@@ -14,11 +14,19 @@ public struct ItemPacked
     public ItemPacked(BaseItem_SO item, int amount = 1)
     {
         this.item = item;
-        this.amount = Mathf.Max(0, amount);
+        if(item == null)
+        {
+            this.amount = 0;
+        }
+        else
+        {
+            this.amount = Mathf.Clamp(amount, 0, item.MaxStack);
+        }
+        
     }
 
     public readonly bool IsEmpty()
     {
-        return item == null || amount <= 0;
+        return amount <= 0 || item == null; 
     }
 }

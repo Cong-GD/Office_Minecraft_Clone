@@ -5,6 +5,18 @@ using UnityEngine;
 
 public abstract class BaseItem_SO : ScriptableObject
 {
+    private string _name = null;
+    public string Name
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_name))
+                _name = name;
+
+            return _name;
+        }
+    }
+
     [field: Header("Base Info")]
     [field: SerializeField]
     [field: ShowAssetPreview]

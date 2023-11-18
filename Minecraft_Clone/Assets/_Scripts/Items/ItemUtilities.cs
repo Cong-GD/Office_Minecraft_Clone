@@ -23,6 +23,7 @@ public static class ItemUtilities
                 if (!_recipes.TryAdd(binding, recipe))
                 {
                     Debug.LogError($"Can't have duplicate recipe: {_recipes[binding].name} <-> {recipe.name}");
+                    Debug.LogError($"Binding: {binding}");
                 }
             }
         }
@@ -35,13 +36,23 @@ public static class ItemUtilities
             throw new Exception("Manufacture space must have 9 slots");
 
         string hashString = string.Join(",", 
-            slots.Select(slot => slot.RootItem == null ? string.Empty : slot.RootItem.name));
+            slots.Select(slot => slot.RootItem.GetName()));
 
         if(_recipes.TryGetValue(hashString, out var recipe))
         {
             return recipe.GetResult();
         }
         return ItemPacked.Empty;
+    }
+
+    public static bool HasAnyItem(Span<ItemSlot> slots)
+    {
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (!slots[i].IsEmpty())
+                return true;
+        }
+        return false;
     }
 
     public static ItemSlot[] NewStogare(int count)
@@ -64,9 +75,9 @@ public static class ItemUtilities
         return storage;
     }
 
-    public static void AddItem(ReadOnlySpan<ItemSlot> target, ItemSlot source)
+    public static void AddItem(Span<ItemSlot> target, ItemSlot source)
     {
-        if (target.IsEmpty || source.IsEmpty())
+        if (source.IsEmpty())
             return;
 
         foreach (ItemSlot slot in target)
@@ -75,5 +86,15 @@ public static class ItemUtilities
             if (source.IsEmpty())
                 return;
         }
+    }
+
+    public static string GetName(this BaseItem_SO item)
+    {
+        return item == null ? "(null)" : item.Name;
+    }
+
+    public static bool IsNullOrEmpty(this ItemSlot slot)
+    { 
+        return slot is null || slot.IsEmpty(); 
     }
 }

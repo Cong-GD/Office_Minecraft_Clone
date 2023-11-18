@@ -47,7 +47,9 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IEnumerable<T
     public NativeArray<T> AsNativeArray()
     {
         var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(_buffer, _count, Allocator.None);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
         NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.GetTempUnsafePtrSliceHandle());
+#endif
         return nativeArray;
     }
 
@@ -205,39 +207,23 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IEnumerable<T
         private readonly T* _buffer;
         private int _index;
         private readonly int _count;
+        private T _value;
 
         public Enumerator(MyNativeList<T> buffer)
         {
             _buffer = buffer._buffer;
             _count = buffer._count;
             _index = -1;
+            _value = default;
         }
 
-        public T Current
-        {
-            get
-            {
-                if ((uint)_index >= _count)
-                    throw new InvalidOperationException();
+        public readonly T Current => _value;
 
-                return _buffer[_index];
+        readonly object IEnumerator.Current => _value;
 
-            }
-        }
-
-        object IEnumerator.Current
-        {
-            get
-            {
-                if ((uint)_index >= _count)
-                    throw new InvalidOperationException();
-
-                return _buffer[_index];
-
-            }
-        }
-
+#pragma warning disable IDE0251 // Make member 'readonly'
         public void Dispose() { }
+#pragma warning restore IDE0251 // Make member 'readonly'
 
         public bool MoveNext()
         {
@@ -246,6 +232,7 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IEnumerable<T
                 return false;
             }
             _index++;
+            _value = _buffer[_index];
             return true;
         }
 

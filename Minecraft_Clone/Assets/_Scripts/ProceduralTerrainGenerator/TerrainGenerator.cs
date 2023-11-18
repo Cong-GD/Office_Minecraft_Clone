@@ -9,6 +9,7 @@ using static WorldSettings;
 using UnityEngine.XR;
 using NaughtyAttributes;
 using System.Runtime.CompilerServices;
+using Unity.Collections.LowLevel.Unsafe;
 
 public class TerrainGenerator : MonoBehaviour
 {
@@ -59,11 +60,11 @@ public class TerrainGenerator : MonoBehaviour
     {
         lock (_biomeCalculationThreadLock)
         {
-            var xCenter = Mathf.RoundToInt((float)centerX / biomeSize) * biomeSize;
-            var zCenter = Mathf.RoundToInt((float)centerZ / biomeSize) * biomeSize;
+            centerX = Mathf.RoundToInt((float)centerX / biomeSize) * biomeSize;
+            centerZ = Mathf.RoundToInt((float)centerZ / biomeSize) * biomeSize;
 
-            int startX = xCenter - biomeSize * biomeSelectRange;
-            int startZ = zCenter - biomeSize * biomeSelectRange;
+            int startX = centerX - biomeSize * biomeSelectRange;
+            int startZ = centerZ - biomeSize * biomeSelectRange;
 
             Span<bool> flags = stackalloc bool[_totalBiomes];
 
@@ -75,8 +76,9 @@ public class TerrainGenerator : MonoBehaviour
                     int worldZ = z * biomeSize + startZ;
                     int id = SelectBiomeId(worldX, worldZ);
                     flags[id] = true;
-                    _biomePositions[z * _gridSize + x] = new Vector2(worldX, worldZ);
-                    _biomeIndexes[z * _gridSize + x] = id;
+                    int index = z * _gridSize + x;
+                    _biomePositions[index] = new Vector2(worldX, worldZ);
+                    _biomeIndexes[index] = id;
                 }
             }
             _nearBiomeCount = 0;
@@ -92,30 +94,31 @@ public class TerrainGenerator : MonoBehaviour
         ChunkData chunkData = GetChunkData();
         chunkData.state = ChunkState.Creating;
         chunkData.SetChunkCoord(chunkCoord);
-
+        int chunkX = chunkData.worldPosition.x;
+        int chunkZ = chunkData.worldPosition.z;
         for (int x = 0; x < CHUNK_WIDTH; x++)
         {
             for (int z = 0; z < CHUNK_WIDTH; z++)
             {
-                int worldX = chunkData.worldPosition.x + x;
-                int worldZ = chunkData.worldPosition.z + z;
+                int worldX = chunkX + x;
+                int worldZ = chunkZ + z;
                 var biome = Biome(SelectBiomeId(worldX, worldZ));
                 Span<float> distances = stackalloc float[_totalBiomes];
                 GetBiomeDistance(distances, worldX, worldZ, out var sum);
-                float terrainHeight = 0f;
+                float sufaceHeight = 0f;
 
-                for (int i = 0; i < _totalBiomes; i++)
+                for (int i = 0; i < distances.Length; i++)
                 {
                     var distance = distances[i];
-                    if (distance > 0f)
+                    var isBiomeInRange = distance > 0f;
+                    if (isBiomeInRange)
                     {
                         float weight = 1f - distance / sum;
-                        float surfaceHeight = Biome(i).GetSurfaceHeightNoise(worldX, worldZ);
-                        terrainHeight += surfaceHeight * weight;
+                        float unitSufaceHeight = Biome(i).GetSurfaceHeightNoise(worldX, worldZ);
+                        sufaceHeight += unitSufaceHeight * weight;
                     }
                 }
-
-                biome.ProcessChunkCollumn(chunkData, x, z, Mathf.RoundToInt(terrainHeight));
+                biome.ProcessChunkCollumn(chunkData, x, z, Mathf.RoundToInt(sufaceHeight));
             }
         }
         chunkData.state = ChunkState.Generated;
@@ -132,7 +135,7 @@ public class TerrainGenerator : MonoBehaviour
     {
         float noiseValue = _tempoNoiseInstance.GetNoise(worldX, worldZ);
 
-        for (int i = 0; i < _totalBiomes; i++)
+        for (int i = 0; i < biomeGeneratorsData.Length; i++)
         {
             if (biomeGeneratorsData[i].IsSuit(noiseValue))
                 return i;
@@ -142,21 +145,24 @@ public class TerrainGenerator : MonoBehaviour
 
     private void GetBiomeDistance(Span<float> distances, int x, int z, out float sum)
     {
-        var pos = new Vector2(x + 0.1f, z + 0.1f);
-        for (int i = 0; i < _biomeIndexes.Length; i++)
+        Span<int> biomeIndexes = _biomeIndexes;
+        Span<Vector2> biomePosition = _biomePositions;
+
+        var position = new Vector2(x + 0.1f, z + 0.1f);
+        for (int i = 0; i < biomeIndexes.Length; i++)
         {
-            int biomeId = _biomeIndexes[i];
-            float distance = Vector2.Distance(pos, _biomePositions[i]);
-            if (distances[biomeId] == 0f || distance < distances[biomeId])
+            int biomeId = biomeIndexes[i];
+            ref float currentDistance = ref distances[biomeId];
+            float distance = Vector2.Distance(position, biomePosition[i]);
+            if (currentDistance == 0f || distance < currentDistance)
             {
-                distances[biomeId] = distance;
+                currentDistance = distance;
             }
         }
         sum = 0f;
-        for (int i = 0; i < _totalBiomes; i++)
-        {
+        for (int i = 0; i < distances.Length; i++) 
             sum += distances[i];
-        }
+
         sum /= 2f;
     }
 
@@ -168,7 +174,6 @@ public class TerrainGenerator : MonoBehaviour
         {
             chunkData = new ChunkData();
         }
-
         return chunkData;
     }
 

@@ -23,8 +23,8 @@ public class World : MonoBehaviour
     [SerializeField] 
     private ObjectPool chunkRendererPool;
 
-    [field: SerializeField]
-    public Rigidbody Player { get; private set; }
+    [SerializeField]
+    private PlayerData_SO playerData;
 
     [field: SerializeField]
     public Vector3Int PlayerCoord { get; private set; }
@@ -130,7 +130,7 @@ public class World : MonoBehaviour
 
     private void Update()
     {
-        PlayerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(Player.position).X_Z(0));
+        PlayerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(playerData.PlayerBody.position).X_Z(0));
 
         int renderedCount = 0;
         while (_priorityMeshToRenders.TryDequeue(out var meshData))
@@ -148,8 +148,8 @@ public class World : MonoBehaviour
     {
         if(Physics.Raycast(new Vector3(0, 250,0), Vector3.down, out var hit, 250, LayerMask.GetMask("Ground")))
         {
-            Player.position = hit.point + Vector3.up * 5;
-            Player.velocity = Vector3.zero;
+            playerData.PlayerBody.position = hit.point + Vector3.up * 5;
+            playerData.PlayerBody.velocity = Vector3.zero;
         }
     }
 
@@ -161,9 +161,8 @@ public class World : MonoBehaviour
     private async Task LongtermViewCheckTask()
     {
         var playerCoord = this.PlayerCoord - Vector3Int.one;
-        while (true)
+        while (!_cancellationToken.IsCancellationRequested)
         {
-            _cancellationToken.ThrowIfCancellationRequested();
             if (playerCoord == this.PlayerCoord)
             {
                 await Task.Delay(1000).ConfigureAwait(false);

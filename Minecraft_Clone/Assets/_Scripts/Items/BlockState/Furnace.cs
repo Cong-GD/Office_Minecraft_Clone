@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class BlastFurnace : IResultGiver, IBlockState
+public class Furnace : IResultGiver, IBlockState
 {
     private class BurnAbleRequiment : IItemSlotRequiment
     {
@@ -43,17 +43,17 @@ public class BlastFurnace : IResultGiver, IBlockState
     private Coroutine _burningCoroutine;
     private Vector3Int _position;
 
-    public BlastFurnace(Vector3Int position)
+    public Furnace(Vector3Int position)
     {
         smeltSlot.OnItemModified += ValidateState;
         burnSlot.OnItemModified += ValidateState;
         _position = position;
     }
 
-    ~BlastFurnace()
+    ~Furnace()
     {
-        CoroutineHelper.Stop(_smeltCoroutine);
-        CoroutineHelper.Stop(_burningCoroutine);
+        CoroutineHelper.Stop(ref _smeltCoroutine);
+        CoroutineHelper.Stop(ref _burningCoroutine);
         smeltSlot.OnItemModified -= ValidateState;
         burnSlot.OnItemModified -= ValidateState;
     }
@@ -93,7 +93,7 @@ public class BlastFurnace : IResultGiver, IBlockState
             return;
 
         IsSmelting = false;
-        CoroutineHelper.Stop(_smeltCoroutine);
+        CoroutineHelper.Stop(ref _smeltCoroutine);
     }
 
 
@@ -154,15 +154,15 @@ public class BlastFurnace : IResultGiver, IBlockState
         yield return Wait.ForSeconds(_cookTime);
         IsSmelting = false;
 
-        var cookResult = _smeltItem.SmeltResult;
+        var smeltResult = _smeltItem.SmeltResult;
         smeltSlot.TakeAmount(1);
         if (_resultSlot.IsEmpty())
         {
-            _resultSlot.SetItem(cookResult);
+            _resultSlot.SetItem(smeltResult);
         }
-        else if (_resultSlot.RootItem == cookResult.item)
+        else if (_resultSlot.RootItem == smeltResult.item)
         {
-            _resultSlot.AddAmount(ref cookResult.amount);
+            _resultSlot.AddAmount(ref smeltResult.amount);
         }
         OnCheckedResult?.Invoke(_resultSlot.GetPacked());
         ValidateState();

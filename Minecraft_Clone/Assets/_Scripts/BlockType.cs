@@ -18,5 +18,6 @@ public enum BlockType : byte
     Water,
     CraftingTable,
     Furnace,
-    IronOre
+    IronOre,
+    CoalOre,
 }

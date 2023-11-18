@@ -17,9 +17,9 @@ MonoBehaviour:
   <MaxStack>k__BackingField: 64
   relativeTransforms:
     rightHand:
-      <position>k__BackingField: {x: 0, y: 0, z: 0}
-      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 1.2, y: 1.2, z: 1.5}
+      <position>k__BackingField: {x: 0, y: -0.1, z: 0}
+      <rotation>k__BackingField: {x: -4.5, y: -100, z: 39.999996}
+      <scale>k__BackingField: {x: 1, y: 1, z: 1}
     leftHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}

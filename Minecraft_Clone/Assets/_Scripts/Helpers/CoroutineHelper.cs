@@ -28,11 +28,12 @@ public class CoroutineHelper : MonoBehaviour
         return Instance.StartCoroutine(routine);
     }
 
-    public static void Stop(Coroutine coroutine)
+    public static void Stop(ref Coroutine coroutine)
     {
         if(coroutine != null)
         {
             Instance.StopCoroutine(coroutine);
+            coroutine = null;
         }
     }
 }

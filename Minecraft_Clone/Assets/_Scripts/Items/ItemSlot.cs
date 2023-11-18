@@ -2,11 +2,6 @@ using System;
 
 public class ItemSlot
 {
-    public static bool IsNullOrEmpty(ItemSlot itemSlot)
-    {
-        return itemSlot is null || itemSlot.IsEmpty();
-    }
-
 
     public event Action OnItemModified;
     public BaseItem_SO RootItem { get; private set; }
@@ -16,14 +11,22 @@ public class ItemSlot
 
     private readonly IItemSlotRequiment _slotRequiment;
 
-    public ItemSlot(IItemSlotRequiment slotRequiment = null)
+    public ItemSlot()
     {
-        _slotRequiment = slotRequiment ?? IItemSlotRequiment.Empty;
+        _slotRequiment = IItemSlotRequiment.Empty;
+    }
+
+    public ItemSlot(IItemSlotRequiment slotRequiment)
+    {
+        if (slotRequiment is null)
+            throw new ArgumentNullException("Slot requiment");
+
+        _slotRequiment = slotRequiment;
     }
 
     public bool IsEmpty()
     {
-        return RootItem == null;
+        return Amount == 0 || RootItem == null;
     }
 
     public bool IsMeetSlotRequiment(BaseItem_SO item)
