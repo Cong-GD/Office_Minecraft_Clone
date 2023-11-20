@@ -1,55 +1,70 @@
 using NaughtyAttributes;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering.Universal.Internal;
 
-namespace Minecraft.Entity
+namespace Minecraft.Entity.Model
 {
-    [RequireComponent(typeof(MeshRenderer))]
-    [RequireComponent(typeof(MeshFilter))]
     public class EntityModel : MonoBehaviour
     {
-        public const int SIZE_IN_PIXEL = 64;
-        public const float PIXEL_NORMALIZED = 1f / SIZE_IN_PIXEL;
-
         public Material material;
-        public MeshFilter meshFilter;
 
-        public Mesh mesh;
-        
-        public SingleBlockModelData headData;
+        public MeshPosition[] bodyParts;
+
+        public Mesh[] createdMeshs;
 
         [Button]
         public void Clear()
         {
-            DestroyImmediate(mesh);
-            mesh = null;
+            foreach (var mesh in createdMeshs.AsSpan())
+            {
+                DestroyImmediate(mesh);
+            }
+            createdMeshs = null;
+
+            
         }
 
         [Button]
         public void Draw()
         {
             Clear();
-            mesh = CreateMesh(headData);
-            meshFilter.mesh = mesh;
+            createdMeshs = new Mesh[bodyParts.Length];
+            for (int i = 0; i < bodyParts.Length; i++)
+            {
+                createdMeshs[i] = CreateMesh(bodyParts[i].data);
+                var partTransform = bodyParts[i].transform;
+                partTransform.GetOrAddComponent<MeshRenderer>().sharedMaterial = material;
+                partTransform.GetOrAddComponent<MeshFilter>().sharedMesh = createdMeshs[i];
+            }
         }
 
-        public static Mesh CreateMesh(SingleBlockModelData entityModelData)
+        private static Mesh CreateMesh(SingleBlockModelData entityModelData)
         {
             Mesh mesh = new Mesh();
             var sixDirections = DirectionExtensions.SixDirections;
             List<Vector3> vertices = new List<Vector3>();
             List<Vector2> uvs = new List<Vector2>();
             List<int> triangle = new List<int>();
-            int2 textureSize = new int2(64, 64);
+            int2 textureSize = new int2(64);
+
             for (int i = 0; i < 6; i++)
             {
+                var uvsValue = entityModelData.GetUvsPosition(sixDirections[i]);
                 MeshDrawerHelper.AddQuadVertices(vertices, sixDirections[i], entityModelData.offSet, entityModelData.size);
                 MeshDrawerHelper.AddQuadTriangle(triangle, vertices.Count);
-                var uvsValue = entityModelData.GetUvsPosition(sixDirections[i]);
+                MeshDrawerHelper.AddQuadUvs(uvs, uvsValue.position, uvsValue.size, textureSize);
+
+                if (!entityModelData.drawCloth)
+                    continue;
+
+                float3 clothOffset = entityModelData.offSet * entityModelData.clothScale;
+                float3 clothSize = entityModelData.size * entityModelData.clothScale;
+                uvsValue.position += entityModelData.clothUvsOffset;
+                MeshDrawerHelper.AddQuadVertices(vertices, sixDirections[i], clothOffset, clothSize);
+                MeshDrawerHelper.AddQuadTriangle(triangle, vertices.Count);
                 MeshDrawerHelper.AddQuadUvs(uvs, uvsValue.position, uvsValue.size, textureSize);
             }
 
@@ -59,7 +74,6 @@ namespace Minecraft.Entity
             mesh.RecalculateNormals();
             return mesh;
         }
-
     }
 
     [Serializable]
@@ -76,6 +90,9 @@ namespace Minecraft.Entity
         public UvsPositionAndSize front;
         public UvsPositionAndSize back;
 
+        public bool drawCloth;
+        public int2 clothUvsOffset;
+        public float clothScale = 1.1f;
         public UvsPositionAndSize GetUvsPosition(Direction direction)
         {
             return direction switch
@@ -97,6 +114,13 @@ namespace Minecraft.Entity
     {
         public int2 position;
         public int2 size;
+    }
+
+    [Serializable]
+    public class MeshPosition
+    {
+        public Transform transform;
+        public SingleBlockModelData data;
     }
 }
 

@@ -47,16 +47,16 @@ public static class MeshDrawerHelper
                 vertices.Add(new Vector3(x + 1, y, z + 1));
                 break;
             case Direction.Right:
-                vertices.Add(new Vector3(x, y, z + 1));
-                vertices.Add(new Vector3(x, y + 1, z + 1));
-                vertices.Add(new Vector3(x, y + 1, z));
-                vertices.Add(new Vector3(x, y, z));
-                break;                       
-            case Direction.Left:
                 vertices.Add(new Vector3(x + 1, y, z));
                 vertices.Add(new Vector3(x + 1, y + 1, z));
                 vertices.Add(new Vector3(x + 1, y + 1, z + 1));
                 vertices.Add(new Vector3(x + 1, y, z + 1));
+                break;                       
+            case Direction.Left:
+                vertices.Add(new Vector3(x, y, z + 1));
+                vertices.Add(new Vector3(x, y + 1, z + 1));
+                vertices.Add(new Vector3(x, y + 1, z));
+                vertices.Add(new Vector3(x, y, z));
                 break;                        
         }
     }
@@ -84,22 +84,22 @@ public static class MeshDrawerHelper
                 vertices.Add(new Vector3(x + size, y + size, z));
                 break;
             case Direction.Down:
-                vertices.Add(new Vector3(x, y, z + size));
-                vertices.Add(new Vector3(x, y, z));
-                vertices.Add(new Vector3(x + size, y, z));
                 vertices.Add(new Vector3(x + size, y, z + size));
+                vertices.Add(new Vector3(x + size, y, z));
+                vertices.Add(new Vector3(x, y, z));
+                vertices.Add(new Vector3(x, y, z + size));
                 break;
             case Direction.Right:
-                vertices.Add(new Vector3(x, y, z + size));
-                vertices.Add(new Vector3(x, y + size, z + size));
-                vertices.Add(new Vector3(x, y + size, z));
-                vertices.Add(new Vector3(x, y, z));
-                break;
-            case Direction.Left:
                 vertices.Add(new Vector3(x + size, y, z));
                 vertices.Add(new Vector3(x + size, y + size, z));
                 vertices.Add(new Vector3(x + size, y + size, z + size));
                 vertices.Add(new Vector3(x + size, y, z + size));
+                break;
+            case Direction.Left:
+                vertices.Add(new Vector3(x, y, z + size));
+                vertices.Add(new Vector3(x, y + size, z + size));
+                vertices.Add(new Vector3(x, y + size, z));
+                vertices.Add(new Vector3(x, y, z));
                 break;
         }
     }
@@ -122,28 +122,28 @@ public static class MeshDrawerHelper
                 vertices.Add(new Vector3(x + size.x, y, z));
                 break;
             case Direction.Up:
-                vertices.Add(new Vector3(x, y + size.y, z));
-                vertices.Add(new Vector3(x, y + size.y, z + size.z));
                 vertices.Add(new Vector3(x + size.x, y + size.y, z + size.z));
-                vertices.Add(new Vector3(x + size.x, y + size.y, z));
+                vertices.Add(new Vector3(x +size.x, y + size.y, z));
+                vertices.Add(new Vector3(x, y + size.y, z));
+                vertices.Add(new Vector3(x, y+ size.y, z + size.z));
                 break;
             case Direction.Down:
-                vertices.Add(new Vector3(x, y, z + size.z));
-                vertices.Add(new Vector3(x, y, z));
+                vertices.Add(new Vector3(x , y, z + size.z));
+                vertices.Add(new Vector3(x , y, z));
                 vertices.Add(new Vector3(x + size.x, y, z));
                 vertices.Add(new Vector3(x + size.x, y, z + size.z));
                 break;
             case Direction.Right:
-                vertices.Add(new Vector3(x, y, z + size.z));
-                vertices.Add(new Vector3(x, y + size.y, z + size.z));
-                vertices.Add(new Vector3(x, y + size.y, z));
-                vertices.Add(new Vector3(x, y, z));
-                break;
-            case Direction.Left:
                 vertices.Add(new Vector3(x + size.x, y, z));
                 vertices.Add(new Vector3(x + size.x, y + size.y, z));
                 vertices.Add(new Vector3(x + size.x, y + size.y, z + size.z));
                 vertices.Add(new Vector3(x + size.x, y, z + size.z));
+                break;
+            case Direction.Left:
+                vertices.Add(new Vector3(x, y, z + size.z));
+                vertices.Add(new Vector3(x, y + size.y, z + size.z));
+                vertices.Add(new Vector3(x, y + size.y, z));
+                vertices.Add(new Vector3(x, y, z));
                 break;
         }
     }

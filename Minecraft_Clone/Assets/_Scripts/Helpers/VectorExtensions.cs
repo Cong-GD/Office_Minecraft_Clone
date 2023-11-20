@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public static class VectorExtensions
@@ -80,17 +81,18 @@ public static class VectorExtensions
         return new Vector3(v.x, y, v.y);
     }
 
-    public static void Parse(this Vector3Int vector, out int x, out int y, out int z)
+    public static void Parse(this Vector3Int v, out int x, out int y, out int z)
     {
-        x = vector.x;
-        y = vector.y;
-        z = vector.z;
+        x = v.x;
+        y = v.y;
+        z = v.z;
     }
 
-    public static void Parse(this Vector3 vector, out float x, out float y, out float z)
+    public static void Parse(this Vector3 v, out float x, out float y, out float z)
     {
-        x = vector.x;
-        y = vector.y;
-        z = vector.z;
+        x = v.x;
+        y = v.y;
+        z = v.z;
     }
+
 }
