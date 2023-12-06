@@ -58,15 +58,51 @@ public static class VectorExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3Int X_Z(this Vector3Int v, int y)
+    public static Vector3Int With(this Vector3Int v, int? x = null, int? y = null, int? z = null)
     {
-        return new Vector3Int(v.x, y, v.z);
+        return new Vector3Int(x ?? v.x,y ?? v.y, z ?? v.z);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3 X_Z(this Vector3 v, float y)
+    public static Vector3 With(this Vector3 v, float? x = null, float? y = null, float? z = null)
     {
-        return new Vector3(v.x, y, v.z);
+        return new Vector3(x ?? v.x, y ?? v.y, z ?? v.z);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector3Int Add(this Vector3Int v, int? x = null, int? y = null, int? z = null)
+    {
+        return new Vector3Int(
+            v.x + x.GetValueOrDefault(),
+            v.y + y.GetValueOrDefault(),
+            v.z + z.GetValueOrDefault());
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector3 Add(this Vector3 v, float? x = null, float? y = null, float? z = null)
+    {
+        return new Vector3(
+            v.x + x.GetValueOrDefault(), 
+            v.y + y.GetValueOrDefault(), 
+            v.z + z.GetValueOrDefault());
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector3Int Multily(this Vector3Int v, int? x = null, int? y = null, int? z = null)
+    {
+        return new Vector3Int(
+            v.x * x.GetValueOrDefault(1),
+            v.y * y.GetValueOrDefault(1),
+            v.z * z.GetValueOrDefault(1));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector3 Multily(this Vector3 v, float? x = null, float? y = null, float? z = null)
+    {
+        return new Vector3(
+            v.x * x.GetValueOrDefault(1f),
+            v.y * y.GetValueOrDefault(1f),
+            v.z * z.GetValueOrDefault(1f));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

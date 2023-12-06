@@ -1,6 +1,7 @@
 ﻿using NaughtyAttributes;
 using System;
 using UnityEngine;
+using UnityEngine.Timeline;
 
 public class UIInventory : MonoBehaviour
 {
@@ -16,10 +17,10 @@ public class UIInventory : MonoBehaviour
     private Canvas renderingCanvas;
 
     [SerializeField] 
-    private GameObject normalCharactorInfo;
+    private Canvas normalCharactorInfo;
 
     [SerializeField] 
-    private GameObject fullCraftingTable;
+    private Canvas fullCraftingTable;
 
     [SerializeField]
     private UIFurnace uiBlastFurnace;
@@ -70,20 +71,20 @@ public class UIInventory : MonoBehaviour
     public void SetState(State state)
     {
         renderingCanvas.enabled = state != State.None;
-        uiBlastFurnace.gameObject.SetActive(false);
-        normalCharactorInfo.SetActive(false);
-        fullCraftingTable.SetActive(false);
+        uiBlastFurnace.enabled = false;
+        normalCharactorInfo.enabled = false;
+        fullCraftingTable.enabled = false;
 
         switch (state)
         {
             case State.Inventory:
-                normalCharactorInfo.SetActive(true);
+                normalCharactorInfo.enabled = true;
                 break;
             case State.FullCraftingTable:
-                fullCraftingTable.SetActive(true);
+                fullCraftingTable.enabled = true;
                 break;
             case State.BlastFurnace:
-                uiBlastFurnace.gameObject.SetActive(true);
+                uiBlastFurnace.enabled = true;
                 break;
         }
     }

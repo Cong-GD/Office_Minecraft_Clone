@@ -19,6 +19,15 @@ MonoBehaviour:
     item: {fileID: 11400000, guid: 4024cfa2a8502384e8a58a55c557f587, type: 2}
     amount: 4
   recipeBinding:
-    row2: {x: 0, y: 0, z: 0}
-    row1: {x: 1, y: 0, z: 0}
-    row0: {x: 1, y: 0, z: 0}
+    c0:
+      x: 0
+      y: 1
+      z: 1
+    c1:
+      x: 0
+      y: 0
+      z: 0
+    c2:
+      x: 0
+      y: 0
+      z: 0

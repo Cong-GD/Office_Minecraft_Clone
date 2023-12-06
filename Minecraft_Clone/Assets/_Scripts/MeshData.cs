@@ -12,7 +12,7 @@ public class MeshData
     public MyNativeList<Vector2> uvs = new(5000);
     public MyList<int> triangles = new(5000);
     public MyList<int> colliderTriangles = new(5000);
-    public MyList<int> transparentTriangles = new(5000);
+    public MyList<int> waterTriangles = new(5000);
 
     ~MeshData()
     {
@@ -27,7 +27,7 @@ public class MeshData
         triangles.Clear();
         uvs.Clear();
         colliderTriangles.Clear();
-        transparentTriangles.Clear();
+        waterTriangles.Clear();
         normals.Clear();
     }
 

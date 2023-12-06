@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b838d6b24873a2748bc3fe1196e9ffc2, type: 3}
   m_Name: Leaves Solid
   m_EditorClassIdentifier: 
-  itemMaterialPrefab: {fileID: 2100000, guid: 3a7f4eb1536838841938d793039995bb, type: 2}
+  itemMaterialPrefab: {fileID: 2100000, guid: 0ae68b4f062066141a83dfa4b5a03c73, type: 2}
   up: 22
   down: 22
   left: 22

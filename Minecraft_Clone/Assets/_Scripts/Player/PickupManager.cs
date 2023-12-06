@@ -1,6 +1,7 @@
 ﻿using NaughtyAttributes;
 using ObjectPooling;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Minecraft
@@ -50,8 +51,8 @@ namespace Minecraft
                 if (ItemLifeTimePass(freeObject))
                     continue;
 
-                _playerPosition = playerBody.position + new Vector3(0, 1.5f, 0);
-                float distanceToPlayer = (freeObject.transform.position - _playerPosition).magnitude;
+                _playerPosition = playerBody.position.Add(y: 1.5f);
+                float distanceToPlayer = Vector3.Distance(freeObject.transform.position, _playerPosition);
 
                 if (MaxDistancePass(freeObject, distanceToPlayer))
                     continue;

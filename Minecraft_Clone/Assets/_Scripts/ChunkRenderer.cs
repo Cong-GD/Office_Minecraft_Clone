@@ -12,9 +12,15 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
     [SerializeField] private MeshFilter meshFilter;
     [SerializeField] private MeshCollider meshCollider;
 
+    public int vertices;
+    public int triangles;
+
+    [SerializeField] private Mesh mesh;
+    [SerializeField] private Mesh colliderMesh;
+
     public event Action OnReturn;
 
-    public ChunkData ChunkData; //{ get; private set; }
+    public ChunkData ChunkData { get; private set; }
 
     public void SetChunkData(ChunkData chunk)
     {
@@ -22,28 +28,11 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
         transform.position = chunk.worldPosition;
     }
 
-    public void UpdateMesh()
-    {
-        MeshData meshData = Chunk.GetMeshData(ChunkData);
-        RenderMesh(meshData);
-    }
-
-    public async void UpdateMeshAsync()
-    {
-        MeshData meshData = await Task.Run(() => Chunk.GetMeshData(ChunkData));
-        RenderMesh(meshData);
-    }
-    public int vertices;
-    public int triangles;
-
-    public Mesh mesh;
-    public Mesh colliderMesh;
-
     private void Awake()
     {
         mesh = new Mesh();
         colliderMesh = new Mesh();
-        meshFilter.mesh = mesh;
+        meshFilter.mesh = mesh;      
     }
     public void RenderMesh(MeshData meshData)
     {
@@ -52,15 +41,10 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
 
         mesh.Clear();
         mesh.subMeshCount = 2;
-        //mesh.SetVertices(meshData.vertices.Items, 0, meshData.vertices.Count);
-        //mesh.SetTriangles(meshData.triangles.Items, 0, meshData.triangles.Count, 0);
-        //mesh.SetTriangles(meshData.transparentTriangles.Items, 0, meshData.transparentTriangles.Count, 1);
-        //mesh.SetUVs(0, meshData.uvs.Items, 0, meshData.uvs.Count);
-        //mesh.SetNormals(meshData.normals.Items, 0, meshData.normals.Count);
 
         mesh.SetVertices(meshData.vertices.AsNativeArray());
         mesh.SetTriangles(meshData.triangles.Items, 0, meshData.triangles.Count, 0);
-        mesh.SetTriangles(meshData.transparentTriangles.Items, 0, meshData.transparentTriangles.Count, 1);
+        mesh.SetTriangles(meshData.waterTriangles.Items, 0, meshData.waterTriangles.Count, 1);
         mesh.SetUVs(0, meshData.uvs.AsNativeArray());
         mesh.SetNormals(meshData.normals.AsNativeArray());
 
@@ -69,7 +53,6 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
             return;
 
         colliderMesh.Clear();
-        //colliderMesh.SetVertices(meshData.vertices.Items, 0, meshData.vertices.Count);
         colliderMesh.SetVertices(meshData.vertices.AsNativeArray());
         colliderMesh.SetTriangles(meshData.colliderTriangles.Items, 0, meshData.colliderTriangles.Count, 0);
         meshCollider.sharedMesh = colliderMesh;

@@ -2,6 +2,7 @@ using Cinemachine;
 using Minecraft.Input;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
@@ -15,6 +16,8 @@ public class PlayerCamera : MonoBehaviour
     public float minNoiseScale = 1f;
     public float maxNoiseScale = 5f;
     public float maxSpeed = 7f;
+    [SerializeField] private float upLimit;
+    [SerializeField] private float downLimit;
 
     private Vector2 _lookInput;
     private float _xRotation = 0;
@@ -36,10 +39,10 @@ public class PlayerCamera : MonoBehaviour
 
         _xRotation += inputDelta.x;
         _yRotation += inputDelta.y;
-        _yRotation = Mathf.Clamp(_yRotation, -90, 90);
+        _yRotation = Mathf.Clamp(_yRotation, -upLimit, downLimit);
 
-        transform.rotation = Quaternion.Euler(_yRotation, _xRotation, 0);
-        orientation.rotation = Quaternion.Euler(0, _xRotation, 0);
+        transform.localRotation = Quaternion.Euler(_yRotation, 0, 0);
+        orientation.localRotation = Quaternion.Euler(0, _xRotation, 0);
     }
 
     private void FixedUpdate()

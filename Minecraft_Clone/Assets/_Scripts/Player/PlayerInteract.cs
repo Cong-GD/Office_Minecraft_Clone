@@ -1,4 +1,5 @@
-﻿using Minecraft;
+﻿using DG.Tweening.Core.Easing;
+using Minecraft;
 using Minecraft.Input;
 using NaughtyAttributes;
 using System.Collections;
@@ -14,7 +15,10 @@ public class PlayerInteract : MonoBehaviour
     private PlayerData_SO playerData;
 
     [SerializeField]
-    private ProgressDisplayer diggingProgressDisplayer;
+    private Animator animator;
+
+    [SerializeField]
+    private BlockBreakingProgress blockBreakingProgress;
 
     [Min(1f)]
     public float checkDistance;
@@ -41,7 +45,7 @@ public class PlayerInteract : MonoBehaviour
     private bool _isDigging;
     private float _allowReceiveBuildInputTime;
 
-    private readonly Vector3 _halfOne = new Vector3(0.5f, 0.5f, 0.5f);
+    private Vector3 _halfOne = new Vector3(0.5f, 0.5f, 0.5f);
 
     private bool AllowReceiveBuildInput => Time.time > _allowReceiveBuildInputTime;
 
@@ -124,18 +128,20 @@ public class PlayerInteract : MonoBehaviour
 
         _isDigging = true;
         ITool toolInHand = InventorySystem.Instance.RightHand.GetTool();
-        diggingProgressDisplayer.Enable();
+        blockBreakingProgress.Enable();
+        blockBreakingProgress.SetMeshAndPosition(block.GetMeshWithoutUvAtlas(), hitPosition);
         float progress = 0f;
         while (MInput.Destroy.IsPressed())
         {
             DiggingCalculation(toolInHand, block, ref progress);
+            animator.Play(AnimID.Attack, 1);
             if (progress >= 1f || hitPosition != this.hitPosition)
                 break;
 
-            diggingProgressDisplayer.SetValue(progress);
+            blockBreakingProgress.SetValue(progress);
             yield return null;
         }
-        diggingProgressDisplayer.Disable();
+        blockBreakingProgress.Disable();
         _isDigging = false;
         if (progress < 1f)
             yield break;

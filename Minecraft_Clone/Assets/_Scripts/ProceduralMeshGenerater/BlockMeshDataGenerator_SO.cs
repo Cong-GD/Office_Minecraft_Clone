@@ -22,5 +22,22 @@ namespace Minecraft.ProceduralMeshGenerate
 
         public abstract Mesh CreateMesh();
 
+        public Mesh CreateMeshWithoutUvAtlas()
+        {
+            var mesh = CreateMesh();
+            if(mesh == null)
+            {
+                return null;
+            }
+
+            Vector2[] uvs = mesh.uv;
+            Span<Vector2> span = uvs;
+            foreach (ref var uv in span)
+            {
+                uv *= MeshDrawerHelper.ATLAS_SIZE;
+            }
+            mesh.uv = uvs;
+            return mesh;
+        }
     }
 }

@@ -21,6 +21,9 @@ public class UIFurnace : MonoBehaviour
     [SerializeField]
     private ProgressDisplayer smeltProgress;
 
+    [SerializeField]
+    private Canvas myCanvas;
+
     public float BurnProgress => _furnace != null ? _furnace.BurnProgressValue : 0f;
 
     public float SmeltProgress => _furnace != null ? _furnace.SmeltProgressValue : 0f;
@@ -29,6 +32,7 @@ public class UIFurnace : MonoBehaviour
     {
         burnProgress.Enable();
         smeltProgress.Enable();
+        myCanvas.enabled = true;
     }
 
     private void OnDisable()
@@ -36,6 +40,7 @@ public class UIFurnace : MonoBehaviour
         ClearFurnace();
         burnProgress.Disable();
         smeltProgress.Disable();
+        myCanvas.enabled = false;
     }
 
     private void FixedUpdate()

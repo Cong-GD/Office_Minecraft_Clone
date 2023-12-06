@@ -22,7 +22,7 @@ namespace Minecraft.ProceduralMeshGenerate
                 for (int j = 0; j < 4; j++)
                     meshData.normals.Add(sixDirectionVectors[i]);
 
-                MeshDrawerHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
+                MeshDrawerHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
 
                 if (!adjacentBlockData.IsSolid)
                     MeshDrawerHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);

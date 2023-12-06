@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
+
 public class World : MonoBehaviour
 {
     [ShowNonSerializedField]
@@ -26,7 +27,10 @@ public class World : MonoBehaviour
     [SerializeField]
     private PlayerData_SO playerData;
 
-    [field: SerializeField]
+    [SerializeField]
+    private Vector3 SpawnOffset;
+
+    [field: ShowNonSerializedField]
     public Vector3Int PlayerCoord { get; private set; }
 
     [SerializeField ,Header("Chunk render properties")]
@@ -76,8 +80,11 @@ public class World : MonoBehaviour
     private void Awake()
     {
         if(Instance != null)
+        {
             Destroy(gameObject);
-
+            return;
+        }
+            
         Instance = this;
         WorldSeed = seed;
         ThreadSafePool<MeshData>.Capacity = 50;
@@ -113,7 +120,12 @@ public class World : MonoBehaviour
                     PrepareMeshDatas(PlayerCoord);
                 }, _cancellationToken);
             }
+            while(_preparedMeshs.TryDequeue(out var meshData))
+            {
+                RenderMesh(meshData);
+            }
             SpawnPlayer();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
             if (continueGenerate)
             {
                 chunkRenderPerFrame = 5;
@@ -130,7 +142,7 @@ public class World : MonoBehaviour
 
     private void Update()
     {
-        PlayerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(playerData.PlayerBody.position).X_Z(0));
+        PlayerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(playerData.PlayerBody.position).With(y: 0));
 
         int renderedCount = 0;
         while (_priorityMeshToRenders.TryDequeue(out var meshData))
@@ -146,9 +158,9 @@ public class World : MonoBehaviour
 
     private void SpawnPlayer()
     {
-        if(Physics.Raycast(new Vector3(0, 250,0), Vector3.down, out var hit, 250, LayerMask.GetMask("Ground")))
+        if(Physics.Raycast(new Vector3(SpawnOffset.x, 250,SpawnOffset.z), Vector3.down, out var hit, 250, LayerMask.GetMask("Ground")))
         {
-            playerData.PlayerBody.position = hit.point + Vector3.up * 5;
+            playerData.PlayerBody.position = hit.point.Add(y: SpawnOffset.y);
             playerData.PlayerBody.velocity = Vector3.zero;
         }
     }
@@ -299,7 +311,7 @@ public class World : MonoBehaviour
         _haveStructuresChunks.Clear();
     }
 
-    private void ApplyModification(ChunkData chunkData, ModifierUnit mod)
+    private void ApplyModification(ChunkData chunkData,in ModifierUnit mod)
     {
         if (!Chunk.IsValidWorldY(mod.y))
             return;

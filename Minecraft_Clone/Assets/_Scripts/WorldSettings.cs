@@ -18,4 +18,3 @@ public class WorldSettings
 
     public static int waterLevel;
 }
-

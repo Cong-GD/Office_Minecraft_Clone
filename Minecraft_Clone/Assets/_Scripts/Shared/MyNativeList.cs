@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections;
@@ -34,6 +33,9 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IEnumerable<T
     {
         if (capacity < 0)
             throw new ArgumentOutOfRangeException("Capacity can't less than 0");
+
+        if (capacity == 0)
+            return;
 
         _capacity = capacity;
         _buffer = Allocate(capacity);
@@ -221,9 +223,7 @@ public unsafe class MyNativeList<T> : IDisposable, ICollection<T>, IEnumerable<T
 
         readonly object IEnumerator.Current => _value;
 
-#pragma warning disable IDE0251 // Make member 'readonly'
-        public void Dispose() { }
-#pragma warning restore IDE0251 // Make member 'readonly'
+        public readonly void Dispose() { }
 
         public bool MoveNext()
         {

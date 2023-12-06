@@ -21,6 +21,8 @@ public class PlayerData_SO : ScriptableObject
     [field: SerializeField]
     public float JumpCooldown { get; private set; } = 0.1f;
 
+    [field: SerializeField]
+    public float WaterPushForce { get; private set; } = 20f;
 
     [field: Header("Enviroment")]
     [field: SerializeField]
@@ -32,6 +34,11 @@ public class PlayerData_SO : ScriptableObject
     [field: SerializeField]
     public float AirDrag { get; private set; } = 1f;
 
+    [field: SerializeField]
+    public float WaterDrag { get; private set; } = 20f;
+
+    [field: SerializeField]
+    public Vector3 BodyOffset { get; private set; }
 
     [field: Header("Ground check")]
     [field: SerializeField]
@@ -73,6 +80,12 @@ public class PlayerData_SO : ScriptableObject
 
     [NonSerialized, ShowNonSerializedField]
     public float allowJumpTime;
+
+    [NonSerialized, ShowNonSerializedField]
+    public bool isStepInWater;
+
+    [NonSerialized, ShowNonSerializedField]
+    public bool isBobyInWater;
 
     public void ClearTempData()
     {

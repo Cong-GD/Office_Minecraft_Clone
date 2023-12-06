@@ -17,17 +17,17 @@ MonoBehaviour:
   <MaxStack>k__BackingField: 64
   relativeTransforms:
     rightHand:
-      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <position>k__BackingField: {x: -0.101, y: 0, z: -0.092}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 1.2, y: 1.2, z: 1.5}
+      <scale>k__BackingField: {x: 0.2, y: 0.2, z: 0.2}
     leftHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
       <scale>k__BackingField: {x: 1, y: 1, z: 1}
     freeObject:
-      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <position>k__BackingField: {x: -0.1, y: 0, z: -0.1}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
-      <scale>k__BackingField: {x: 2, y: 2, z: 2}
+      <scale>k__BackingField: {x: 0.2, y: 0.2, z: 0.2}
   <CanBurn>k__BackingField: 0
   <BurnDuration>k__BackingField: 0
   <CanSmelt>k__BackingField: 1

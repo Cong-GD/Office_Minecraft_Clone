@@ -9,8 +9,8 @@ namespace Minecraft.ProceduralMeshGenerate
     {
         private class MeshGenerator
         {
-            private static readonly Vector3Int[] vectors = VectorExtensions.SixDirectionsVector3Int.ToArray();
-            private static readonly Direction[] directions = DirectionExtensions.SixDirections.ToArray();
+            private readonly Vector3Int[] vectors = VectorExtensions.SixDirectionsVector3Int.ToArray();
+            private readonly Direction[] directions = DirectionExtensions.SixDirections.ToArray();
 
             private int height;
             private int width;
@@ -28,12 +28,7 @@ namespace Minecraft.ProceduralMeshGenerate
                 this.size = size;
                 SetTexture(texture2D);
                 Generate();
-                mesh.Clear();
-                mesh.SetVertices(vertices.Items, 0, vertices.Count);
-                mesh.SetTriangles(triangles.Items, 0, triangles.Count, 0);
-                mesh.SetUVs(0, uvs.Items, 0, uvs.Count);
-                mesh.RecalculateBounds();
-                mesh.RecalculateNormals();
+                UpdateMesh(mesh);
             }
 
             private void SetTexture(Texture2D texture2D)
@@ -60,6 +55,16 @@ namespace Minecraft.ProceduralMeshGenerate
                         DrawPixel(x, y);
                     }
                 }
+            }
+
+            private void UpdateMesh(Mesh mesh)
+            {
+                mesh.Clear();
+                mesh.SetVertices(vertices.Items, 0, vertices.Count);
+                mesh.SetTriangles(triangles.Items, 0, triangles.Count, 0);
+                mesh.SetUVs(0, uvs.Items, 0, uvs.Count);
+                mesh.RecalculateBounds();
+                mesh.RecalculateNormals();
             }
 
             private void DrawPixel(int x, int y)

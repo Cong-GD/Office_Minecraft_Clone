@@ -89,8 +89,9 @@ namespace Minecraft.ProceduralMeshGenerate
 
         public void Apply(Transform transform)
         {
-            transform.localPosition = position;
-            transform.localEulerAngles = rotation;
+            transform.SetLocalPositionAndRotation(position, Quaternion.Euler(rotation));
+            //transform.localPosition = position;
+            //transform.localEulerAngles = rotation;
             transform.localScale = scale;
         }
     }

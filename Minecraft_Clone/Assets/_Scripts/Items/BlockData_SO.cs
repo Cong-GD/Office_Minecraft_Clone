@@ -1,5 +1,6 @@
 ﻿using Minecraft.ProceduralMeshGenerate;
 using NaughtyAttributes;
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -45,6 +46,9 @@ public class BlockData_SO : BaseItem_SO
     [field: SerializeField, Expandable] 
     public BlockMeshDataGenerator_SO MeshGenerator { get; private set; }
 
+    [NonSerialized]
+    private Mesh _cachedMesh;
+
     protected override Mesh CreateMesh()
     {
         return MeshGenerator.CreateMesh();
@@ -53,6 +57,15 @@ public class BlockData_SO : BaseItem_SO
     protected override Material CreateMaterial()
     {
         return MeshGenerator.CreateMaterial();
+    }
+
+    public Mesh GetMeshWithoutUvAtlas()
+    {
+        if(_cachedMesh == null)
+        {
+            _cachedMesh = MeshGenerator.CreateMeshWithoutUvAtlas();
+        }
+        return _cachedMesh;
     }
 
     public bool CanHarvestBy(ITool tool)

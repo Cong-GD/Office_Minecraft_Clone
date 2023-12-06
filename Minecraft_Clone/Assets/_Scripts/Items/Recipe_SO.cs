@@ -1,35 +1,20 @@
 ﻿using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Minecraft/Item/Recipes")]
 public class Recipe_SO : ScriptableObject
 {
+    private const int GRID_SIZE = 3;
+
     [Serializable]
     public class ItemBindings
     {
         [Range(1, 9)]
         public int id = 1;
         public BaseItem_SO item;
-    }
-
-    [Serializable]
-    public class RecipeBinding
-    {
-        public Vector3Int row2;
-        public Vector3Int row1;
-        public Vector3Int row0;
-
-        public RecipeBinding Clone()
-        {
-            var binding = new RecipeBinding();
-            binding.row0 = row0;
-            binding.row1 = row1;
-            binding.row2 = row2;
-            return binding;
-        }
-        
     }
 
     [SerializeField]
@@ -39,130 +24,120 @@ public class Recipe_SO : ScriptableObject
     private ItemPacked result;
 
     [SerializeField]
-    private RecipeBinding recipeBinding;
-
+    private int3x3 recipeBinding;
 
     public ItemPacked GetResult() => result;
 
-    public IEnumerable<string> GetRecipeBindings()
+    public IEnumerable<int3x3> GetRecipeBindings()
     {
-        ThrowIfInvalidBinding(recipeBinding);
-        var binding = recipeBinding.Clone();
-        while (MoveDown(binding));
-        while (MoveLeft(binding));
+        var binding = ToItemIDs(ref recipeBinding);
+        ThrowIfInvalidBinding(ref binding);
+        while (MoveDown(ref binding));
+        while (MoveLeft(ref binding));
 
-        foreach (var hashString in CheckRow(binding))
+        do
         {
-            yield return hashString;
-        }
-        while(MoveUp(binding))
-        {
-            foreach (var hashString in CheckRow(binding))
+            var copy = binding;
+            do
             {
-                yield return hashString;
+                yield return copy;
             }
+            while (MoveRight(ref copy));
         }
+        while(MoveUp(ref binding));
     }
 
-    private IEnumerable<string> CheckRow(RecipeBinding binding)
+    private bool MoveRight(ref int3x3 binding)
     {
-        binding = binding.Clone();
-        yield return GetHashString(binding);
-        while(MoveRight(binding))
+        ThrowIfInvalidBinding(ref binding);
+        for (int i = 0; i < GRID_SIZE; i++)
         {
-            yield return GetHashString(binding);
+            if (binding[i][2] != 0)
+                return false;
         }
-    }
 
-    private bool MoveRight(RecipeBinding binding)
-    {
-        ThrowIfInvalidBinding(binding);
-        if (binding.row0.z != 0 || binding.row1.z != 0 || binding.row2.z != 0)
-            return false;
-
-        binding.row0.z = binding.row0.y;
-        binding.row1.z = binding.row1.y;
-        binding.row2.z = binding.row2.y;
-
-        binding.row0.y = binding.row0.x;
-        binding.row1.y = binding.row1.x;
-        binding.row2.y = binding.row2.x;
-
-        binding.row0.x = 0;
-        binding.row1.x = 0;
-        binding.row2.x = 0;
+        for (int i = 0; i < GRID_SIZE; i++)
+        {
+            binding[i][2] = binding[i][1];
+            binding[i][1] = binding[i][0];
+            binding[i][0] = 0;
+        }
         return true;
     }
 
-    private bool MoveLeft(RecipeBinding binding)
+    private bool MoveLeft(ref int3x3 binding)
     {
-        ThrowIfInvalidBinding(binding);
-        if (binding.row0.x != 0 || binding.row1.x != 0 || binding.row2.x != 0)
-            return false;
+        ThrowIfInvalidBinding(ref binding);
+        for (int i = 0; i < GRID_SIZE; i++)
+        {
+            if (binding[i][0] != 0)
+                return false;
+        }
 
-        binding.row0.x = binding.row0.y;
-        binding.row1.x = binding.row1.y;
-        binding.row2.x = binding.row2.y;
+        for (int i = 0; i < GRID_SIZE; i++)
+        {
+            binding[i][0] = binding[i][1];
+            binding[i][1] = binding[i][2];
+            binding[i][2] = 0;
+        }
 
-        binding.row0.y = binding.row0.z;
-        binding.row1.y = binding.row1.z;
-        binding.row2.y = binding.row2.z;
-
-        binding.row0.z = 0;
-        binding.row1.z = 0;
-        binding.row2.z = 0;
         return true;
     }
 
-    private bool MoveUp(RecipeBinding binding)
+    private bool MoveUp(ref int3x3 binding)
     {
-        ThrowIfInvalidBinding(binding);
-        if (binding.row2 != Vector3Int.zero)
-            return false;
+        ThrowIfInvalidBinding(ref binding);
+        for (int i = 0; i < GRID_SIZE; i++)
+        {
+            if (binding[0][i] != 0)
+                return false;
+        }
 
-        binding.row2 = binding.row1;
-        binding.row1 = binding.row0;
-        binding.row0 = Vector3Int.zero;
+        for (int i = 0; i < GRID_SIZE; i++)
+        {
+            binding[0][i] = binding[1][i];
+            binding[1][i] = binding[2][i];
+            binding[2][i] = 0;
+        }
         return true;
     }
 
-    private bool MoveDown(RecipeBinding binding)
+    private bool MoveDown(ref int3x3 binding)
     {
-        ThrowIfInvalidBinding(binding);
-        if (binding.row0 != Vector3Int.zero)
-            return false;
+        ThrowIfInvalidBinding(ref binding);
+        for (int i = 0; i < GRID_SIZE; i++)
+        {
+            if (binding[2][i] != 0)
+                return false;
+        }
 
-        binding.row0 = binding.row1;
-        binding.row1 = binding.row2;
-        binding.row2 = Vector3Int.zero;
+        for (int i = 0; i < GRID_SIZE; i++)
+        {
+            binding[2][i] = binding[1][i];
+            binding[1][i] = binding[0][i];
+            binding[0][i] = 0;
+        }
         return true;
     }
 
-    private string GetHashString(RecipeBinding recipeBindings)
+    private int3x3 ToItemIDs(ref int3x3 binding)
     {
-        return 
-            $"{ToHashString(recipeBindings.row0.x)}" +
-            $",{ToHashString(recipeBindings.row0.y)}" +
-            $",{ToHashString(recipeBindings.row0.z)}" +
-            $",{ToHashString(recipeBindings.row1.x)}" +
-            $",{ToHashString(recipeBindings.row1.y)}" +
-            $",{ToHashString(recipeBindings.row1.z)}" +
-            $",{ToHashString(recipeBindings.row2.x)}" +
-            $",{ToHashString(recipeBindings.row2.y)}" +
-            $",{ToHashString(recipeBindings.row2.z)}";
+        return new int3x3(
+            ToItemID(binding[0][2]), ToItemID(binding[1][2]), ToItemID(binding[2][2]),
+            ToItemID(binding[0][1]), ToItemID(binding[1][1]), ToItemID(binding[2][1]),
+            ToItemID(binding[0][0]), ToItemID(binding[1][0]), ToItemID(binding[2][0])
+            );
     }
 
-    private string ToHashString(int itemId)
+    private int ToItemID(int itemId)
     {
         var binding = itemBindings.Find(x => x.id == itemId);
-        return binding == null ? "(null)" : binding.item.GetName();
+        return binding == null ? 0 : binding.item.GetItemID();
     }
 
-    private void ThrowIfInvalidBinding(RecipeBinding recipeBinding)
+    private void ThrowIfInvalidBinding(ref int3x3 recipeBinding)
     {
-        if (recipeBinding.row0 == Vector3Int.zero
-          && recipeBinding.row1 == Vector3Int.zero
-          && recipeBinding.row2 == Vector3Int.zero)
+        if (recipeBinding.Equals(0))
             throw new Exception($"Recipe binding can't be empty: {name}");
     }
 

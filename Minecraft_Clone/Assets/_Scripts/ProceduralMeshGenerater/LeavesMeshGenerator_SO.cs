@@ -19,27 +19,10 @@ namespace Minecraft.ProceduralMeshGenerate
                 if (!nextBlockData.IsTransparent)
                     continue;
 
-                //if (nextBlockData.BlockType == BlockType.Leaves)
-                //{
-                //    bool isNextTransparent = IsLeavesTransparent(chunkData, nextX, nextY, nextZ);
-                //    if (isTransparent && isNextTransparent || !isNextTransparent)
-                //        continue;
-
-                //}
-
                 MeshDrawerHelper.AddQuadVertices(meshData.vertices, sixDirections[i], x, y, z);
 
                 for (int j = 0; j < 4; j++)
                     meshData.normals.Add(sixDirectionVectors[i]);
-
-                //if (isTransparent)
-                //{
-                //    VoxelHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
-                //}
-                //else
-                //{
-                //    VoxelHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
-                //}
 
                 MeshDrawerHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
 

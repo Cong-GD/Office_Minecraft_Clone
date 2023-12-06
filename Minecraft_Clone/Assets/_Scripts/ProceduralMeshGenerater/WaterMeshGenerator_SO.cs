@@ -25,8 +25,12 @@ namespace Minecraft.ProceduralMeshGenerate
                 for (int j = 0; j < 4; j++)
                     meshData.normals.Add(sixDirectionVectors[i]);
 
-                MeshDrawerHelper.AddQuadTriangle(meshData.transparentTriangles, meshData.vertices.Count);
-                MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
+                MeshDrawerHelper.AddQuadTriangle(meshData.waterTriangles, meshData.vertices.Count);
+                //MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
+                meshData.uvs.Add(new Vector2(0f, 0f));
+                meshData.uvs.Add(new Vector2(0f, 1f));
+                meshData.uvs.Add(new Vector2(1f, 1f));
+                meshData.uvs.Add(new Vector2(1f, 0f));
             }
         }
     }

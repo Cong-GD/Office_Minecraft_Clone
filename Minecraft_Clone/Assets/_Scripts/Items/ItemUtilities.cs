@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public static class ItemUtilities
 {
-    private static Dictionary<string, Recipe_SO> _recipes;
+    private static Dictionary<int3x3, Recipe_SO> _recipes;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
         using var timer = TimeExcute.Start("Intialized all recipes");
         var recipes = Resources.LoadAll<Recipe_SO>("Recipes");
-        _recipes = new Dictionary<string, Recipe_SO>();
+        _recipes = new Dictionary<int3x3, Recipe_SO>();
         foreach (var recipe in recipes)
         {
             foreach (var binding in recipe.GetRecipeBindings())
@@ -35,10 +36,13 @@ public static class ItemUtilities
         if (slots.Length != 9)
             throw new Exception("Manufacture space must have 9 slots");
 
-        string hashString = string.Join(",", 
-            slots.Select(slot => slot.RootItem.GetName()));
+        int3x3 hashCodes = new int3x3(
+            GetItemID(slots[0].RootItem), GetItemID(slots[1].RootItem), GetItemID(slots[2].RootItem),
+            GetItemID(slots[3].RootItem), GetItemID(slots[4].RootItem), GetItemID(slots[5].RootItem),
+            GetItemID(slots[6].RootItem), GetItemID(slots[7].RootItem), GetItemID(slots[8].RootItem)
+            );
 
-        if(_recipes.TryGetValue(hashString, out var recipe))
+        if(_recipes.TryGetValue(hashCodes, out var recipe))
         {
             return recipe.GetResult();
         }
@@ -93,8 +97,14 @@ public static class ItemUtilities
         return item == null ? "(null)" : item.Name;
     }
 
+
     public static bool IsNullOrEmpty(this ItemSlot slot)
     { 
         return slot is null || slot.IsEmpty(); 
+    }
+
+    public static int GetItemID(this BaseItem_SO item)
+    {
+        return item == null ? 0 : item.GetInstanceID();
     }
 }

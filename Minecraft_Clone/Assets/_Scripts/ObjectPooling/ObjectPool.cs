@@ -1,22 +1,10 @@
 using NaughtyAttributes;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace ObjectPooling
 {
-    public interface IPoolObject
-    {
-        GameObject gameObject { get; }
-
-        Transform transform { get; }
-
-        event Action OnReturn;
-        void ReturnToPool();
-    }
-
-
     [CreateAssetMenu(menuName = "ObjectPool")]
     public class ObjectPool : ScriptableObject
     {
