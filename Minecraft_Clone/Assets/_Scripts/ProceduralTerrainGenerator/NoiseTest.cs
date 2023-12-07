@@ -77,7 +77,7 @@ public class NoiseTest : MonoBehaviour
     [System.Diagnostics.Conditional("UNITY_EDITOR")]
     public void WriteResult()
     {
-        const string path = "Assets/_Data/Testing/PerlinTest.csv";
+        const string path = "Assets/Testing/PerlinTest.csv";
 
         float min = Mathf.Infinity;
         float max = Mathf.NegativeInfinity;
