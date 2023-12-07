@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using NaughtyAttributes;
+﻿using NaughtyAttributes;
 
 namespace Minecraft
 {

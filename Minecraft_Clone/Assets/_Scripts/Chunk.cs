@@ -2,6 +2,7 @@
 using System.Data;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using static WorldSettings;
 
@@ -102,9 +103,13 @@ public static class Chunk
                         chunkData.worldPosition.z + localZ);
     }
 
-    public static BlockType GetBlock(Vector3Int worldPos)
+    public static BlockType GetBlock(Vector3 worldPos)
     {
-        return GetBlock(worldPos.x, worldPos.y, worldPos.z);
+        return GetBlock(
+            Mathf.FloorToInt(worldPos.x), 
+            Mathf.FloorToInt(worldPos.y), 
+            Mathf.FloorToInt(worldPos.z)
+            );
     }
 
     public static BlockType GetBlock(int worldX, int worldY, int worldZ)
@@ -122,9 +127,13 @@ public static class Chunk
         return BlockType.Air;
     }
 
-    public static Direction GetDirection(Vector3Int worldPosition)
+    public static Direction GetDirection(Vector3 worldPosition)
     {
-        return GetDirection(worldPosition.x, worldPosition.y, worldPosition.z);
+        return GetDirection(
+            Mathf.FloorToInt(worldPosition.x), 
+            Mathf.FloorToInt(worldPosition.y), 
+            Mathf.FloorToInt(worldPosition.z)
+            );
     }
 
     public static Direction GetDirection(int worldX, int worldY, int worldZ)

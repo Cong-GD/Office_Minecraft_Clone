@@ -38,4 +38,12 @@ MonoBehaviour:
     gain: 0.5
     lucunarity: 2
   postProcessors:
-  - {fileID: 11400000, guid: 8d53c7597f7b7294fb70b2948b94592c, type: 2}
+  - rid: 4445369641343647749
+  references:
+    version: 2
+    RefIds:
+    - rid: 4445369641343647749
+      type: {class: RedistributePostProcess, ns: Minecraft, asm: Assembly-CSharp}
+      data:
+        name: Redistribute
+        exponent: 2

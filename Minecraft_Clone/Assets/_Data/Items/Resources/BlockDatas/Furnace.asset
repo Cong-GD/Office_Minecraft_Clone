@@ -38,7 +38,7 @@ MonoBehaviour:
   <BlockType>k__BackingField: 15
   <IsSolid>k__BackingField: 1
   <IsTransparent>k__BackingField: 0
-  <Hardness>k__BackingField: 1
+  <Hardness>k__BackingField: 3.5
   <BestTool>k__BackingField: 4
   <HarvestableTier>k__BackingField: -1
   <HarvestableTool>k__BackingField: -1

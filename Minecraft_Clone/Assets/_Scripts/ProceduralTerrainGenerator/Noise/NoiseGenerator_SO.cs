@@ -1,9 +1,6 @@
-﻿using Minecraft.ProceduralTerrain;
-using NaughtyAttributes;
+﻿using NaughtyAttributes;
 using System;
-using System.Collections.Generic;
-using System.Xml.Serialization;
-using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 namespace Minecraft
@@ -27,7 +24,7 @@ namespace Minecraft
         };
 
 
-        [SerializeField] 
+        [SerializeField]
         private NoiseSettings noiseSettings;
 
         [SerializeField]
@@ -38,10 +35,9 @@ namespace Minecraft
         [EnableIf("useDomainWrapper")]
         private DomainWrapper domainWrapper;
 
-        [SerializeField]
-        [Expandable] 
+        [SerializeReference]
         [Tooltip("Add processors after noise value generated")]
-        private NoisePostProcess_SO[] postProcessors = Array.Empty<NoisePostProcess_SO>();
+        private INoisePostProcessor[] postProcessors = Array.Empty<INoisePostProcessor>();
 
         public NoiseInstance GetNoiseInstance()
         {
@@ -53,12 +49,29 @@ namespace Minecraft
                 noiseInstance = new DomainWrappedNoise(noiseInstance, domainNoise);
             }
 
-            if(postProcessors.Length > 0)
+            if (postProcessors.Length > 0)
             {
                 noiseInstance = new PostProcessedNoise(noiseInstance, postProcessors);
             }
 
             return noiseInstance;
         }
+
+#if UNITY_EDITOR
+
+        [Button]
+        private void AddRedistributionProcessor()
+        {
+            ArrayUtility.Add(ref postProcessors, new RedistributePostProcess());
+        }
+
+        [Button]
+        private void AddTerraceProcessor()
+        {
+            ArrayUtility.Add(ref postProcessors, new TerracesPostProcess());
+        }
+
+#endif
+
     }
 }

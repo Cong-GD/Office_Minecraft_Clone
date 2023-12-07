@@ -1,15 +1,10 @@
-﻿using Minecraft.ProceduralTerrain;
-using Minecraft;
-using System;
-
-namespace Minecraft
+﻿namespace Minecraft
 {
     public abstract class NoiseInstance
     {
         public abstract float GetNoise(float x, float y);
         public abstract float GetNoise(float x, float y, float z);
     }
-
 
 
     public class SingleNoise : NoiseInstance
@@ -38,7 +33,7 @@ namespace Minecraft
         private readonly FastNoise _domainWrapper;
         private readonly NoiseInstance _noiseInstance;
 
-        public DomainWrappedNoise(NoiseInstance noiseInstance ,FastNoise domainWrapper)
+        public DomainWrappedNoise(NoiseInstance noiseInstance, FastNoise domainWrapper)
         {
             _domainWrapper = domainWrapper;
             _noiseInstance = noiseInstance;
@@ -58,13 +53,12 @@ namespace Minecraft
     }
 
 
-
     public class PostProcessedNoise : NoiseInstance
     {
         private readonly NoiseInstance _noiseInstance;
-        private readonly NoisePostProcess_SO[] _postProcessors;
+        private readonly INoisePostProcessor[] _postProcessors;
 
-        public PostProcessedNoise(NoiseInstance noiseInstance, NoisePostProcess_SO[] postProcessors)
+        public PostProcessedNoise(NoiseInstance noiseInstance, INoisePostProcessor[] postProcessors)
         {
             _noiseInstance = noiseInstance;
             _postProcessors = postProcessors;

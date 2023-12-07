@@ -41,7 +41,7 @@ MonoBehaviour:
   <Hardness>k__BackingField: 2
   <BestTool>k__BackingField: 4
   <HarvestableTier>k__BackingField: -1
-  <HarvestableTool>k__BackingField: -1
+  <HarvestableTool>k__BackingField: 4
   <HarvestResult>k__BackingField:
     item: {fileID: 11400000}
     amount: 1

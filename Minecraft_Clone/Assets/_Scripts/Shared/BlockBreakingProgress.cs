@@ -12,7 +12,12 @@ public class BlockBreakingProgress : ProgressDisplayer
     [SerializeField]
     private MeshFilter meshFilter;
 
+    [SerializeField]
+    private float offset;
+
     private Material _material;
+
+    private Vector3 Offset => new Vector3(offset, offset, offset);
 
     private void Awake()
     {
@@ -26,7 +31,7 @@ public class BlockBreakingProgress : ProgressDisplayer
 
     public void SetMeshAndPosition(Mesh mesh, Vector3 position)
     {
-        transform.position = position - (Vector3)(float3)0.05f;
+        transform.position = position + Offset;
         meshFilter.mesh = mesh;
         _material.mainTexture = breakingTextures[0];
     }

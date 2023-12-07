@@ -129,9 +129,9 @@ public class Recipe_SO : ScriptableObject
             );
     }
 
-    private int ToItemID(int itemId)
+    private int ToItemID(int bindingID)
     {
-        var binding = itemBindings.Find(x => x.id == itemId);
+        var binding = itemBindings.Find(x => x.id == bindingID);
         return binding == null ? 0 : binding.item.GetItemID();
     }
 

@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public static class ItemUtilities
@@ -24,14 +20,13 @@ public static class ItemUtilities
                 if (!_recipes.TryAdd(binding, recipe))
                 {
                     Debug.LogError($"Can't have duplicate recipe: {_recipes[binding].name} <-> {recipe.name}");
-                    Debug.LogError($"Binding: {binding}");
                 }
             }
         }
         Debug.Log("Recipe generated: " + _recipes.Count);
     }
 
-    public static ItemPacked CheckRecipe(ItemSlot[] slots)
+    public static ItemPacked CheckRecipe(ReadOnlySpan<ItemSlot> slots)
     {
         if (slots.Length != 9)
             throw new Exception("Manufacture space must have 9 slots");
@@ -42,14 +37,14 @@ public static class ItemUtilities
             GetItemID(slots[6].RootItem), GetItemID(slots[7].RootItem), GetItemID(slots[8].RootItem)
             );
 
-        if(_recipes.TryGetValue(hashCodes, out var recipe))
+        if (_recipes.TryGetValue(hashCodes, out var recipe))
         {
             return recipe.GetResult();
         }
         return ItemPacked.Empty;
     }
 
-    public static bool HasAnyItem(Span<ItemSlot> slots)
+    public static bool HasAnyItem(ReadOnlySpan<ItemSlot> slots)
     {
         for (int i = 0; i < slots.Length; i++)
         {
@@ -79,7 +74,7 @@ public static class ItemUtilities
         return storage;
     }
 
-    public static void AddItem(Span<ItemSlot> target, ItemSlot source)
+    public static void AddItem(ReadOnlySpan<ItemSlot> target, ItemSlot source)
     {
         if (source.IsEmpty())
             return;
@@ -97,10 +92,9 @@ public static class ItemUtilities
         return item == null ? "(null)" : item.Name;
     }
 
-
     public static bool IsNullOrEmpty(this ItemSlot slot)
-    { 
-        return slot is null || slot.IsEmpty(); 
+    {
+        return slot is null || slot.IsEmpty();
     }
 
     public static int GetItemID(this BaseItem_SO item)
