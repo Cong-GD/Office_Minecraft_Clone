@@ -6,8 +6,7 @@ namespace Minecraft
     [Serializable]
     public class TerracesPostProcess : INoisePostProcessor
     {
-        [SerializeField]
-        private string name = "Terraces";
+        public string name = "Terraces";
 
         [SerializeField, Range(4, 32)]
         private int terraces;

@@ -6,8 +6,7 @@ namespace Minecraft
     [Serializable]
     public class RedistributePostProcess : INoisePostProcessor
     {
-        [SerializeField]
-        private string name = "Redistribute";
+        public string name = "Redistribute";
 
         [SerializeField, Range(0f, 10f)]
         private float exponent;

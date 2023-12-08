@@ -6,14 +6,14 @@ namespace Minecraft.ProceduralTerrain.Structures
     [CreateAssetMenu(menuName = "Minecraft/Structure/Tree")]
     public class TreeStructure_SO : Structure_SO
     {
-        [SerializeField]
-        private int maxTreeSize = 10;
+        //[SerializeField]
+        //private int maxTreeSize = 10;
 
-        [SerializeField]
-        private int minTreeSize = 5;
+        //[SerializeField]
+        //private int minTreeSize = 5;
 
-        [SerializeField]
-        private float noiseScale = 0.01f;
+        //[SerializeField]
+        //private float noiseScale = 0.01f;
 
         [SerializeField] private BlockType body;
         [SerializeField] private BlockType leaves;

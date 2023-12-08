@@ -1,5 +1,6 @@
 ﻿#define UNSAFE
 
+using CongTDev.Collection;
 using Minecraft.ProceduralTerrain.Structures;
 using System;
 using System.Collections.Generic;

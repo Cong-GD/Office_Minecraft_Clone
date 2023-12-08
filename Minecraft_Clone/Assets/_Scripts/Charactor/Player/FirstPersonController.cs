@@ -134,6 +134,7 @@ namespace Minecraft
 
         private void GroundCheck()
         {
+            
             var spherePosition = Rigidbody.position.Add(y: data.GroundOffset);
             data.isGrounded = Physics.CheckSphere(spherePosition, data.GroundRadius, data.GroundLayer, QueryTriggerInteraction.Ignore);
         }

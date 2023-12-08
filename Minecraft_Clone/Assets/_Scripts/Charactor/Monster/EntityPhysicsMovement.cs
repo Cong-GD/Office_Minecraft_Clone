@@ -27,7 +27,7 @@ namespace Minecraft
         public Vector3 MoveDirectionInput
         {
             get => moveDirectionInput;
-            set => moveDirectionInput = value;
+            set => moveDirectionInput = value.normalized;
         }
 
         public float MoveSpeed

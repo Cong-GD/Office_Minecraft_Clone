@@ -112,6 +112,15 @@ public static class Chunk
             );
     }
 
+    public static BlockType GetBlock(float3 worldPos)
+    {
+        return GetBlock(
+            Mathf.FloorToInt(worldPos.x),
+            Mathf.FloorToInt(worldPos.y),
+            Mathf.FloorToInt(worldPos.z)
+            );
+    }
+
     public static BlockType GetBlock(int worldX, int worldY, int worldZ)
     {
         var chunkCoord = GetChunkCoord(worldX, worldY, worldZ);
