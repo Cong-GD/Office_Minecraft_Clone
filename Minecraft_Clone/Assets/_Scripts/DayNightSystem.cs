@@ -1,6 +1,4 @@
-﻿using NaughtyAttributes;
-using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System;
 using Unity.Mathematics;
 using UnityEngine;
 

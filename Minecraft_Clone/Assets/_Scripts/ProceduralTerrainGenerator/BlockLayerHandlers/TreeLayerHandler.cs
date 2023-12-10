@@ -38,7 +38,7 @@ namespace Minecraft.ProceduralTerrain
             if (surfaceHeightNoise > terrainHeightLimit)
                 return true;
 
-            chunkData.worldPosition.Parse(out var worldX, out var worldY, out var worldZ);
+            (int worldX, int worldY, int worldZ) = chunkData.worldPosition;
             worldX += x;
             worldZ += z;
             int localSurfaceHeight = surfaceHeightNoise - worldY;

@@ -18,7 +18,7 @@ namespace Minecraft
         public Rigidbody Rigidbody { get; private set; }
 
         [SerializeField]
-        private PlayerData_SO data;
+        private PlayerData_SO playerData;
 
         [SerializeField]
         private float blendSpeedChangeRate;
@@ -48,7 +48,7 @@ namespace Minecraft
 
         private void Awake()
         {
-            data.ClearTempData();
+            playerData.ClearTempData();
         }
 
         private void Update()
@@ -70,10 +70,10 @@ namespace Minecraft
 
         private void ProcessSprintInput(InputAction.CallbackContext context)
         {
-            if (data.isCrounching)
+            if (playerData.isCrounching)
                 return;
 
-            data.isSprinting = true;
+            playerData.isSprinting = true;
         }
 
         private void ProcessMoveInput(InputAction.CallbackContext context)
@@ -86,17 +86,17 @@ namespace Minecraft
             if (!MInput.Jump.IsPressed())
                 return;
 
-            if (!(data.isGrounded || data.isBobyInWater) || Time.time < data.allowJumpTime)
+            if (!(playerData.isGrounded || playerData.isBobyInWater) || Time.time < playerData.allowJumpTime)
                 return;
 
-            data.allowJumpTime = Time.time + data.JumpCooldown;
+            playerData.allowJumpTime = Time.time + playerData.JumpCooldown;
             Jump();
         }
 
         private void ProcessCronchInput(InputAction.CallbackContext context)
         {
-            data.isCrounching = context.performed;
-            data.isSprinting &= data.isCrounching;
+            playerData.isCrounching = context.performed;
+            playerData.isSprinting &= playerData.isCrounching;
         }
 
         private void Move()
@@ -104,69 +104,69 @@ namespace Minecraft
             var moveDirection = orientation.forward * _moveInput.y + orientation.right * _moveInput.x;
             if (moveDirection == Vector3.zero)
             {
-                data.currentMoveSpeed = 0f;
+                playerData.currentMoveSpeed = 0f;
                 return;
             }
-            float airMultilier = !data.isGrounded && !data.isBobyInWater ? 10f * data.AirMultilier : 10f;
-            float sprintMultilier = data.isSprinting ? data.SprintMultilier : 1f;
-            float crounchMultilier = data.isCrounching && data.isGrounded ? data.CrounchMultilier : 1f;
-            data.currentMoveSpeed = data.WalkSpeed * sprintMultilier * crounchMultilier;
-            Rigidbody.AddForce(airMultilier * data.currentMoveSpeed * moveDirection, ForceMode.Force);
+            float airMultilier = !playerData.isGrounded && !playerData.isBobyInWater ? 10f * playerData.AirMultilier : 10f;
+            float sprintMultilier = playerData.isSprinting ? playerData.SprintMultilier : 1f;
+            float crounchMultilier = playerData.isCrounching && playerData.isGrounded ? playerData.CrounchMultilier : 1f;
+            playerData.currentMoveSpeed = playerData.WalkSpeed * sprintMultilier * crounchMultilier;
+            Rigidbody.AddForce(airMultilier * playerData.currentMoveSpeed * moveDirection, ForceMode.Force);
         }
 
         private void BlendAnimation()
         {
-            _blendSpeedValue = math.lerp(_blendSpeedValue, data.currentMoveSpeed, blendSpeedChangeRate * Time.deltaTime);
+            _blendSpeedValue = math.lerp(_blendSpeedValue, playerData.currentMoveSpeed, blendSpeedChangeRate * Time.deltaTime);
             animator.SetFloat(AnimID.Speed, _blendSpeedValue);
         }
 
         private void ResetSprintState()
         {
-            data.isSprinting = data.isSprinting && _moveInput != Vector2.zero;
+            playerData.isSprinting = playerData.isSprinting && _moveInput != Vector2.zero;
         }
 
         private void ApplyVelocityDrag()
         {
-            float dragValue = data.isGrounded ? data.GroundDrag : data.AirDrag;
-            dragValue = data.isStepInWater ? data.WaterDrag : dragValue;
+            float dragValue = playerData.isGrounded ? playerData.GroundDrag : playerData.AirDrag;
+            dragValue = playerData.isStepInWater ? playerData.WaterDrag : dragValue;
             Rigidbody.drag = dragValue;
         }
 
         private void GroundCheck()
         {
             
-            var spherePosition = Rigidbody.position.Add(y: data.GroundOffset);
-            data.isGrounded = Physics.CheckSphere(spherePosition, data.GroundRadius, data.GroundLayer, QueryTriggerInteraction.Ignore);
+            var spherePosition = Rigidbody.position.Add(y: playerData.GroundOffset);
+            playerData.isGrounded = Physics.CheckSphere(spherePosition, playerData.GroundRadius, playerData.GroundLayer, QueryTriggerInteraction.Ignore);
         }
 
         private void WaterCheck()
         {
             var footPosition = Vector3Int.FloorToInt(transform.position);
-            var bodyPosition = Vector3Int.FloorToInt(transform.position + data.BodyOffset);
-            data.isStepInWater = Chunk.GetBlock(footPosition) == BlockType.Water;
-            data.isBobyInWater = Chunk.GetBlock(bodyPosition) == BlockType.Water;
+            var bodyPosition = Vector3Int.FloorToInt(transform.position + playerData.BodyOffset);
+            playerData.isStepInWater = Chunk.GetBlock(footPosition) == BlockType.Water;
+            playerData.isBobyInWater = Chunk.GetBlock(bodyPosition) == BlockType.Water;
         }
 
         private void ApplyWaterPush()
         {
-            if (!data.isBobyInWater)
+            if (!playerData.isBobyInWater)
                 return;
 
-            var waterForce = data.WaterPushForce * Vector3.up;
+            var waterForce = playerData.WaterPushForce * Vector3.up;
             Rigidbody.AddForce(waterForce, ForceMode.Force);
         }
 
         private void Jump()
         {
             float jumpMultilier = 1f;
-            if (data.isStepInWater)
+            if (playerData.isStepInWater)
             {
                 jumpMultilier = 0.5f;
-                jumpMultilier += HasGroundInFront() ? data.HelpForceToLeaveWater : 0f;
+                jumpMultilier += HasGroundInFront() ? playerData.HelpForceToLeaveWater : 0f;
             }
 
             Rigidbody.velocity = Rigidbody.velocity.With(y: 0);
-            Rigidbody.AddForce(jumpMultilier * data.JumpForce * Vector3.up, ForceMode.Impulse);
+            Rigidbody.AddForce(jumpMultilier * playerData.JumpForce * Vector3.up, ForceMode.Impulse);
         }
 
         private bool HasGroundInFront()
@@ -180,10 +180,10 @@ namespace Minecraft
         {
             var flatVelocity = Rigidbody.velocity.With(y: 0);
             var flatSpeed = flatVelocity.magnitude;
-            if (flatSpeed <= data.currentMoveSpeed)
+            if (flatSpeed <= playerData.currentMoveSpeed)
                 return;
 
-            var dragForce = (flatSpeed - data.currentMoveSpeed) * 2f * -flatVelocity;
+            var dragForce = (flatSpeed - playerData.currentMoveSpeed) * 2f * -flatVelocity;
             Rigidbody.AddForce(dragForce, ForceMode.Force);
         }
 
@@ -194,10 +194,10 @@ namespace Minecraft
             Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
             Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
 
-            Gizmos.color = data.isGrounded ? transparentGreen : transparentRed;
+            Gizmos.color = playerData.isGrounded ? transparentGreen : transparentRed;
             Gizmos.DrawSphere(
-                transform.position.Add(y: data.GroundOffset),
-                data.GroundRadius);
+                transform.position.Add(y: playerData.GroundOffset),
+                playerData.GroundRadius);
         }
 #endif
     }

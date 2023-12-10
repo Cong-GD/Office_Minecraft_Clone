@@ -37,7 +37,7 @@ public class Recipe_SO : ScriptableObject
 
         do
         {
-            var copy = binding;
+            int3x3 copy = binding;
             do
             {
                 yield return copy;

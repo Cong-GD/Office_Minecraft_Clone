@@ -13,8 +13,6 @@ public class UIFurnace : MonoBehaviour
     [SerializeField]
     private ResultUIItemSlot resultSlot;
 
-    private Furnace _furnace;
-
     [SerializeField]
     private ProgressDisplayer burnProgress;
 
@@ -27,6 +25,8 @@ public class UIFurnace : MonoBehaviour
     public float BurnProgress => _furnace != null ? _furnace.BurnProgressValue : 0f;
 
     public float SmeltProgress => _furnace != null ? _furnace.SmeltProgressValue : 0f;
+
+    private Furnace _furnace;
 
     private void OnEnable()
     {

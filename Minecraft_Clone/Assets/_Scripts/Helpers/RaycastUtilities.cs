@@ -11,6 +11,6 @@ public static class RaycastUtilities
         return results.Count > 0;
     }
 
-    static PointerEventData ScreenPosToPointerData(Vector2 screenPos)
+    private static PointerEventData ScreenPosToPointerData(Vector2 screenPos)
        => new(EventSystem.current) { position = screenPos };
 }

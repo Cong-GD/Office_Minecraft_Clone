@@ -15,12 +15,19 @@ public static class ItemUtilities
         _recipes = new Dictionary<int3x3, Recipe_SO>();
         foreach (var recipe in recipes)
         {
-            foreach (var binding in recipe.GetRecipeBindings())
+            try
             {
-                if (!_recipes.TryAdd(binding, recipe))
+                foreach (var binding in recipe.GetRecipeBindings())
                 {
-                    Debug.LogError($"Can't have duplicate recipe: {_recipes[binding].name} <-> {recipe.name}");
+                    if (!_recipes.TryAdd(binding, recipe))
+                    {
+                        Debug.LogError($"Can't have duplicate recipe: {_recipes[binding].name} <-> {recipe.name}");
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error when load recipe: {recipe.name}\n{e}");
             }
         }
         Debug.Log("Recipe generated: " + _recipes.Count);
@@ -37,7 +44,7 @@ public static class ItemUtilities
             GetItemID(slots[6].RootItem), GetItemID(slots[7].RootItem), GetItemID(slots[8].RootItem)
             );
 
-        if (_recipes.TryGetValue(hashCodes, out var recipe))
+        if (_recipes.TryGetValue(hashCodes, out Recipe_SO recipe))
         {
             return recipe.GetResult();
         }

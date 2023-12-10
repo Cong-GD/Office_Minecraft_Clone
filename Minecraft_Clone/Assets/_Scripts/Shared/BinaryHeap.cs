@@ -21,11 +21,7 @@ namespace CongTDev.Collection
         {
         }
 
-        public BinaryHeap(int capacity) : this(capacity, null)
-        {
-        }
-
-        public BinaryHeap(int capacity, IComparer<T> comparer)
+        public BinaryHeap(int capacity, IComparer<T> comparer = null)
         {
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException("Capacity can't less than 0");
@@ -36,7 +32,7 @@ namespace CongTDev.Collection
 
         private void DoubleSize()
         {
-            Array.Resize(ref _heap, (int)math.min((uint)Length * 2u, int.MaxValue));
+            Array.Resize(ref _heap, (int)Math.Min((uint)Length * 2u, int.MaxValue));
         }
 
         public void Add(T item)
@@ -59,12 +55,37 @@ namespace CongTDev.Collection
             return result;
         }
 
+        public bool TryExtract(out T result)
+        {
+            if (Count == 0)
+            {
+                result = default;
+                return false;
+            }
+
+            result = _heap[0];
+            RemoveAt(0);
+            return true;
+        }
+
         public T Peek()
         {
             if (Count == 0)
                 throw new InvalidOperationException("Heap is empty");
 
             return _heap[0];
+        }
+
+        public bool TryPeek(out T result)
+        {
+            if (Count == 0)
+            {
+                result = default;
+                return false;
+            }
+
+            result = _heap[0];
+            return true;
         }
 
         public void Clear()
@@ -113,7 +134,7 @@ namespace CongTDev.Collection
             if (index < 0)
                 return false;
 
-            UpdatePosition(index);
+            UpdateAt(index);
             return true;
         }
 
@@ -133,8 +154,7 @@ namespace CongTDev.Collection
 
         public IEnumerator<T> GetEnumerator()
         {
-            for (int i = 0; i < Count; i++)
-                yield return _heap[i];
+            return new Enumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -142,9 +162,9 @@ namespace CongTDev.Collection
             return GetEnumerator();
         }
 
-        private int UpdatePosition(int index)
+        private int UpdateAt(int index)
         {
-            var newIndex = HeapifyUp(index);
+            int newIndex = HeapifyUp(index);
             if (newIndex == index)
             {
                 newIndex = HepifyDown(newIndex);
@@ -214,5 +234,38 @@ namespace CongTDev.Collection
         {
             (_heap[index2], _heap[index1]) = (_heap[index1], _heap[index2]);
         }
+
+#pragma warning disable IDE0251 // Make member 'readonly'
+        public struct Enumerator : IEnumerator<T>
+        {
+            private readonly BinaryHeap<T> _heap;
+            private int _index;
+
+            public Enumerator(BinaryHeap<T> heap)
+            {
+                _heap = heap;
+                _index = -1;
+            }
+
+            public T Current => _heap._heap[_index];
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                return ++_index < _heap.Count;
+            }
+
+            public void Reset()
+            {
+                _index = -1;
+            }
+        }
+#pragma warning restore IDE0251 // Make member 'readonly'
+
     }
 }

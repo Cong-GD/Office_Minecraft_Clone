@@ -32,7 +32,7 @@ namespace Minecraft.ProceduralMeshGenerate
 
             Vector2[] uvs = mesh.uv;
             Span<Vector2> span = uvs;
-            foreach (ref var uv in span)
+            foreach (ref Vector2 uv in span)
             {
                 uv *= MeshDrawerHelper.ATLAS_SIZE;
             }

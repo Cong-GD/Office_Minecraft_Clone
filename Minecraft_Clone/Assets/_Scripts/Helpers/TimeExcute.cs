@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class TimeExcute : IDisposable
@@ -20,13 +18,14 @@ public class TimeExcute : IDisposable
 
     private TimeExcute(string message)
     {
-        _jobName  = message;
+        _jobName = message;
         _stopwatch = Stopwatch.StartNew();
     }
 
     public void Dispose()
     {
         _stopwatch.Stop();
-        UnityEngine.Debug.Log($"{_jobName} in {_stopwatch.ElapsedMilliseconds} ms".RichText(Color.yellow));
+        UnityEngine.Debug.Log($"{_jobName} in {_stopwatch.ElapsedMilliseconds} ms".RichText(Color.yellow) +
+            $"\nTick: {_stopwatch.ElapsedTicks}");
     }
 }

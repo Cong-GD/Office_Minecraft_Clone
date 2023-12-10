@@ -7,8 +7,6 @@ namespace Minecraft.ProceduralMeshGenerate
     {
         public override void GetMeshData(ChunkData chunkData, MeshData meshData, int x, int y, int z)
         {
-            //bool isTransparent = IsLeavesTransparent(chunkData, x, y, z);
-
             for (int i = 0; i < FACES_COUNT; i++)
             {
                 int nextX = x + sixDirectionVectors[i].x;
@@ -33,20 +31,5 @@ namespace Minecraft.ProceduralMeshGenerate
 
             }
         }
-
-        private bool IsLeavesTransparent(ChunkData chunkData, int x, int y, int z)
-        {
-            for (int i = 0; i < FACES_COUNT; i++)
-            {
-                var adjacentBlock = Chunk.GetBlock(chunkData,
-                    x + sixDirectionVectors[i].x,
-                    y + sixDirectionVectors[i].y,
-                    z + sixDirectionVectors[i].z);
-                if (adjacentBlock == BlockType.Air || adjacentBlock == BlockType.Glass)
-                    return true;
-            }
-            return false;
-        }
-
     }
 }

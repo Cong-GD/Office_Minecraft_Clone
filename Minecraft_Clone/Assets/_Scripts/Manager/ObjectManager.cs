@@ -11,20 +11,20 @@ public class ObjectManager : MonoBehaviour
     {
         get
         {
-            Init();
+            Initialize();
             return _instance;
         }
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Init()
+    private static void Initialize()
     {
         if (_instance == null)
         {
             _instance = FindAnyObjectByType<ObjectManager>();
             if(_instance == null )
             {
-                var gameObject = new GameObject("Object Manager");
+                GameObject gameObject = new GameObject("Object Manager");
                 _instance = gameObject.AddComponent<ObjectManager>();
             }
             else
@@ -36,11 +36,11 @@ public class ObjectManager : MonoBehaviour
 
     public static void AddToManagingList(Object obj)
     {
-        Instance._objects.Add(obj);
+        Instance.objects.Add(obj);
     }
 
     [SerializeField ,ReadOnly]
-    private List<Object> _objects = new();
+    private List<Object> objects = new();
 
     private void Awake()
     {
@@ -59,11 +59,11 @@ public class ObjectManager : MonoBehaviour
     [Button]
     public void DestroyCreatedObjects()
     {
-        foreach (Object obj in _objects)
+        foreach (Object obj in objects)
         {
             DestroyImmediate(obj);
         }
-        Debug.Log(_objects.Count + " objects has been destroyed");
-        _objects.Clear();
+        Debug.Log(objects.Count + " objects has been destroyed");
+        objects.Clear();
     }
 }

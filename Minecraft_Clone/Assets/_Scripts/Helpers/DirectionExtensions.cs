@@ -1,12 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using UnityEngine;
-
-public enum Direction : byte
-{
-    Forward, Backward, Right, Left, Up, Down
-}
 
 public static class DirectionExtensions
 {

@@ -6,27 +6,6 @@ public interface ITool
     public ToolType ToolType { get; }
 }
 
-public enum ToolTier
-{
-    None = 1,
-    Wood = 2, 
-    Stone = 4, 
-    Iron = 8, 
-    Diamond = 16,
-    Gold = 32,
-}
-
-public enum ToolType
-{
-    BareHand = 1,
-    Sword = 2,
-    Pickaxe = 4,
-    Axe = 8,
-    Hoe = 16,
-    Shovel = 32,
-    Shears = 64,
-}
-
 public static class MiningHelper
 {
     public static int GetToolMultilier(this ITool tool)

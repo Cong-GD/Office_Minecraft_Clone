@@ -25,20 +25,4 @@ public static class MyMath
         float dec = Mathf.Pow(10, numberBehindDot);
         return (int)(dec * value) / dec;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Max(ReadOnlySpan<int> span)
-    {
-        if (span.Length == 0)
-            throw new ArgumentException("Span cannot be empty.");
-
-        int max = span[0];
-        int length = span.Length;
-        for (int i = 1; i < length; i++)
-        {
-            if (span[i] > max)
-                max = span[i];
-        }
-        return max;
-    }
 }

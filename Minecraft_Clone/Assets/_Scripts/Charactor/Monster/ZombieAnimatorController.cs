@@ -23,7 +23,6 @@ namespace Minecraft
         [SerializeField]
         private float _speedBlendSpeed = 10f;
 
-        private readonly int _speedHash = Animator.StringToHash("Speed");
         private float _speedBlendValue;
 
         private void Update()
@@ -36,7 +35,7 @@ namespace Minecraft
             var speed = _movement.Velocity.XZ().magnitude;
             _speedBlendValue = Mathf.Lerp(_speedBlendValue, speed, Time.deltaTime * _speedBlendSpeed);
 
-            _animator.SetFloat(_speedHash, _speedBlendValue);
+            _animator.SetFloat(AnimID.Speed, _speedBlendValue);
         }
     }
 }

@@ -90,7 +90,8 @@ public static class Chunk
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsPositionInRange(Vector3Int center, Vector3Int position, int range)
     {
-        return Mathf.Abs(center.x - position.x) <= range && Mathf.Abs(center.z - position.z) <= range;
+        return Mathf.Abs(center.x - position.x) <= range 
+            && Mathf.Abs(center.z - position.z) <= range;
     }
 
     public static BlockType GetBlock(ChunkData chunkData, int localX, int localY, int localZ)
@@ -108,15 +109,6 @@ public static class Chunk
         return GetBlock(
             Mathf.FloorToInt(worldPos.x), 
             Mathf.FloorToInt(worldPos.y), 
-            Mathf.FloorToInt(worldPos.z)
-            );
-    }
-
-    public static BlockType GetBlock(float3 worldPos)
-    {
-        return GetBlock(
-            Mathf.FloorToInt(worldPos.x),
-            Mathf.FloorToInt(worldPos.y),
             Mathf.FloorToInt(worldPos.z)
             );
     }
@@ -182,11 +174,13 @@ public static class Chunk
     public static IEnumerable<Vector3Int> GetCoordsInRange(Vector3Int center, int range)
     {
         int xStart = center.x - range;
-        int yStart = 0;
+        const int yStart = 0;
         int zStart = center.z - range;
+
         int xEnd = center.x + range;
-        int yEnd = MAP_HEIGHT_IN_CHUNK;
+        const int yEnd = MAP_HEIGHT_IN_CHUNK;
         int zEnd = center.z + range;
+
         for (int x = xStart;x <= xEnd; x++)
         {
             for (int y = yStart;y < yEnd; y++)

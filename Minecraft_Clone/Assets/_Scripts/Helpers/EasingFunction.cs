@@ -995,7 +995,7 @@ public static class EasingFunction
 
     //Don't change element order
     private static readonly Function[] _derivatedFunctions =
-{
+    {
         EaseInQuadD,
         EaseOutQuadD,
         EaseInOutQuadD,
@@ -1031,9 +1031,9 @@ public static class EasingFunction
     };
     
     // For faster get ease function and not allocate memory
-    public static Function GetEaseFunction(this Ease easeFunctio)
+    public static Function GetEaseFunction(this Ease easeFunction)
     {
-        return _functions[(int)easeFunctio];
+        return _functions[(int)easeFunction];
     }
 
     public static Function GetDerivativeFunction(this Ease easeFunction)

@@ -107,7 +107,7 @@ public static class MeshDrawerHelper
 
     public static void AddQuadVertices(ICollection<Vector3> vertices, Direction direction, Vector3 position, Vector3 size)
     {
-        position.Parse(out float x, out float y, out float z);
+        (float x, float y, float z) = position;
         switch (direction)
         {
             case Direction.Forward:

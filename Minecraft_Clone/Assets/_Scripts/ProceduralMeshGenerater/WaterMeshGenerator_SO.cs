@@ -26,7 +26,6 @@ namespace Minecraft.ProceduralMeshGenerate
                     meshData.normals.Add(sixDirectionVectors[i]);
 
                 MeshDrawerHelper.AddQuadTriangle(meshData.waterTriangles, meshData.vertices.Count);
-                //MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
                 meshData.uvs.Add(new Vector2(0f, 0f));
                 meshData.uvs.Add(new Vector2(0f, 1f));
                 meshData.uvs.Add(new Vector2(1f, 1f));

@@ -153,6 +153,7 @@ namespace CongTDev.Collection
             --_count;
         }
 
+#pragma warning disable IDE0251 // Make member 'readonly'
         public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
         {
             private readonly T[] _items;
@@ -172,9 +173,8 @@ namespace CongTDev.Collection
 
             readonly object IEnumerator.Current => _value;
 
-#pragma warning disable IDE0251 // Make member 'readonly'
+
             public void Dispose() { }
-#pragma warning restore IDE0251 // Make member 'readonly'
 
             public bool MoveNext()
             {
@@ -192,5 +192,7 @@ namespace CongTDev.Collection
                 _index = -1;
             }
         }
+
+#pragma warning restore IDE0251 // Make member 'readonly'
     }
 }

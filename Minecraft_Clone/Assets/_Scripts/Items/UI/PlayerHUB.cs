@@ -44,7 +44,7 @@ public class PlayerHUB : MonoBehaviour
 
         while(_healthDisplayers.Count < healthPoints.Count)
         {
-            var displayer = (HealthDisplayer)healthDisplayerPool.Get();
+            HealthDisplayer displayer = (HealthDisplayer)healthDisplayerPool.Get();
             displayer.transform.SetParent(healthBarParent);
             _healthDisplayers.Add(displayer);
             isDirty = true;

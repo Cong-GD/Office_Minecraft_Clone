@@ -70,8 +70,8 @@ public class BlockData_SO : BaseItem_SO
 
     public bool CanHarvestBy(ITool tool)
     {
-        var isMeetTierRequiment = (HarvestableTier & tool.ToolTier) != 0;
-        var isMeetTypeRequiment = (HarvestableTool & tool.ToolType) != 0;
+        bool isMeetTierRequiment = (HarvestableTier & tool.ToolTier) != 0;
+        bool isMeetTypeRequiment = (HarvestableTool & tool.ToolType) != 0;
         return isMeetTierRequiment && isMeetTypeRequiment;
     }
 
