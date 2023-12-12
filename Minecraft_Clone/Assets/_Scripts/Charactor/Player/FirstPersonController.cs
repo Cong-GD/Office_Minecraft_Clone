@@ -141,10 +141,8 @@ namespace Minecraft
 
         private void WaterCheck()
         {
-            var footPosition = Vector3Int.FloorToInt(transform.position);
-            var bodyPosition = Vector3Int.FloorToInt(transform.position + playerData.BodyOffset);
-            playerData.isStepInWater = Chunk.GetBlock(footPosition) == BlockType.Water;
-            playerData.isBobyInWater = Chunk.GetBlock(bodyPosition) == BlockType.Water;
+            playerData.isStepInWater = Chunk.CheckWater(transform.position);
+            playerData.isBobyInWater = Chunk.CheckWater(transform.position + playerData.BodyOffset);
         }
 
         private void ApplyWaterPush()

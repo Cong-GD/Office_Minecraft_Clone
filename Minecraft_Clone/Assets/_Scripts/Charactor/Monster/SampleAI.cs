@@ -1,3 +1,4 @@
+using CongTDev.Collection;
 using NaughtyAttributes;
 using System;
 using System.Collections;
@@ -19,39 +20,45 @@ namespace Minecraft.AI
         [SerializeField]
         private PathFinding pathFinding;
 
-
-        public Vector3[] path;
-
-        private int pathIndex;
-
         [SerializeField]
-        private float endNodeDistance = 0.1f;
+        private float endNodeDistance = 1f;
 
-        private Coroutine coroutine;
+        [ShowNativeProperty]
+        public int PathLength => _path.Count;
+
+        private MyNativeList<Vector3> _path = new MyNativeList<Vector3>();
+        private int _pathIndex;
+        private VoxelSearchContext.Token _searchToken;
+
+        private void Update()
+        {
+            if(_pathIndex < _path.Count)
+            {
+                Vector3 targetPosition = _path[_pathIndex];
+                Vector3 direction = targetPosition - transform.position;
+
+                movement.MoveDirectionInput = direction.With(y: 0);
+
+                if (direction.magnitude < endNodeDistance)
+                {
+                    _pathIndex++;
+                }
+            }
+            else
+            {
+                movement.MoveDirectionInput = Vector3.zero;
+            }   
+        }
+
+        private void OnDisable()
+        {
+            _searchToken.Cancel();
+        }
 
         [Button]
         public void FindPlayer()
         {
-            pathFinding.FindPathAsync(this, transform.position + Vector3.up, target.position + Vector3.up);
-        }
-
-        private IEnumerator FollowPath()
-        {
-            while (pathIndex < path.Length)
-            {
-                Vector3 targetPosition = path[pathIndex];
-                Vector3 direction = (targetPosition - transform.position).With(y: 0);
-
-                movement.MoveDirectionInput = direction;
-
-                if (Vector3.Distance(transform.position, targetPosition) < endNodeDistance)
-                {
-                    pathIndex++;
-                }
-
-                yield return null;
-            }
-            movement.MoveDirectionInput = Vector3.zero;
+            _searchToken = pathFinding.FindPathAsync(this, transform.position.Add(y: 0.5f), target.position.Add(y:0.5f));
         }
 
         [Button]
@@ -60,61 +67,73 @@ namespace Minecraft.AI
             transform.position = target.position;
         }
 
-        private void OnDrawGizmos()
+        public bool CanTraverse(IContext context, NodeView source, NodeView dest)
         {
-            if(path != null)
-            {
-                Gizmos.color = Color.blue;
-                for (int i = pathIndex; i < path.Length; i++)
-                {
-                    Gizmos.DrawSphere(path[i], 0.2f);
-                }
-            }
-        }
-
-        public bool CanTraverse(NodeView source, NodeView dest)
-        {
-            if(dest.BlockData.IsSolid)
+            if (dest.BlockData.IsSolid)
                 return false;
 
             (int destX, int destY, int destZ) = dest.Position;
-
-            BlockData_SO blockAtHead = Chunk.GetBlock(destX, destY + 1, destZ).Data();
-            if(blockAtHead.IsSolid)
-                return false;
-
             (int srcX, int srcY, int srcZ) = source.Position;
 
-            bool isStepingOnGround = Chunk.GetBlock(srcX, srcY - 1, srcZ).Data().IsSolid;
-            if(!isStepingOnGround)
+            // if there is a solid block above the dest, it can not go there
+            BlockData_SO blockForhead = context.GetNode(destX, destY + 1, destZ).BlockData;
+            if (blockForhead.IsSolid)
+                return false;
+
+
+            bool isInWater = source.BlockData.BlockType == BlockType.Water;
+            if (isInWater)
+            {
+                bool isSinked = context.GetNode(srcX, srcY + 1, srcZ).BlockData.BlockType == BlockType.Water;
+                if (isSinked)
+                {
+                    bool isSwimmingUp = srcX == destX && srcZ == destZ && destY == srcY + 1;
+                    return isSwimmingUp;
+                }
+
+                bool isGoingToWater = dest.BlockData.BlockType == BlockType.Water;
+                if (isGoingToWater)
+                {
+                    bool isNotSwimmingDown = destY >= srcY;
+                    return isNotSwimmingDown;
+                }
+            }
+
+            // if it is not on the ground, it is falling down
+            bool isSteppingOnGround = context.GetNode(srcX, srcY - 1, srcZ).BlockData.IsSolid;
+            if (!isInWater && !isSteppingOnGround)
             {
                 bool isFallingDown = srcX == destX && srcZ == destZ && destY == srcY - 1;
                 return isFallingDown;
             }
 
-            bool hasBlockBelowFoot = Chunk.GetBlock(destX, destY - 1, destZ).Data().IsSolid;
-            if(!hasBlockBelowFoot)
+            // if there is no ground below the dest, it will fall down
+            bool isThereWillBeGround = context.GetNode(destX, destY - 1, destZ).BlockData.IsSolid;
+            if (!isThereWillBeGround)
             {
-                bool isStepDown = destY == srcY - 1;
-                return isStepDown;
+                bool isStepdown = destY == srcY - 1;
+                return isStepdown;
             }
+
             return true;
         }
 
-        public void OnPathFound(Vector3[] path)
+        public void OnPathFound(VoxelSearchContext.SearchResult searchResult)
         {
-            if(Thread.CurrentThread.ManagedThreadId != 1)
-            {
-                Debug.LogError("OnPathFound is not called on main thread");
-            }
+            searchResult.GetPath(_path);
+            _pathIndex = 0;
+        }
 
-            if (coroutine != null)
+        private void OnDrawGizmos()
+        {
+            if(_path.Count == 0)
+                return;
+
+            Gizmos.color = Color.blue;
+            for (int i = _pathIndex; i < _path.Count; i++)
             {
-                StopCoroutine(coroutine);
+                Gizmos.DrawSphere(_path[i], 0.2f);
             }
-            this.path = path;
-            pathIndex = 0;
-            coroutine = StartCoroutine(FollowPath());
         }
     }
 }

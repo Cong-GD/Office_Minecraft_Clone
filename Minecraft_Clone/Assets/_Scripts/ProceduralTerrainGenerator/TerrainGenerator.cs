@@ -1,15 +1,10 @@
 using Minecraft;
-using Minecraft.ProceduralTerrain.Structures;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using System.Runtime.InteropServices;
-using static WorldSettings;
-using UnityEngine.XR;
 using NaughtyAttributes;
+using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+using static WorldSettings;
 
 public class TerrainGenerator : MonoBehaviour
 {
@@ -37,12 +32,11 @@ public class TerrainGenerator : MonoBehaviour
     private int _totalBiomes;
     private int _nearBiomeCount;
     private BiomeGenerator[] _biomeLookupArray;
-
     private Vector2[] _biomePositions;
     private int[] _biomeIndexes;
     private int _gridSize;
     private object _biomeCalculationThreadLock = new object();
-    
+
 
     private void Awake()
     {
@@ -109,8 +103,8 @@ public class TerrainGenerator : MonoBehaviour
 
                 for (int i = 0; i < distances.Length; i++)
                 {
-                    var distance = distances[i];
-                    var isBiomeInRange = distance > 0f;
+                    float distance = distances[i];
+                    bool isBiomeInRange = distance > 0f;
                     if (isBiomeInRange)
                     {
                         float weight = 1f - distance / sum;
@@ -160,7 +154,7 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
         sum = 0f;
-        for (int i = 0; i < distances.Length; i++) 
+        for (int i = 0; i < distances.Length; i++)
             sum += distances[i];
 
         sum /= 2f;
@@ -190,7 +184,7 @@ public class TerrainGenerator : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (!Application.isPlaying || _biomeIndexes is null)
+        if (!Application.isPlaying || _biomePositions is null)
             return;
 
         Gizmos.color = Color.blue;
@@ -200,7 +194,7 @@ public class TerrainGenerator : MonoBehaviour
             {
                 var pos = new Vector3(vec2.x, 0, vec2.y);
                 Gizmos.DrawLine(pos, pos + Vector3.up * CHUNK_DEPTH);
-            } 
+            }
         }
     }
 #endif

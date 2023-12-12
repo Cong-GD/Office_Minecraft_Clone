@@ -28,7 +28,6 @@ namespace CongTDev.Collection
 
         public MyNativeList()
         {
-
         }
 
         public MyNativeList(int capacity)
@@ -76,14 +75,32 @@ namespace CongTDev.Collection
             {
                 EnsureCapacity(_count + 1);
             }
-            _buffer[_count] = item;
-            _count++;
+            _buffer[_count++] = item;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
             _count = 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0180:Use tuple to swap values", Justification = "<Pending>")]
+        public void Reverse()
+        {
+            if(_count == 0)
+                return;
+
+            T* left = _buffer;
+            T* right = _buffer + _count - 1;
+            while (left < right)
+            {
+                T temp = *left;
+                *left = *right;
+                *right = temp;
+                ++left;
+                --right;
+            }
         }
 
         private void EnsureCapacity(int minSize)
@@ -131,24 +148,24 @@ namespace CongTDev.Collection
 
         public bool Contains(T item)
         {
-            for (int i = 0; i < _count; i++)
-            {
-                if (_buffer[i].Equals(item))
-                    return true;
-            }
-            return false;
+            return IndexOf(item) >= 0;
         }
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            if (array == null)
-                throw new ArgumentNullException("array");
+            if(array == null)
+                throw new ArgumentNullException(nameof(array));
 
             int end = Mathf.Min(array.Length, _count);
             for (int i = arrayIndex, j = 0; i < end && j < end; ++i, ++j)
             {
                 array[i] = _buffer[j];
             }
+        }
+
+        public Span<T> AsSpan()
+        {
+            return new Span<T>(_buffer, _count);
         }
 
         public bool Remove(T item)
@@ -162,9 +179,13 @@ namespace CongTDev.Collection
 
         public int IndexOf(T item)
         {
+            if (_count == 0)
+                return -1;
+
+            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
             for (int i = 0; i < _count; ++i)
             {
-                if (item.Equals(_buffer[i]))
+                if (comparer.Equals(item, _buffer[i]))
                     return i;
             }
             return -1;
@@ -206,36 +227,28 @@ namespace CongTDev.Collection
             _capacity = 0;
         }
 
-        public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
+        public struct Enumerator : IEnumerator<T>
         {
-            private readonly T* _buffer;
+            private readonly MyNativeList<T> _list;
             private int _index;
-            private readonly int _count;
-            private T _value;
 
-            public Enumerator(MyNativeList<T> buffer)
+            public Enumerator(MyNativeList<T> list)
             {
-                _buffer = buffer._buffer;
-                _count = buffer._count;
+                _list = list;
                 _index = -1;
-                _value = default;
             }
 
-            public readonly T Current => _value;
+            public T Current => _list[_index];
 
-            readonly object IEnumerator.Current => _value;
+            object IEnumerator.Current => Current;
 
-            public readonly void Dispose() { }
+            public void Dispose()
+            {
+            }
 
             public bool MoveNext()
             {
-                if (_index >= _count - 1)
-                {
-                    return false;
-                }
-                _index++;
-                _value = _buffer[_index];
-                return true;
+                return ++_index < _list.Count;
             }
 
             public void Reset()

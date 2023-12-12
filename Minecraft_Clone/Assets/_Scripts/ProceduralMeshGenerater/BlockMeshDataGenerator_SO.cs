@@ -15,7 +15,7 @@ namespace Minecraft.ProceduralMeshGenerate
 
         public Material CreateMaterial()
         {
-            var material = new Material(itemMaterialPrefab);
+            Material material = new Material(itemMaterialPrefab);
             ObjectManager.AddToManagingList(material);
             return material;
         }
@@ -24,7 +24,7 @@ namespace Minecraft.ProceduralMeshGenerate
 
         public Mesh CreateMeshWithoutUvAtlas()
         {
-            var mesh = CreateMesh();
+            Mesh mesh = CreateMesh();
             if(mesh == null)
             {
                 return null;

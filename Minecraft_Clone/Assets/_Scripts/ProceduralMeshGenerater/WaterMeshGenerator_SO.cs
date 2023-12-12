@@ -9,10 +9,11 @@ namespace Minecraft.ProceduralMeshGenerate
         {
             for (int i = 0; i < FACES_COUNT; i++)
             {
+                Vector3Int directionVector = sixDirectionVectors[i];
                 var adjacentBlockData = Chunk.GetBlock(chunkData,
-                    localX + sixDirectionVectors[i].x,
-                    localY + sixDirectionVectors[i].y,
-                    localZ + sixDirectionVectors[i].z).Data();
+                    localX + directionVector.x,
+                    localY + directionVector.y,
+                    localZ + directionVector.z).Data();
 
                 if (adjacentBlockData.BlockType == BlockType.Water)
                     continue;
@@ -20,10 +21,11 @@ namespace Minecraft.ProceduralMeshGenerate
                 if (adjacentBlockData.BlockType != BlockType.Glass && adjacentBlockData.IsSolid)
                     continue;
 
-                MeshDrawerHelper.AddQuadVertices(meshData.vertices, sixDirections[i], localX, localY, localZ);
+                Direction direction = sixDirections[i];
+                MeshDrawerHelper.AddQuadVertices(meshData.vertices, direction, localX, localY, localZ);
 
                 for (int j = 0; j < 4; j++)
-                    meshData.normals.Add(sixDirectionVectors[i]);
+                    meshData.normals.Add(directionVector);
 
                 MeshDrawerHelper.AddQuadTriangle(meshData.waterTriangles, meshData.vertices.Count);
                 meshData.uvs.Add(new Vector2(0f, 0f));

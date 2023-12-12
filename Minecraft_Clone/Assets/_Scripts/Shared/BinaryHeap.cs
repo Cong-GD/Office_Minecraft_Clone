@@ -183,7 +183,7 @@ namespace CongTDev.Collection
                 if (_comparer.Compare(_heap[index], _heap[parent]) >= 0)
                     break;
 
-                Swap(index, parent);
+                Swap(ref _heap[index], ref _heap[parent]);
                 index = parent;
             }
             return index;
@@ -206,7 +206,7 @@ namespace CongTDev.Collection
                 if (smallest == index)
                     break;
 
-                Swap(index, smallest);
+                Swap(ref _heap[index] ,ref _heap[smallest]);
                 index = smallest;
             }
             return index;
@@ -230,9 +230,12 @@ namespace CongTDev.Collection
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Swap(int index1, int index2)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0180:Use tuple to swap values", Justification = "<Pending>")]
+        private void Swap(ref T left, ref T right)
         {
-            (_heap[index2], _heap[index1]) = (_heap[index1], _heap[index2]);
+            T temp = left;
+            left = right;
+            right = temp;
         }
 
 #pragma warning disable IDE0251 // Make member 'readonly'

@@ -152,6 +152,16 @@ public static class Chunk
         return Direction.Forward;
     }
 
+    public static bool CheckWater(Vector3 worldPosition)
+    {
+        return GetBlock(
+               Mathf.FloorToInt(worldPosition.x), 
+               Mathf.FloorToInt(worldPosition.y), 
+               Mathf.FloorToInt(worldPosition.z))
+               .Data()
+               .BlockType == BlockType.Water;
+    }
+
     public static void SetBlock(Vector3Int worldPos, BlockType blockType, Direction direction = Direction.Forward)
     {
         SetBlock(worldPos.x, worldPos.y, worldPos.z, blockType, direction);

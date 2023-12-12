@@ -1,5 +1,6 @@
 ﻿using Minecraft.ProceduralTerrain.Structures;
 using NaughtyAttributes;
+using System;
 using UnityEngine;
 
 namespace Minecraft.ProceduralTerrain
@@ -55,7 +56,8 @@ namespace Minecraft.ProceduralTerrain
             if (IsLocalMax(worldX, worldZ))
             {
                 chunkData.SetBlock(x, localSurfaceHeight, z, BlockType.Dirt);
-                chunkData.structures.Add((new Vector3Int(worldX, surfaceHeightNoise + 1, worldZ), treeStructure));
+                Vector3Int treePosition = new Vector3Int(worldX, surfaceHeightNoise + 1, worldZ);
+                chunkData.structures.Add((treePosition, treeStructure));
                 return true;
             }
 

@@ -7,7 +7,6 @@ namespace Minecraft.ProceduralMeshGenerate
     {
         public override void GetMeshData(ChunkData chunkData, MeshData meshData, int x, int y, int z)
         {
-            return;
         }
 
         public override Mesh CreateMesh()

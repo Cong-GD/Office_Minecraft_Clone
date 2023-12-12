@@ -25,7 +25,7 @@ namespace Minecraft
 
         private void Update()
         {
-            var isUndeWater = IsUnderWater(mainCam.transform.position);
+            var isUndeWater = Chunk.CheckWater(mainCam.transform.position);
             if (isUndeWater == isCammeraUnderWater)
                 return;
 
@@ -34,11 +34,5 @@ namespace Minecraft
             volume.profile = isUndeWater ? underWaterProfile : normalProfile;
             RenderSettings.fog = isUndeWater;
         }
-
-        private bool IsUnderWater(Vector3 position)
-        {
-            return Chunk.GetBlock(Vector3Int.FloorToInt(position)).Data().BlockType == BlockType.Water;
-        }
-
     }
 }

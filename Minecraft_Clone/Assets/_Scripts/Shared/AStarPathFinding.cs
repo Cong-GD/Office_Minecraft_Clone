@@ -87,16 +87,15 @@ namespace CongTDev.AStarPathFinding
 
     public static class AStarPathFinding
     {
-        public static void FindPath<Node>(ISearchContext<Node> context, int maxNodeProcess = int.MaxValue)
+        public static void FindPath<Node>(ISearchContext<Node> context, int maxNodeProcess = 100000)
             where Node : SearchNode<Node>
         {
-            using var timer = TimeExcute.Start("Find a path");
+            using var _ = TimeExcute.Start("Find a path");
             int count = 0;
 
             BinaryHeap<Node> openList = ThreadSafePool<BinaryHeap<Node>>.Get();
             openList.Clear();
             openList.Add(context.Start);
-
             using var pooledBuffer = ArrayPoolHelper.Rent<Node>(context.MaxNeightbours, true);
             Span<Node> buffer = pooledBuffer.Value;
             while (openList.TryExtract(out Node current))
@@ -143,5 +142,6 @@ namespace CongTDev.AStarPathFinding
             openList.Clear();
             ThreadSafePool<BinaryHeap<Node>>.Release(openList);
         }
+
     }
 }

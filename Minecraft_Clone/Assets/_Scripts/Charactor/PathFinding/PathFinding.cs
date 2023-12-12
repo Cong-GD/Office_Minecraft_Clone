@@ -1,55 +1,88 @@
 ﻿using CongTDev.AStarPathFinding;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Minecraft.AI
 {
     public class PathFinding : MonoBehaviour
     {
         [SerializeField, Min(10)]
-        private int maxSearchrPocess = 10000;
+        private int maxSearchrPocess = 10_000;
 
-        private VoxelSearchContext _context = new VoxelSearchContext();
-
-        public bool useSqrtDistance = true;
+        [SerializeField]
+        [Tooltip("Highly recommended to use SquaredEuclidean for performance reason")]
+        private DistanceType distanceType = DistanceType.SquaredEuclidean;
 
         private void Awake()
         {
-            ThreadSafePool<VoxelNode>.Capacity = 100000;
+            ThreadSafePool<VoxelNode>.Capacity = 1_000_000;
         }
 
         public void FindPath(ISearcher searcher, Vector3 start, Vector3 end)
         {
-            _context.SetStartPosition(start);
-            _context.SetEndPosition(end);
-            _context.UseSqrtDistance = useSqrtDistance;
-            _context.Searcher = searcher;
-            AStarPathFinding.FindPath(_context, maxSearchrPocess);
-            Vector3[] path = _context.GetPath();
-            _context.CleanUp();
-            searcher.OnPathFound(path);
-        }
+            Assert.IsNotNull(searcher, "Searcher can't be null");
 
-        public VoxelSearchContext.CancelToken FindPathAsync(ISearcher searcher, Vector3 start, Vector3 end)
-        {
-            _context.SetStartPosition(start);
-            _context.SetEndPosition(end);
-            _context.UseSqrtDistance = useSqrtDistance;
-            _context.Searcher = searcher;
-            FindPathAsyncInternal(_context, searcher);
-            return _context.GetCancelToken();
-        }
-
-        private async void FindPathAsyncInternal(VoxelSearchContext context, ISearcher searcher)
-        {
-            Vector3[] path = await Task.Run(() =>
+            VoxelSearchContext context = ThreadSafePool<VoxelSearchContext>.Get(); 
+            try
             {
+                context.SetStartPosition(start);
+                context.SetEndPosition(end);
+                context.DistanceType = distanceType;
+                context.Searcher = searcher;
                 AStarPathFinding.FindPath(context, maxSearchrPocess);
-                path = context.GetPath();
+                if (!context.Cancelled)
+                {
+                    searcher.OnPathFound(context.GetResult());
+                }
+            }
+            catch(System.Exception e)
+            {
+                Debug.LogException(e);
+            }
+            finally
+            {
                 context.CleanUp();
-                return path;
-            });
-            searcher.OnPathFound(path);
+                ThreadSafePool<VoxelSearchContext>.Release(context);
+            }
+        }
+
+        public VoxelSearchContext.Token FindPathAsync(ISearcher searcher, Vector3 start, Vector3 end)
+        {
+            Assert.IsNotNull(searcher, "Searcher can't be null");
+
+            VoxelSearchContext context = ThreadSafePool<VoxelSearchContext>.Get();
+            context.SetStartPosition(start);
+            context.SetEndPosition(end);
+            context.DistanceType = distanceType;
+            context.Searcher = searcher;
+            FindPathAsyncInternal(context, searcher);
+            return context.GetToken();
+        }
+
+        private async void FindPathAsyncInternal(VoxelSearchContext context ,ISearcher searcher)
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    AStarPathFinding.FindPath(context, maxSearchrPocess);
+                });
+                if(!context.Cancelled)
+                {
+                    searcher.OnPathFound(context.GetResult());
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
+            finally
+            {
+                context.CleanUp();
+                ThreadSafePool<VoxelSearchContext>.Release(context);
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using Minecraft.ProceduralTerrain.Structures;
 using NaughtyAttributes;
 using ObjectPooling;
 using System;
@@ -55,9 +56,6 @@ public class World : MonoBehaviour
     [ShowNativeProperty]
     public int ChunkRendering => _chunkRendererDictionary.Count;
 
-    public int ChunkDataLoadRange => viewDistance + 1;
-    public int HiddenChunkDistance => viewDistance + 2;
-
     [ShowNativeProperty]
     public int MeshDataInPool => ThreadSafePool<MeshData>.Count;
 
@@ -67,6 +65,7 @@ public class World : MonoBehaviour
     private readonly ConcurrentQueue<MeshData> _priorityMeshToRenders = new();
     private readonly Queue<ChunkData> _activeChunkData = new();
     private readonly ConcurrentDictionary<Vector3Int, ChunkData> _hasModifierChunks = new();
+    private readonly ConcurrentStack<Vector3Int> _chunkNeedToHide = new();
     private readonly List<ChunkData> _haveStructuresChunks = new();
 
     private readonly Dictionary<Vector3Int, ChunkRenderer> _chunkRendererDictionary = new();
@@ -100,13 +99,14 @@ public class World : MonoBehaviour
     private async void Start()
     {
         await Task.Delay(50);
-        
+        int viewDistance = this.viewDistance;
+        Vector3Int playerCoord = Chunk.GetChunkCoord(playerData.PlayerBody.position.With(y: 0));
         if (!multiThread)
         {
             _parallelOptions.MaxDegreeOfParallelism = 1;
-            PrepareChunkData(PlayerCoord);
+            PrepareChunkData(playerCoord, viewDistance);
             BuildStructures();
-            PrepareMeshDatas(PlayerCoord);
+            PrepareMeshDatas(playerCoord, viewDistance);
         }
 
         try
@@ -115,42 +115,47 @@ public class World : MonoBehaviour
             {
                 await Task.Run(() =>
                 {
-                    PrepareChunkData(PlayerCoord);
+                    PrepareChunkData(playerCoord, viewDistance);
                     BuildStructures();
-                    PrepareMeshDatas(PlayerCoord);
+                    PrepareMeshDatas(playerCoord, viewDistance);
                 }, _cancellationToken);
             }
-            while(_preparedMeshs.TryDequeue(out var meshData))
+            while (_preparedMeshs.TryDequeue(out MeshData meshData))
             {
                 RenderMesh(meshData);
             }
             SpawnPlayer();
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
-            if (continueGenerate)
-            {
-                chunkRenderPerFrame = 5;
-                StartCoroutine(HiddenOutOfViewChunks());
-                await Task.Run(LongtermViewCheckTask, _cancellationToken);
-            }
-
         }
         catch (Exception ex)
         {
-            UnityEngine.Debug.LogException(ex);
+            Debug.LogException(ex);
+        }
+        if (continueGenerate)
+        {
+            Task _ = Task.Run(LongtermViewCheckTask, _cancellationToken);
         }
     }
 
     private void Update()
     {
-        PlayerCoord = Chunk.GetChunkCoord(Vector3Int.FloorToInt(playerData.PlayerBody.position).With(y: 0));
+        PlayerCoord = Chunk.GetChunkCoord(playerData.PlayerBody.position.With(y: 0));
+
+        while (_chunkNeedToHide.TryPop(out Vector3Int chunkToHide))
+        {
+            if (_chunkRendererDictionary.Remove(chunkToHide, out ChunkRenderer chunkRenderer))
+            {
+                chunkRenderer.ReturnToPool();
+            }
+        }
 
         int renderedCount = 0;
-        while (_priorityMeshToRenders.TryDequeue(out var meshData))
+        while (_priorityMeshToRenders.TryDequeue(out MeshData meshData))
         {
             RenderMesh(meshData);
             renderedCount++;
         }  
-        while (renderedCount++ < chunkRenderPerFrame && _preparedMeshs.TryDequeue(out var preparedMesh))
+        while (renderedCount++ < chunkRenderPerFrame && _preparedMeshs.TryDequeue(out MeshData preparedMesh))
         {
             RenderMesh(preparedMesh);
         }
@@ -158,11 +163,22 @@ public class World : MonoBehaviour
 
     private void SpawnPlayer()
     {
-        if(Physics.Raycast(new Vector3(SpawnOffset.x, 250,SpawnOffset.z), Vector3.down, out var hit, 250, LayerMask.GetMask("Ground")))
+        if(Physics.Raycast(new Vector3(SpawnOffset.x, 250,SpawnOffset.z), Vector3.down, 
+            out RaycastHit hit, 250, LayerMask.GetMask("Ground")))
         {
             playerData.PlayerBody.position = hit.point.Add(y: SpawnOffset.y);
             playerData.PlayerBody.velocity = Vector3.zero;
         }
+    }
+
+    private int ChunkLoadRange(int viewDistance)
+    {
+        return viewDistance + 1;
+    }
+
+    private int ChunkHideRange(int viewDistance)
+    {
+        return viewDistance + 3;
     }
 
     /// <summary>
@@ -170,36 +186,45 @@ public class World : MonoBehaviour
     /// Method LongtermViewCheckTask() only call once on Start(), Don't call any of these methods from outside of this region
     /// </summary>
     #region Long term world operation method group
-    private async Task LongtermViewCheckTask()
+    private async void LongtermViewCheckTask()
     {
-        var playerCoord = this.PlayerCoord - Vector3Int.one;
+        var playerCoord = PlayerCoord;
         while (!_cancellationToken.IsCancellationRequested)
         {
-            if (playerCoord == this.PlayerCoord)
+            try
             {
-                await Task.Delay(1000).ConfigureAwait(false);
-                continue;
-            }
-            playerCoord = this.PlayerCoord;
-            _parallelOptions.MaxDegreeOfParallelism = maxDegreeOfParallelism;
-            RemoveOutOfRangeChunkData(playerCoord);
-            PrepareChunkData(playerCoord);
-            ExcuseModifyQuery();
-            BuildStructures();
-            PrepareMeshDatas(playerCoord);
+                if (playerCoord == PlayerCoord)
+                {
+                    await Task.Delay(1000).ConfigureAwait(false);
+                    continue;
+                }
+                playerCoord = PlayerCoord;
+                _parallelOptions.MaxDegreeOfParallelism = maxDegreeOfParallelism;
+                int viewDistance = this.viewDistance;
 
-            await Task.Delay(100).ConfigureAwait(false);
+                RemoveOutOfRangeChunkData(playerCoord, viewDistance);
+                PrepareChunkData(playerCoord, viewDistance);
+                ExcuseModifyQuery();
+                BuildStructures();
+                PrepareMeshDatas(playerCoord, viewDistance);
+
+                await Task.Delay(100).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
     }
 
-    private void RemoveOutOfRangeChunkData(Vector3Int playerCoord)
+    private void RemoveOutOfRangeChunkData(Vector3Int playerCoord, int viewDistance)
     {
         bool IsThisChunkNeedToReturn(ChunkData chunkData)
         {
-            if (chunkData.state != ChunkState.Generated)
+            if (chunkData.state != ChunkState.Generated && chunkData.state != ChunkState.Rendering)
                 return false;
 
-            if (Chunk.IsPositionInRange(playerCoord, chunkData.chunkCoord, HiddenChunkDistance + 2))
+            if (Chunk.IsPositionInRange(playerCoord, chunkData.chunkCoord, ChunkHideRange(viewDistance)))
                 return false;
 
             return true;
@@ -209,14 +234,15 @@ public class World : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             _cancellationToken.ThrowIfCancellationRequested();
-            if (!_activeChunkData.TryDequeue(out var chunkData))
+            if (!_activeChunkData.TryDequeue(out ChunkData chunkData))
             {
-                throw new Exception("Error when dequeue chunk data to remove");
+                throw new Exception("Can't dequeue chunk data");
             }
             if (IsThisChunkNeedToReturn(chunkData) && _chunkDataDictionary.TryRemove(chunkData.chunkCoord, out _))
             {
                 terrainGenerator.ReleaseChunk(chunkData);
                 _hasModifierChunks.TryRemove(chunkData.chunkCoord, out _);
+                _chunkNeedToHide.Push(chunkData.chunkCoord);
                 continue;
             }
 
@@ -224,19 +250,19 @@ public class World : MonoBehaviour
         }
     }
 
-    private void PrepareChunkData(Vector3Int playerCoord)
+    private void PrepareChunkData(Vector3Int playerCoord, int viewDistance)
     {
-        using var _ = TimeExcute.Start("Prepare chunk datas");
-        terrainGenerator.CalculateBiomeCenter(playerCoord.x * WorldSettings.CHUNK_WIDTH, playerCoord.z * WorldSettings.CHUNK_WIDTH);
+        using TimeExcute _ = TimeExcute.Start("Prepare chunk datas");
+        terrainGenerator.CalculateBiomeCenter(playerCoord.x, playerCoord.z);
         if (_parallelOptions.MaxDegreeOfParallelism == 1)
         {
-            foreach (var chunkCoord in Chunk.GetCoordsInRange(playerCoord, ChunkDataLoadRange))
+            foreach (Vector3Int chunkCoord in Chunk.GetCoordsInRange(playerCoord, ChunkLoadRange(viewDistance)))
             {
                 _cancellationToken.ThrowIfCancellationRequested();
                 if (_chunkDataDictionary.ContainsKey(chunkCoord))
                     continue;
 
-                var chunkData = terrainGenerator.GenerateChunk(chunkCoord);
+                ChunkData chunkData = terrainGenerator.GenerateChunk(chunkCoord);
                 if (_chunkDataDictionary.TryAdd(chunkCoord, chunkData))
                 {
                     _activeChunkData.Enqueue(chunkData);
@@ -251,12 +277,12 @@ public class World : MonoBehaviour
         {
             object lockObject = new object();
 
-            Parallel.ForEach(Chunk.GetCoordsInRange(playerCoord, ChunkDataLoadRange)
+            Parallel.ForEach(Chunk.GetCoordsInRange(playerCoord, ChunkLoadRange(viewDistance))
                 .Where(chunkCoord => !_chunkDataDictionary.ContainsKey(chunkCoord)),
                 _parallelOptions,
                 chunkCoord =>
                 {
-                    var chunkData = terrainGenerator.GenerateChunk(chunkCoord);
+                    ChunkData chunkData = terrainGenerator.GenerateChunk(chunkCoord);
                     if (_chunkDataDictionary.TryAdd(chunkCoord, chunkData))
                     {
                         lock (lockObject)
@@ -274,7 +300,10 @@ public class World : MonoBehaviour
 
     private void ExcuseModifyQuery()
     {
-        foreach (var chunkData in _hasModifierChunks.Values.ToArray())
+        using var pooledArray = ArrayPoolHelper.Rent<ChunkData>(_hasModifierChunks.Count, true);
+        _hasModifierChunks.Values.CopyTo(pooledArray.Value, 0);
+        Span<ChunkData> hasModifierChunks = pooledArray.Value.AsSpan(0, _hasModifierChunks.Count);
+        foreach (ChunkData chunkData in hasModifierChunks)
         {
             _cancellationToken.ThrowIfCancellationRequested();
             int count = chunkData.modifierQueue.Count;
@@ -292,12 +321,12 @@ public class World : MonoBehaviour
     private void BuildStructures()
     {
         Queue<ModifierUnit> modifiers = new Queue<ModifierUnit>();
-        foreach (var chunkData in _haveStructuresChunks)
+        foreach (ChunkData chunkData in _haveStructuresChunks)
         {
-            foreach (var (position, structure) in chunkData.structures)
+            foreach ((Vector3Int position, IStructure structure) in chunkData.structures)
             {
                 structure.GetModifications(modifiers, position);
-                while (modifiers.TryDequeue(out var modifier))
+                while (modifiers.TryDequeue(out ModifierUnit modifier))
                 {
                     ApplyModification(chunkData, modifier);
                 }
@@ -316,7 +345,7 @@ public class World : MonoBehaviour
         if (!Chunk.IsValidWorldY(mod.y))
             return;
 
-        var chunkCoord = Chunk.GetChunkCoord(mod.x, mod.y, mod.z);
+        Vector3Int chunkCoord = Chunk.GetChunkCoord(mod.x, mod.y, mod.z);
 
         if (!TryGetChunkData(chunkCoord, out var modifyChunk))
         {
@@ -338,15 +367,15 @@ public class World : MonoBehaviour
             mod.direction);
     }
 
-    private IEnumerable<ChunkData> GetChunkNeedToPrepareMesh(Vector3Int playerCoord)
+    private IEnumerable<ChunkData> GetChunkNeedToPrepareMesh(Vector3Int playerCoord, int viewDistance)
     {
-        foreach (var chunkCoord in Chunk.GetCoordsInRange(playerCoord, viewDistance))
+        foreach (Vector3Int chunkCoord in Chunk.GetCoordsInRange(playerCoord, viewDistance))
         {
             _cancellationToken.ThrowIfCancellationRequested();
-            if (!TryGetChunkData(chunkCoord, out var chunkData))
+            if (!TryGetChunkData(chunkCoord, out ChunkData chunkData))
                 continue;
 
-            if (chunkData.state != ChunkState.Generated || (chunkData.state == ChunkState.Rendering && !chunkData.isDirty))
+            if ((chunkData.state == ChunkState.Rendering && !chunkData.isDirty) || chunkData.state != ChunkState.Generated)
                 continue;
 
             chunkData.state = ChunkState.PreparingMesh;
@@ -355,27 +384,26 @@ public class World : MonoBehaviour
         }
     }
 
-    private void PrepareMeshDatas(Vector3Int playerCoord)
+    private void PrepareMeshDatas(Vector3Int playerCoord, int viewDistance)
     {
-        using var timer = TimeExcute.Start("Prepare mesh datas");
+        using TimeExcute _ = TimeExcute.Start("Prepare mesh datas");
         if (_parallelOptions.MaxDegreeOfParallelism == 1)
         {
-            var chunkNeedToPrepareMesh = GetChunkNeedToPrepareMesh(playerCoord).ToArray();
-            foreach (var chunkData in chunkNeedToPrepareMesh)
+            foreach (ChunkData chunkData in GetChunkNeedToPrepareMesh(playerCoord, viewDistance))
             {
                 _cancellationToken.ThrowIfCancellationRequested();
-                var meshData = Chunk.GetMeshData(chunkData);
+                MeshData meshData = Chunk.GetMeshData(chunkData);
                 chunkData.state = ChunkState.MeshPrepared;
                 _preparedMeshs.Enqueue(meshData);
             }
         }
         else
         {
-            Parallel.ForEach(GetChunkNeedToPrepareMesh(playerCoord),
+            Parallel.ForEach(GetChunkNeedToPrepareMesh(playerCoord, viewDistance),
             _parallelOptions,
             (chunkData) =>
             {
-                var meshData = Chunk.GetMeshData(chunkData);
+                MeshData meshData = Chunk.GetMeshData(chunkData);
                 chunkData.state = ChunkState.MeshPrepared;
                 _preparedMeshs.Enqueue(meshData);
             });
@@ -385,11 +413,11 @@ public class World : MonoBehaviour
 
     private void RenderMesh(MeshData meshData)
     {
-        var coord = meshData.position;
-        if (!TryGetChunkData(coord, out var chunkData))
+        Vector3Int coord = meshData.position;
+        if (!TryGetChunkData(coord, out ChunkData chunkData))
             return;
 
-        if (_chunkRendererDictionary.TryGetValue(coord, out var chunkRenderer))
+        if (_chunkRendererDictionary.TryGetValue(coord, out ChunkRenderer chunkRenderer))
         {
             if (meshData.HasDataToRender())
             {
@@ -413,33 +441,6 @@ public class World : MonoBehaviour
         chunkData.ValidateBlockState();
         ThreadSafePool<MeshData>.Release(meshData);
         chunkData.state = ChunkState.Rendering;
-    }
-
-    private IEnumerator HiddenOutOfViewChunks()
-    {
-        var oldPlayerCoord = PlayerCoord;
-        while (true)
-        {
-            if (oldPlayerCoord == PlayerCoord)
-            {
-                yield return Wait.ForSeconds(1f);
-                continue;
-            }
-            oldPlayerCoord = PlayerCoord;
-            foreach (var chunk in _chunkRendererDictionary.ToArray())
-            {
-                if (Chunk.IsPositionInRange(PlayerCoord, chunk.Key, HiddenChunkDistance) || !TryGetChunkData(chunk.Key, out var chunkData))
-                    continue;
-
-                if (chunkData.state != ChunkState.Rendering)
-                    continue;
-
-                _chunkRendererDictionary.Remove(chunkData.chunkCoord);
-                chunk.Value.ReturnToPool();
-                chunkData.state = ChunkState.Generated;
-            }
-            yield return Wait.ForSeconds(1f);
-        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -469,7 +470,7 @@ public class World : MonoBehaviour
         {
             foreach (var chunkCoord in Chunk.GetAdjacentChunkCoords(worldPosition))
             {
-                if (TryGetChunkData(chunkCoord, out var chunkData) && chunkData.state == ChunkState.Rendering)
+                if (TryGetChunkData(chunkCoord, out ChunkData chunkData) && chunkData.state == ChunkState.Rendering)
                 {
                     _cancellationToken.ThrowIfCancellationRequested();
                     _priorityMeshToRenders.Enqueue(Chunk.GetMeshData(chunkData));

@@ -39,7 +39,7 @@ public class ChunkData
     public bool isDirty;
     public bool modifiedByPlayer;
 
-    public readonly List<(Vector3Int, IStructure)> structures = new();
+    public readonly List<ValueTuple<Vector3Int, IStructure>> structures = new();
     public readonly Queue<ModifierUnit> modifierQueue = new();
     public readonly Dictionary<Vector3Int, IBlockState> blockStates = new();
 
@@ -63,9 +63,11 @@ public class ChunkData
     }
 #endif
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasStructure() => structures.Count > 0;
 
-    public bool HasModifier() => modifierQueue.Any();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasModifier() => modifierQueue.Count > 0;
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -106,9 +108,9 @@ public class ChunkData
         _blockDirections[index] = direction;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public BlockType GetBlock(Vector3Int localPosition)
     {
-
         return GetBlock(localPosition.x, localPosition.y, localPosition.z);
     }
 

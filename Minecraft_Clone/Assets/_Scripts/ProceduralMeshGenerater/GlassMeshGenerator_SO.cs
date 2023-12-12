@@ -9,25 +9,27 @@ namespace Minecraft.ProceduralMeshGenerate
         {
             for (int i = 0; i < FACES_COUNT; i++)
             {
-                var adjacentBlockData = Chunk.GetBlock(chunkData,
-                    localX + sixDirectionVectors[i].x,
-                    localY + sixDirectionVectors[i].y,
-                    localZ + sixDirectionVectors[i].z).Data();
+                Vector3Int directionVector = sixDirectionVectors[i];
+                BlockData_SO adjacentBlockData = Chunk.GetBlock(chunkData,
+                    localX + directionVector.x,
+                    localY + directionVector.y,
+                    localZ + directionVector.z).Data();
 
-                if (!adjacentBlockData.IsTransparent || adjacentBlockData.BlockType == BlockType.Glass)
+                if (!adjacentBlockData.IsTransparent)
                     continue;
 
-                MeshDrawerHelper.AddQuadVertices(meshData.vertices, sixDirections[i], localX, localY, localZ);
+                Direction direction = sixDirections[i];
+                MeshDrawerHelper.AddQuadVertices(meshData.vertices, direction, localX, localY, localZ);
 
                 for (int j = 0; j < 4; j++)
-                    meshData.normals.Add(sixDirectionVectors[i]);
+                    meshData.normals.Add(directionVector);
 
                 MeshDrawerHelper.AddQuadTriangle(meshData.triangles, meshData.vertices.Count);
 
                 if (!adjacentBlockData.IsSolid)
                     MeshDrawerHelper.AddQuadTriangle(meshData.colliderTriangles, meshData.vertices.Count);
 
-                MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(sixDirections[i]));
+                MeshDrawerHelper.AddQuadUvs(meshData.uvs, GetUvIndex(direction));
 
             }
         }

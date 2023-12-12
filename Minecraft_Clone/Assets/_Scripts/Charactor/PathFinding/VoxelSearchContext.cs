@@ -1,54 +1,31 @@
 ﻿using CongTDev.AStarPathFinding;
+using CongTDev.Collection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Minecraft.AI
 {
-    public class VoxelNode : SearchNode<VoxelNode>
+    public enum DistanceType
     {
-        public int3 position;
-        public BlockData_SO blockData;
+        SquaredEuclidean,
+        Euclidean,
+        Manhattan,
+        Diagonal,
     }
 
-    public readonly struct NodeView
+    public class VoxelSearchContext : ISearchContext<VoxelNode>, IContext
     {
-        private readonly VoxelNode _voxelNode;
+        public VoxelNode Start { get; private set; }
 
-        public readonly int3 Position => _voxelNode.position;
-
-        public readonly BlockData_SO BlockData => _voxelNode.blockData;
-
-        public NodeView(VoxelNode voxelNode)
-        {
-            _voxelNode = voxelNode;
-        }
-
-        public static implicit operator NodeView(VoxelNode voxelNode)
-        {
-            return new NodeView(voxelNode);
-        }
-    }
-
-    public interface ISearcher
-    {
-        bool CanTraverse(NodeView from, NodeView to);
-
-        void OnPathFound(Vector3[] path);
-    }
-
-    public class VoxelSearchContext : ISearchContext<VoxelNode>
-    {
-        public VoxelNode Start { get; set; }
-
-        public VoxelNode End { get; set; }
+        public VoxelNode End { get; private set; }
 
         public VoxelNode CompletedAt { get; private set; }
 
-        public bool UseSqrtDistance { get; set; }
+        public DistanceType DistanceType { get; set; }
 
         public bool Cancelled { get; private set; }
 
@@ -57,7 +34,7 @@ namespace Minecraft.AI
         public int MaxNeightbours => _direction3Ds.Length;
 
         private int _version;
-        private Dictionary<int3, VoxelNode> _nodes = new(10000);
+        private Dictionary<int3, VoxelNode> _nodeMap = new(10000);
         private Stack<VoxelNode> _hasUse = new(10000);
         private static readonly int3[] _direction3Ds =
         {
@@ -103,11 +80,27 @@ namespace Minecraft.AI
 
         public uint CostBetween(VoxelNode from, VoxelNode to)
         {
-            int3 delta = to.position - from.position;
-            int distancesq = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
-            return UseSqrtDistance ? (uint)(Math.Sqrt(distancesq) * 10) : (uint)distancesq;
+            switch (DistanceType)
+            {
+                case DistanceType.Euclidean:
+                    return (uint)(math.distance(from.position, to.position) * 10f);
+                case DistanceType.Manhattan:
+                    return (uint)math.csum(math.abs(from.position - to.position));
+                case DistanceType.Diagonal:
+                    const float D = 1f;
+                    const float D2 = 1.4142135623730950488016887242097f;
+                    float dx = math.abs(from.position.x - to.position.x);
+                    float dy = math.abs(from.position.y - to.position.y);
+                    float dz = math.abs(from.position.z - to.position.z);
+                    return (uint)(D * (dx + dy + dz) + (D2 - 2 * D) * math.min(math.min(dx, dy), dz));
+                case DistanceType.SquaredEuclidean:
+                default:
+                    return (uint)math.distancesq(from.position, to.position);
+
+            }
         }
 
+        [SuppressMessage("Style", "IDE0057:Use range operator", Justification = "<Pending>")]
         public ReadOnlySpan<VoxelNode> GetNeighbours(VoxelNode node, Span<VoxelNode> buffer)
         {
             int count = 0;
@@ -117,7 +110,7 @@ namespace Minecraft.AI
                 int3 neighbourPosition = node.position + direction3Ds[i];
                 VoxelNode neightbourNode = GetNode(neighbourPosition);
                 bool isClosed = neightbourNode.State == SearchState.Closed;
-                if (!isClosed && Searcher.CanTraverse(node, neightbourNode))
+                if (!isClosed && Searcher.CanTraverse(this ,node, neightbourNode))
                 {
                     buffer[count++] = neightbourNode;
                 }
@@ -135,26 +128,9 @@ namespace Minecraft.AI
             CompletedAt = node;
         }
 
-        public Vector3[] GetPath()
-        {
-            int count = CountPathLength(CompletedAt);
-            if(count == 0)
-            {
-                return Array.Empty<Vector3>();
-            }
-
-            Vector3[] path = new Vector3[count];
-            VoxelNode node = CompletedAt;
-            for (int i = count - 1; i >= 0; i--)
-            {
-                path[i] = node.position + new float3(0.5f, 0f, 0.5f);
-                node = node.Conection;
-            }
-            return path;
-        }
-
         public void CleanUp()
         {
+            _nodeMap.Clear();
             while (_hasUse.TryPop(out VoxelNode node))
             {
                 node.State = SearchState.Unvisited;
@@ -167,57 +143,114 @@ namespace Minecraft.AI
             _version++;
             Cancelled = false;
             Searcher = null;
-            _nodes.Clear();
         }
 
-        public CancelToken GetCancelToken()
+        public Token GetToken()
         {
-            return new CancelToken(this);
+            return new Token(this);
+        }
+
+        public SearchResult GetResult()
+        {
+            return new SearchResult(this);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private VoxelNode GetNode(int3 position)
         {
-            if (_nodes.TryGetValue(position, out VoxelNode node))
+            if (_nodeMap.TryGetValue(position, out VoxelNode node))
             {
                 return node;
             }
 
             node = ThreadSafePool<VoxelNode>.Get();
             _hasUse.Push(node);
-
             node.position = position;
             node.blockData = Chunk.GetBlock(position.x, position.y, position.z).Data();
-            _nodes.Add(position, node);
+            _nodeMap.Add(position, node);
             return node;
         }
 
-        private int CountPathLength(VoxelNode node)
+        public NodeView GetNode(int x, int y, int z)
         {
-            int count = 0;
-            while (node != null)
-            {
-                count++;
-                node = node.Conection;
-            }
-            return count;
+            return GetNode(new int3(x, y, z));
         }
 
-        public readonly struct CancelToken
+        public readonly struct Token
         {
             private readonly VoxelSearchContext _context;
             private readonly int _version;
 
-            public CancelToken(VoxelSearchContext context)
+            public Token(VoxelSearchContext context)
             {
                 _context = context;
                 _version = context._version;
             }
 
+            public bool OnSearching 
+                => _context is not null && _version == _context._version && !_context.Cancelled;
+
             public void Cancel()
             {
-                if(_version == _context._version)
+                if (_context is not null && _version == _context._version)
                     _context.Cancelled = true;
+            }
+        }
+
+        public readonly ref struct SearchResult
+        {
+            private readonly VoxelSearchContext _context;
+            public SearchResult(VoxelSearchContext context)
+            {
+                _context = context;
+            }
+
+            public Vector3[] GetPath()
+            {
+                VoxelNode node = _context.CompletedAt;
+                int count = CountPathLength(node);
+                if (count == 0)
+                {
+                    return Array.Empty<Vector3>();
+                }
+
+                Vector3[] path = new Vector3[count];
+                for (int i = count - 1; i >= 0; i--)
+                {
+                    path[i] = new Vector3(
+                        node.position.x + 0.5f,
+                        node.position.y,
+                        node.position.z + 0.5f);
+                    node = node.Conection;
+                }
+                return path;
+            }
+
+            public void GetPath(MyNativeList<Vector3> path)
+            {
+                path.Clear();
+                VoxelNode node = _context.CompletedAt;
+                while (node != null)
+                {
+                    path.Add(new Vector3(
+                        node.position.x + 0.5f,
+                        node.position.y,
+                        node.position.z + 0.5f)
+                        );
+                    node = node.Conection;
+                }
+                path.Reverse();
+            }
+
+            private int CountPathLength(VoxelNode node)
+            {
+                int count = 0;
+                while (node != null)
+                {
+                    count++;
+                    node = node.Conection;
+                }
+                return count;
             }
         }
 

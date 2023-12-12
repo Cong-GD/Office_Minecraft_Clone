@@ -8,7 +8,7 @@ public static class ArrayPoolHelper
         return new SharedObject<T>(minimumLength, clearOnReturn);
     }
 
-    public struct SharedObject<T> : IDisposable
+    public readonly struct SharedObject<T> : IDisposable
     {
         private readonly T[] _value;
         private readonly bool _clearOnreturn;

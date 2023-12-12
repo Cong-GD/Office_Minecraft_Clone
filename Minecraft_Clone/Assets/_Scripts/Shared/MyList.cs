@@ -25,9 +25,8 @@ namespace CongTDev.Collection
 
         public bool IsReadOnly => false;
 
-        public MyList()
+        public MyList() : this(0)
         {
-            _items = Array.Empty<T>();
         }
 
         public MyList(int capacity)
@@ -89,20 +88,19 @@ namespace CongTDev.Collection
             return GetEnumerator();
         }
 
-
         public bool Contains(T item)
         {
-            for (int i = 0; i < _count; i++)
-            {
-                if (item.Equals(_items[i]))
-                    return true;
-            }
-            return false;
+            return IndexOf(item) >= 0;
         }
 
         public void CopyTo(T[] array, int arrayIndex)
         {
             Array.Copy(_items, 0, array, arrayIndex, _items.Length);
+        }
+
+        public Span<T> AsSpan()
+        {
+            return new Span<T>(_items, 0, _count);
         }
 
         public bool Remove(T item)
@@ -116,12 +114,7 @@ namespace CongTDev.Collection
 
         public int IndexOf(T item)
         {
-            for (int i = 0; i < _count; ++i)
-            {
-                if (item.Equals(_items[i]))
-                    return i;
-            }
-            return -1;
+            return Array.IndexOf(_items, item, 0, _count);
         }
 
         public void Insert(int index, T item)
@@ -154,7 +147,7 @@ namespace CongTDev.Collection
         }
 
 #pragma warning disable IDE0251 // Make member 'readonly'
-        public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
+        public struct Enumerator : IEnumerator<T>
         {
             private readonly T[] _items;
             private int _index;
