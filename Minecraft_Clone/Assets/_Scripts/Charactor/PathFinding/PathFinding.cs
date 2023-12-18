@@ -22,7 +22,8 @@ namespace Minecraft.AI
 
         public void FindPath(ISearcher searcher, Vector3 start, Vector3 end)
         {
-            Assert.IsNotNull(searcher, "Searcher can't be null");
+            if (searcher.IsUnityNull())
+                throw new System.ArgumentNullException("Searcher is null");
 
             VoxelSearchContext context = ThreadSafePool<VoxelSearchContext>.Get(); 
             try
@@ -32,17 +33,18 @@ namespace Minecraft.AI
                 context.DistanceType = distanceType;
                 context.Searcher = searcher;
                 AStarPathFinding.FindPath(context, maxSearchrPocess);
-                if (!context.Cancelled)
-                {
-                    searcher.OnPathFound(context.GetResult());
-                }
             }
             catch(System.Exception e)
             {
+                context.Error = true;
                 Debug.LogException(e);
             }
             finally
             {
+                if (!context.Cancelled)
+                {
+                    searcher.OnPathFound(context.GetResult());
+                }
                 context.CleanUp();
                 ThreadSafePool<VoxelSearchContext>.Release(context);
             }
@@ -50,7 +52,8 @@ namespace Minecraft.AI
 
         public VoxelSearchContext.Token FindPathAsync(ISearcher searcher, Vector3 start, Vector3 end)
         {
-            Assert.IsNotNull(searcher, "Searcher can't be null");
+            if(searcher.IsUnityNull())
+                throw new System.ArgumentNullException("Searcher is null");
 
             VoxelSearchContext context = ThreadSafePool<VoxelSearchContext>.Get();
             context.SetStartPosition(start);
@@ -69,17 +72,18 @@ namespace Minecraft.AI
                 {
                     AStarPathFinding.FindPath(context, maxSearchrPocess);
                 });
-                if(!context.Cancelled)
-                {
-                    searcher.OnPathFound(context.GetResult());
-                }
             }
             catch (System.Exception e)
             {
+                context.Error = true;
                 Debug.LogException(e);
             }
             finally
             {
+                if (!context.Cancelled)
+                {
+                    searcher.OnPathFound(context.GetResult());
+                }
                 context.CleanUp();
                 ThreadSafePool<VoxelSearchContext>.Release(context);
             }

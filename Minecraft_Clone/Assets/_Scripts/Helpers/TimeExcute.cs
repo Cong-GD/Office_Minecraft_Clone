@@ -6,7 +6,7 @@ public class TimeExcute : IDisposable
 {
     public static TimeExcute Start(string message)
     {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && DEBUG
         return new TimeExcute(message);
 #else
         return null;

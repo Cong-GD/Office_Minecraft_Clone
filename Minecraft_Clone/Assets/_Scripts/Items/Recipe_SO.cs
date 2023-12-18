@@ -30,7 +30,7 @@ public class Recipe_SO : ScriptableObject
 
     public IEnumerable<int3x3> GetRecipeBindings()
     {
-        var binding = ToItemIDs(ref recipeBinding);
+        int3x3 binding = ToItemIDs(ref recipeBinding);
         ThrowIfInvalidBinding(ref binding);
         while (MoveDown(ref binding));
         while (MoveLeft(ref binding));

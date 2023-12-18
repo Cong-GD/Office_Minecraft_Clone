@@ -5,7 +5,7 @@ namespace Minecraft.AI
 {
     public interface ISearcher
     {
-        bool CanTraverse(IContext context, NodeView from, NodeView to);
+        bool CanTraverse(VoxelSearchContext.NodeProvider context, NodeView from, NodeView to);
 
         void OnPathFound(VoxelSearchContext.SearchResult result);
     }

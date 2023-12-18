@@ -62,7 +62,7 @@ public class PlayerHUB : MonoBehaviour
 
     private void Start()
     {
-        var inventorySystem = InventorySystem.Instance;
+        InventorySystem inventorySystem = InventorySystem.Instance;
         for (int i = 0; i < inventorySystem.toolBarItems.Length && i < uiToolBarSlots.Length; i++)
         {
             uiToolBarSlots[i].SetSlot(inventorySystem.toolBarItems[i]);

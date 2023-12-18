@@ -23,7 +23,7 @@ namespace Minecraft
         [SerializeField]
         private float stepOffset = 1f;
 
-        [SerializeField]
+        [SerializeField, Min(0f)]
         private float moveSpeed = 5f;
 
         [SerializeField]
@@ -32,18 +32,18 @@ namespace Minecraft
         [SerializeField]
         private float bodyPositionOffset = 1.1f;
 
-        public bool IsMoving => _moveDirectionInput.sqrMagnitude > 0;
+        public bool IsMoving => _moveDirection.sqrMagnitude > 0;
 
-        public Vector3 MoveDirectionInput
+        public Vector3 MoveDirection
         {
-            get => _moveDirectionInput;
-            set => _moveDirectionInput = value;
+            get => _moveDirection;
+            set => _moveDirection = value;
         }
 
         public float MoveSpeed
         {
             get => moveSpeed;
-            set => moveSpeed = Mathf.Max(0, value);
+            set => moveSpeed = Mathf.Max(0f, value);
         }
 
         public float StepOffset
@@ -51,7 +51,7 @@ namespace Minecraft
             get => stepOffset;
             set
             {
-                stepOffset = Mathf.Max(0, value);
+                stepOffset = Mathf.Max(0f, value);
                 _controller.stepOffset = stepOffset;
             }
         }
@@ -66,11 +66,14 @@ namespace Minecraft
 
 
         private Vector3 _velocity;
-        private Vector3 _moveDirectionInput;
+        private Vector3 _moveDirection;
 
         private void Reset()
         {
-            _controller = GetComponent<CharacterController>();
+            if(_controller != null)
+            {
+                _controller = GetComponent<CharacterController>();
+            }
         }
 
         private void OnValidate()
@@ -93,7 +96,7 @@ namespace Minecraft
         private void Move()
         {
             float drag = IsStepingOnWater ? waterDrag : 1f; 
-            Vector3 moveDirection = _moveDirectionInput.normalized;
+            Vector3 moveDirection = _moveDirection.normalized;
             Vector3 moveVelocity = drag * moveSpeed * moveDirection;
             _velocity.x = moveVelocity.x;
             _velocity.z = moveVelocity.z;

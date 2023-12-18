@@ -17,7 +17,7 @@ namespace Minecraft.AI
         Diagonal,
     }
 
-    public class VoxelSearchContext : ISearchContext<VoxelNode>, IContext
+    public class VoxelSearchContext : ISearchContext<VoxelNode>
     {
         public VoxelNode Start { get; private set; }
 
@@ -29,13 +29,17 @@ namespace Minecraft.AI
 
         public bool Cancelled { get; private set; }
 
+        public bool Error { get; set; }
+
         public ISearcher Searcher { get; set; }
 
         public int MaxNeightbours => _direction3Ds.Length;
 
         private int _version;
-        private Dictionary<int3, VoxelNode> _nodeMap = new(10000);
-        private Stack<VoxelNode> _hasUse = new(10000);
+        private readonly Dictionary<int3, VoxelNode> _nodeMap = new(10000);
+        private readonly Stack<VoxelNode> _hasUse = new(10000);
+        private readonly VoxelNode[] _neightbourBuffer = new VoxelNode[_direction3Ds.Length];
+
         private static readonly int3[] _direction3Ds =
         {
             new int3(-1, -1 , -1),
@@ -82,47 +86,63 @@ namespace Minecraft.AI
         {
             switch (DistanceType)
             {
-                case DistanceType.Euclidean:
-                    return (uint)(math.distance(from.position, to.position) * 10f);
                 case DistanceType.Manhattan:
-                    return (uint)math.csum(math.abs(from.position - to.position));
+                    {
+                        int dx = math.abs(from.position.x - to.position.x);
+                        int dy = math.abs(from.position.y - to.position.y);
+                        int dz = math.abs(from.position.z - to.position.z);
+                        return (uint)(dx + dy + dz);
+                    }
                 case DistanceType.Diagonal:
-                    const float D = 1f;
-                    const float D2 = 1.4142135623730950488016887242097f;
-                    float dx = math.abs(from.position.x - to.position.x);
-                    float dy = math.abs(from.position.y - to.position.y);
-                    float dz = math.abs(from.position.z - to.position.z);
-                    return (uint)(D * (dx + dy + dz) + (D2 - 2 * D) * math.min(math.min(dx, dy), dz));
+                    {
+                        const float D = 1f;
+                        const float D2 = 1.4142135623730950488016887242097f;
+                        float dx = math.abs(from.position.x - to.position.x);
+                        float dy = math.abs(from.position.y - to.position.y);
+                        float dz = math.abs(from.position.z - to.position.z);
+                        return (uint)(D * (dx + dy + dz) + (D2 - 2 * D) * math.min(math.min(dx, dy), dz));
+                    }
+                case DistanceType.Euclidean:
+                    {
+                        int3 delta = from.position - to.position;
+                        int distancesq = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+                        return (uint)(math.sqrt(distancesq) * 10f);
+                    }
                 case DistanceType.SquaredEuclidean:
                 default:
-                    return (uint)math.distancesq(from.position, to.position);
-
+                    {
+                        int3 delta = from.position - to.position;
+                        float distancesq = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+                        return (uint)distancesq;
+                    }
             }
         }
 
-        [SuppressMessage("Style", "IDE0057:Use range operator", Justification = "<Pending>")]
-        public ReadOnlySpan<VoxelNode> GetNeighbours(VoxelNode node, Span<VoxelNode> buffer)
+        public ReadOnlySpan<VoxelNode> GetNeighbours(VoxelNode node)
         {
             int count = 0;
             int3[] direction3Ds = _direction3Ds;
+            VoxelNode[] buffer = _neightbourBuffer;
             for (int i = 0; i < direction3Ds.Length; i++)
             {
                 int3 neighbourPosition = node.position + direction3Ds[i];
                 VoxelNode neightbourNode = GetNode(neighbourPosition);
                 bool isClosed = neightbourNode.State == SearchState.Closed;
-                if (!isClosed && Searcher.CanTraverse(this ,node, neightbourNode))
+                if (!isClosed && Searcher.CanTraverse(new NodeProvider(this), node, neightbourNode))
                 {
                     buffer[count++] = neightbourNode;
                 }
             }
-            return buffer.Slice(0, count);
+            return buffer.AsSpan(0, count);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsGoal(VoxelNode node)
         {
             return node == End;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PathCompleteAt(VoxelNode node)
         {
             CompletedAt = node;
@@ -139,10 +159,12 @@ namespace Minecraft.AI
                 node.Conection = null;
                 ThreadSafePool<VoxelNode>.Release(node);
             }
+            Array.Clear(_neightbourBuffer, 0, _neightbourBuffer.Length);
             CompletedAt = null;
             _version++;
             Cancelled = false;
             Searcher = null;
+            Error = false;
         }
 
         public Token GetToken()
@@ -171,28 +193,25 @@ namespace Minecraft.AI
             return node;
         }
 
-        public NodeView GetNode(int x, int y, int z)
-        {
-            return GetNode(new int3(x, y, z));
-        }
-
         public readonly struct Token
         {
             private readonly VoxelSearchContext _context;
             private readonly int _version;
+            private readonly bool _hasValue;
 
             public Token(VoxelSearchContext context)
             {
                 _context = context;
-                _version = context._version;
+                _hasValue = context is not null;
+                _version = _hasValue ? context._version : 0;
             }
 
-            public bool OnSearching 
-                => _context is not null && _version == _context._version && !_context.Cancelled;
+            public bool OnSearching
+                => _hasValue && _version == _context._version && !_context.Cancelled;
 
             public void Cancel()
             {
-                if (_context is not null && _version == _context._version)
+                if (_hasValue && _version == _context._version)
                     _context.Cancelled = true;
             }
         }
@@ -204,6 +223,10 @@ namespace Minecraft.AI
             {
                 _context = context;
             }
+
+            public bool Error => _context.Error;
+
+            public bool IsFound => _context.CompletedAt is not null;
 
             public Vector3[] GetPath()
             {
@@ -228,6 +251,28 @@ namespace Minecraft.AI
 
             public void GetPath(MyNativeList<Vector3> path)
             {
+                if (path is null)
+                    throw new ArgumentNullException("List is null");
+
+                path.Clear();
+                VoxelNode node = _context.CompletedAt;
+                while (node != null)
+                {
+                    path.Add(new Vector3(
+                        node.position.x + 0.5f,
+                        node.position.y,
+                        node.position.z + 0.5f)
+                        );
+                    node = node.Conection;
+                }
+                path.Reverse();
+            }
+
+            public void GetPath(List<Vector3> path)
+            {
+                if (path is null)
+                    throw new ArgumentNullException("List is null");
+
                 path.Clear();
                 VoxelNode node = _context.CompletedAt;
                 while (node != null)
@@ -251,6 +296,22 @@ namespace Minecraft.AI
                     node = node.Conection;
                 }
                 return count;
+            }
+        }
+
+        public readonly ref struct NodeProvider
+        {
+            private readonly VoxelSearchContext _context;
+
+            public NodeProvider(VoxelSearchContext context)
+            {
+                _context = context;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public NodeView GetNode(int x, int y, int z)
+            {
+                return _context.GetNode(new int3(x, y, z));
             }
         }
 

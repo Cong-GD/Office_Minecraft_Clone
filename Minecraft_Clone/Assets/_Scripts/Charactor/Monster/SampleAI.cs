@@ -1,10 +1,5 @@
 using CongTDev.Collection;
 using NaughtyAttributes;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Minecraft.AI
@@ -32,12 +27,12 @@ namespace Minecraft.AI
 
         private void Update()
         {
-            if(_pathIndex < _path.Count)
+            if (_pathIndex < _path.Count)
             {
                 Vector3 targetPosition = _path[_pathIndex];
                 Vector3 direction = targetPosition - transform.position;
 
-                movement.MoveDirectionInput = direction.With(y: 0);
+                movement.MoveDirection = direction.With(y: 0);
 
                 if (direction.magnitude < endNodeDistance)
                 {
@@ -46,8 +41,8 @@ namespace Minecraft.AI
             }
             else
             {
-                movement.MoveDirectionInput = Vector3.zero;
-            }   
+                movement.MoveDirection = Vector3.zero;
+            }
         }
 
         private void OnDisable()
@@ -58,16 +53,10 @@ namespace Minecraft.AI
         [Button]
         public void FindPlayer()
         {
-            _searchToken = pathFinding.FindPathAsync(this, transform.position.Add(y: 0.5f), target.position.Add(y:0.5f));
+            _searchToken = pathFinding.FindPathAsync(this, transform.position.Add(y: 0.5f), target.position.Add(y: 0.5f));
         }
 
-        [Button]
-        public void TeleportToPlayer()
-        {
-            transform.position = target.position;
-        }
-
-        public bool CanTraverse(IContext context, NodeView source, NodeView dest)
+        public bool CanTraverse(VoxelSearchContext.NodeProvider context, NodeView source, NodeView dest)
         {
             if (dest.BlockData.IsSolid)
                 return false;
@@ -126,7 +115,7 @@ namespace Minecraft.AI
 
         private void OnDrawGizmos()
         {
-            if(_path.Count == 0)
+            if (_path.Count == 0)
                 return;
 
             Gizmos.color = Color.blue;

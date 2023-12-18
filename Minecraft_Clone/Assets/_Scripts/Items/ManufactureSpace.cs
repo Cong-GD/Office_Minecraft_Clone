@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine.UIElements;
 
 public class ManufactureSpace : IResultGiver
 {
@@ -50,9 +49,9 @@ public class ManufactureSpace : IResultGiver
         if (_currentResult.IsEmpty())
             return _currentResult;
 
-        var pack = _currentResult;
+        ItemPacked pack = _currentResult;
         _canCheckRecipe = false;
-        foreach (var slot in _materials)
+        foreach (ItemSlot slot in _materials)
         {
             slot.TakeAmount(1);
         }

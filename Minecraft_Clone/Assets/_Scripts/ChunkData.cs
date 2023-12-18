@@ -93,7 +93,7 @@ public class ChunkData
     {
         int index = GetIndexOptimized(x, y, z);
 #if UNSAFE
-        if ((uint)index > TOTAL_BLOCK_IN_CHUNK)
+        if ((uint)index >= TOTAL_BLOCK_IN_CHUNK)
             throw new IndexOutOfRangeException($"Set block: ({x} , {y}, {z})");
 #endif
         _blocks[index] = block;
@@ -120,7 +120,7 @@ public class ChunkData
     {
         int index = GetIndexOptimized(x, y, z);
 #if UNSAFE
-        if ((uint)index > TOTAL_BLOCK_IN_CHUNK)
+        if ((uint)index >= TOTAL_BLOCK_IN_CHUNK)
             throw new IndexOutOfRangeException($"Get block ({x} , {y}, {z})");
 #endif
         return _blocks[index];
@@ -138,7 +138,7 @@ public class ChunkData
     {
         int index = GetIndexOptimized(x, y, z);
 #if UNSAFE
-        if ((uint)index > TOTAL_BLOCK_IN_CHUNK)
+        if ((uint)index >= TOTAL_BLOCK_IN_CHUNK)
             throw new IndexOutOfRangeException($"Get direction ({x} , {y}, {z})");
 #endif
         return _blockDirections[index];
@@ -156,7 +156,7 @@ public class ChunkData
     {
         int index = GetIndexOptimized(x, y, z);
 #if UNSAFE
-        if ((uint)index > TOTAL_BLOCK_IN_CHUNK)
+        if ((uint)index >= TOTAL_BLOCK_IN_CHUNK)
             throw new IndexOutOfRangeException($"Get block and direction ({x} , {y}, {z})");
 #endif
         block = _blocks[index];

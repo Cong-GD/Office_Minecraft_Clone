@@ -65,7 +65,7 @@ public class ItemDragingSystem : MonoBehaviour
     private bool GetCurrentMouseOverSlot(out UIItemSlot slot)
     {
         RaycastUtilities.UIRaycast(MInput.PointerPosition, _rayCastResut);
-        foreach (var hit in _rayCastResut)
+        foreach (RaycastResult hit in _rayCastResut)
         {
             if(hit.gameObject.TryGetComponent(out slot))
             {

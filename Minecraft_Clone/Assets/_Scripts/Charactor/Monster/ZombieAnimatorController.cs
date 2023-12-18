@@ -29,7 +29,7 @@ namespace Minecraft
         {
             if(_movement.IsMoving)
             {
-                var targetRotation = Quaternion.LookRotation(_movement.MoveDirectionInput.With(y: 0));
+                var targetRotation = Quaternion.LookRotation(_movement.MoveDirection.With(y: 0));
                 _modelRoot.rotation = Quaternion.RotateTowards(_modelRoot.rotation, targetRotation, _turnSpeed * Time.deltaTime);
             }
             var speed = _movement.Velocity.XZ().magnitude;

@@ -82,7 +82,7 @@ namespace CongTDev.AStarPathFinding
         bool IsGoal(Node node);
         uint CostBetween(Node from, Node to);
         void PathCompleteAt(Node node);
-        ReadOnlySpan<Node> GetNeighbours(Node node, Span<Node> buffer);
+        ReadOnlySpan<Node> GetNeighbours(Node node);
     }
 
     public static class AStarPathFinding
@@ -90,14 +90,12 @@ namespace CongTDev.AStarPathFinding
         public static void FindPath<Node>(ISearchContext<Node> context, int maxNodeProcess = 100000)
             where Node : SearchNode<Node>
         {
-            using var _ = TimeExcute.Start("Find a path");
+            using TimeExcute timer = TimeExcute.Start("Find a path");
             int count = 0;
 
             BinaryHeap<Node> openList = ThreadSafePool<BinaryHeap<Node>>.Get();
             openList.Clear();
             openList.Add(context.Start);
-            using var pooledBuffer = ArrayPoolHelper.Rent<Node>(context.MaxNeightbours, true);
-            Span<Node> buffer = pooledBuffer.Value;
             while (openList.TryExtract(out Node current))
             {
                 if (++count == maxNodeProcess || context.Cancelled)
@@ -111,7 +109,7 @@ namespace CongTDev.AStarPathFinding
                     break;
                 }
 
-                foreach (Node neighbour in context.GetNeighbours(current, buffer))
+                foreach (Node neighbour in context.GetNeighbours(current))
                 {
                     if (neighbour.State == SearchState.Closed)
                         continue;
@@ -137,8 +135,9 @@ namespace CongTDev.AStarPathFinding
                     }
                 }
             }
-
+#if DEBUG
             Debug.Log($"Total nodes processed: {count}");
+#endif
             openList.Clear();
             ThreadSafePool<BinaryHeap<Node>>.Release(openList);
         }

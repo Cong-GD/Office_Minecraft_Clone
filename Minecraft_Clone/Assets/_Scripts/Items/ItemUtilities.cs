@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public static class ItemUtilities
 {
@@ -10,14 +11,13 @@ public static class ItemUtilities
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
-        using var timer = TimeExcute.Start("Intialized all recipes");
-        var recipes = Resources.LoadAll<Recipe_SO>("Recipes");
+        Recipe_SO[] recipes = Resources.LoadAll<Recipe_SO>("Recipes");
         _recipes = new Dictionary<int3x3, Recipe_SO>();
-        foreach (var recipe in recipes)
+        foreach (Recipe_SO recipe in recipes)
         {
             try
             {
-                foreach (var binding in recipe.GetRecipeBindings())
+                foreach (int3x3 binding in recipe.GetRecipeBindings())
                 {
                     if (!_recipes.TryAdd(binding, recipe))
                     {
@@ -35,8 +35,8 @@ public static class ItemUtilities
 
     public static ItemPacked CheckRecipe(ReadOnlySpan<ItemSlot> slots)
     {
-        if (slots.Length != 9)
-            throw new Exception("Manufacture space must have 9 slots");
+        if(slots.Length != 9)
+            throw new ArgumentException("Manufacture space must have 9 slots");
 
         int3x3 hashCodes = new int3x3(
             GetItemID(slots[0].RootItem), GetItemID(slots[1].RootItem), GetItemID(slots[2].RootItem),
@@ -63,6 +63,9 @@ public static class ItemUtilities
 
     public static ItemSlot[] NewStogare(int count)
     {
+        if(count <= 0)
+            return Array.Empty<ItemSlot>();
+
         ItemSlot[] storage = new ItemSlot[count];
         for (int i = 0; i < count; i++)
         {
@@ -73,6 +76,9 @@ public static class ItemUtilities
 
     public static ItemSlot[] NewStogare(int count, IItemSlotRequiment slotRequiment)
     {
+        if (count <= 0)
+            return Array.Empty<ItemSlot>();
+
         ItemSlot[] storage = new ItemSlot[count];
         for (int i = 0; i < count; i++)
         {

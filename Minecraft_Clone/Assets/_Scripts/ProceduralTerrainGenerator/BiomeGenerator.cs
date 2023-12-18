@@ -26,12 +26,12 @@ public class BiomeGenerator : MonoBehaviour
 
     public void ProcessChunkCollumn(ChunkData chunkData, int localX, int localZ, int sufaceHeight)
     {
-        var startLayer = startLayerHandler;
+        BlockLayerHandler startLayer = startLayerHandler;
         for (int localY = 0; localY < CHUNK_DEPTH; localY++)
         {
             startLayer.Handle(chunkData, localX, localY, localZ, sufaceHeight);
         }
-        foreach (var layer in addictionalLayerHandlers)
+        foreach (BlockLayerHandler layer in addictionalLayerHandlers)
         {
             layer.Handle(chunkData, localX, 0, localZ, sufaceHeight);
         }

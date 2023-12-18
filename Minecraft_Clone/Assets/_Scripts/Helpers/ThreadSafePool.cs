@@ -3,23 +3,20 @@ using UnityEngine;
 
 public static class ThreadSafePool<T> where T : class, new()
 {
-
-    public const int POOL_SIZE_LIMIT = 2000;
-    private const int defaultCapacity = 5;
+    private const int DEFAULT_CAPACITY = 5;
 
     public static int Capacity
     {
-        get => pool.Length;
+        get => _pool.Length;
         set
         {
-            int newSize = Mathf.Clamp(value, 0, POOL_SIZE_LIMIT);
-            Array.Resize(ref pool, newSize);
+            Array.Resize(ref _pool, value);
         }
     }
 
     public static int Count { get; private set; }
 
-    private static T[] pool = new T[defaultCapacity];
+    private static T[] _pool = new T[DEFAULT_CAPACITY];
 
     private readonly static object _lockObj = new object();
 
@@ -30,8 +27,8 @@ public static class ThreadSafePool<T> where T : class, new()
             if (Count > 0)
             {
                 --Count;
-                T instance = pool[Count];
-                pool[Count] = null;
+                T instance = _pool[Count];
+                _pool[Count] = null;
                 return instance;
             }
         }
@@ -43,9 +40,9 @@ public static class ThreadSafePool<T> where T : class, new()
     {
         lock (_lockObj)
         {
-            if (Count < pool.Length)
+            if (Count < _pool.Length)
             {
-                pool[Count++] = instance;
+                _pool[Count++] = instance;
             }
         }
     }

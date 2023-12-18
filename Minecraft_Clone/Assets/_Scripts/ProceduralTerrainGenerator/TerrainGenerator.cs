@@ -37,7 +37,6 @@ public class TerrainGenerator : MonoBehaviour
     private int _gridSize;
     private object _biomeCalculationThreadLock = new object();
 
-
     private void Awake()
     {
         WorldSettings.waterLevel = waterLevel;
@@ -96,7 +95,7 @@ public class TerrainGenerator : MonoBehaviour
             {
                 int worldX = chunkX + x;
                 int worldZ = chunkZ + z;
-                var biome = Biome(SelectBiomeId(worldX, worldZ));
+                BiomeGenerator biome = Biome(SelectBiomeId(worldX, worldZ));
                 Span<float> distances = stackalloc float[_totalBiomes];
                 GetBiomeDistance(distances, worldX, worldZ, out var sum);
                 float sufaceHeight = 0f;

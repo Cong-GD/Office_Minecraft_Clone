@@ -1,15 +1,9 @@
 ﻿using Minecraft.ProceduralMeshGenerate;
-using System;
-using System.Collections.ObjectModel;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
-using UnityEngine.XR;
 
 public class InventorySystem : GlobalReference<InventorySystem>
 {
-    
+
     public readonly ItemSlot[] inventory = ItemUtilities.NewStogare(27);
 
     public readonly ItemSlot[] toolBarItems = ItemUtilities.NewStogare(9);
@@ -28,7 +22,7 @@ public class InventorySystem : GlobalReference<InventorySystem>
     private void Start()
     {
         ItemSlot slot = new ItemSlot();
-        foreach (var itemPacked in startupItem)
+        foreach (ItemPacked itemPacked in startupItem)
         {
             slot.SetItem(itemPacked);
             AddItemToInventory(slot);
@@ -43,12 +37,12 @@ public class InventorySystem : GlobalReference<InventorySystem>
 
     public void SetRightHand(ItemSlot hand)
     {
-        if(RightHand is not null)
+        if (RightHand is not null)
         {
             RightHand.OnItemModified -= RenderRightHand;
         }
         RightHand = hand;
-        if(RightHand is not null)
+        if (RightHand is not null)
         {
             RightHand.OnItemModified += RenderRightHand;
             RenderRightHand();
@@ -57,7 +51,7 @@ public class InventorySystem : GlobalReference<InventorySystem>
 
     private void RenderRightHand()
     {
-        if(RightHand.IsNullOrEmpty())
+        if (RightHand.IsNullOrEmpty())
         {
             handRenderer.Clear();
             return;
