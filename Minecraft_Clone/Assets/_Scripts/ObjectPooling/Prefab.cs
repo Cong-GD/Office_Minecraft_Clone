@@ -1,5 +1,6 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+
+using InstanceID = System.Collections.Generic.LinkedListNode<ObjectPooling.Prefab>;
 
 namespace ObjectPooling
 {
@@ -8,28 +9,26 @@ namespace ObjectPooling
     {
         public IPoolObject Instance { get; private set; }
 
-        public int ID { get; private set; }
+        public InstanceID ID { get; private set; }
 
-        private Action<int> destroyAction;
-        private Action<int> returnAction;
+        public ObjectPool Pool { get; private set; }
 
-        public void Init(int id, Action<int> returnAction, Action<int> destroyAction)
+        public void Init(InstanceID id, ObjectPool pool)
         {
             ID = id;
             Instance = GetComponent<IPoolObject>();
-            this.returnAction = returnAction;
-            this.destroyAction = destroyAction;
-            Instance.OnReturn += ReturnAction;
+            Pool = pool;
+            Instance.OnReturn += ReturnToPool;
         }
 
-        private void ReturnAction()
+        public void ReturnToPool()
         {
-            returnAction.Invoke(ID);
+            Pool.Release(ID);
         }
 
         private void OnDestroy()
         {
-            destroyAction?.Invoke(ID);
+            ID?.List?.Remove(ID);
         }
     }
 }

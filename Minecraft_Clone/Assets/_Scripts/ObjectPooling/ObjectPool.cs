@@ -1,40 +1,22 @@
 using NaughtyAttributes;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+
+using InstanceID = System.Collections.Generic.LinkedListNode<ObjectPooling.Prefab>;
 
 namespace ObjectPooling
 {
     [CreateAssetMenu(menuName = "ObjectPool")]
     public class ObjectPool : ScriptableObject
     {
-        private static Transform _poolParent;
-        private static Transform PoolParent
-        {
-            get
-            {
-                if (_poolParent == null)
-                {
-                    _poolParent = new GameObject("Object Pool Parent").transform;
-                    _poolParent.gameObject.SetActive(false);
-                    DontDestroyOnLoad(_poolParent.gameObject);
-                }
-                return _poolParent;
-            }
-        }
-
-        [SerializeField, Required] 
+        [SerializeField, Required]
         private Prefab prefab;
 
-        [ShowNonSerializedField]
-        private int _currentID = 0;
-
-        private readonly Dictionary<int, Prefab> _pool = new();
-        private readonly HashSet<int> _inactive = new();
-        private readonly HashSet<int> _active = new();
+        private readonly LinkedList<Prefab> _inactive = new();
+        private readonly LinkedList<Prefab> _active = new();
 
         [ShowNativeProperty]
-        public int CountAll => _pool.Count;
+        public int CountAll => _active.Count + _inactive.Count;
 
         [ShowNativeProperty]
         public int CountActive => _active.Count;
@@ -43,45 +25,33 @@ namespace ObjectPooling
         public int CountInactive => _inactive.Count;
 
 
-        public IPoolObject Get()
+        public IPoolObject Get(Transform parent = null)
         {
-            int id;
-            if (_inactive.Any())
+            InstanceID id;
+            if (_inactive.Count == 0)
             {
-                id = _inactive.First();
-                _inactive.Remove(id);
+                InstanciateInstance();
             }
-            else
-            {
-                id = InstanciateInstance().ID;
-            }
-            _active.Add(id);
-            var instance = _pool[id].Instance;
-            instance.transform.SetParent(null);
+            id = _inactive.Last;
+            _inactive.RemoveLast();
+            _active.AddLast(id);
+            IPoolObject instance = id.Value.Instance;
+            instance.transform.SetParent(parent);
             return instance;
         }
 
-        private Prefab InstanciateInstance()
+        private void InstanciateInstance()
         {
-            var prefabInstance = Instantiate(prefab);
-            prefabInstance.Init(_currentID++, Release, Remove);
-            _pool[prefabInstance.ID] = prefabInstance;
-            return prefabInstance;
+            Prefab prefabInstance = Instantiate(prefab);
+            InstanceID id = _inactive.AddLast(prefabInstance);
+            prefabInstance.Init(id, this);
         }
 
-        private void Release(int id)
+        public void Release(InstanceID id)
         {
-            var prefabInstance = _pool[id];
-            prefabInstance.transform.SetParent(PoolParent);
+            id.Value.gameObject.SetActive(false);
             _active.Remove(id);
-            _inactive.Add(id);
-        }
-
-        private void Remove(int id)
-        {
-            _active.Remove(id);
-            _inactive.Remove(id);
-            _pool.Remove(id);
+            _inactive.AddFirst(id);
         }
     }
 }
