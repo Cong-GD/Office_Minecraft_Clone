@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -7,6 +8,8 @@ using UnityEngine.Assertions;
 public static class ItemUtilities
 {
     private static Dictionary<int3x3, Recipe_SO> _recipes;
+
+    private static Dictionary<string, BaseItem_SO> _allItems;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
@@ -30,7 +33,20 @@ public static class ItemUtilities
                 Debug.LogError($"Error when load recipe: {recipe.name}\n{e}");
             }
         }
-        Debug.Log("Recipe generated: " + _recipes.Count);
+        Debug.Log("Recipes generated: " + _recipes.Count);
+
+        BaseItem_SO[] allItems = Resources.LoadAll<BaseItem_SO>("Items");
+        _allItems = allItems.ToDictionary(item => item.name, item => item);   
+        Debug.Log("Items loaded: " + _allItems.Count);
+    }
+
+    public static BaseItem_SO GetItemByName(string name)
+    {
+        if (_allItems.TryGetValue(name, out BaseItem_SO item))
+        {
+            return item;
+        }
+        return null;
     }
 
     public static ItemPacked CheckRecipe(ReadOnlySpan<ItemSlot> slots)

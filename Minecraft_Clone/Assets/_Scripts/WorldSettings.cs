@@ -14,7 +14,9 @@ public class WorldSettings
 
     public static readonly Vector3Int ChunkSizeVector = new (CHUNK_WIDTH, CHUNK_DEPTH, CHUNK_WIDTH);
 
-    public static int worldSeed;
+    public static int WorldSeed { get; set; }
 
-    public static int waterLevel;
+    public static int WaterLevel { get; set;}
+
+    public static int ChunkRenderRange { get; set; }
 }

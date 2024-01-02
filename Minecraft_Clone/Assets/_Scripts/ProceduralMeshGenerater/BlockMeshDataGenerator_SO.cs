@@ -22,7 +22,7 @@ namespace Minecraft.ProceduralMeshGenerate
 
         public abstract Mesh CreateMesh();
 
-        public Mesh CreateMeshWithoutUvAtlas()
+        public Mesh CreateMeshFlattenUV()
         {
             Mesh mesh = CreateMesh();
             if(mesh == null)
@@ -31,8 +31,7 @@ namespace Minecraft.ProceduralMeshGenerate
             }
 
             Vector2[] uvs = mesh.uv;
-            Span<Vector2> span = uvs;
-            foreach (ref Vector2 uv in span)
+            foreach (ref Vector2 uv in uvs.AsSpan())
             {
                 uv *= MeshDrawerHelper.ATLAS_SIZE;
             }

@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Minecraft
 {
-    public class EntityPhysicsMovement : MonoBehaviour
+    public class EntityPhysicsMovement : MonoBehaviour, IPushAble
     {
         [SerializeField]
         private float gravity = -9.8f;
@@ -18,7 +15,7 @@ namespace Minecraft
         private float waterPower = 2f;
 
         [SerializeField]
-        private CharacterController _controller;
+        private CharacterController controller;
 
         [SerializeField]
         private float stepOffset = 1f;
@@ -31,6 +28,9 @@ namespace Minecraft
 
         [SerializeField]
         private float bodyPositionOffset = 1.1f;
+
+        [SerializeField]
+        private float pushResistance = 10f;
 
         public bool IsMoving => _moveDirection.sqrMagnitude > 0;
 
@@ -52,8 +52,14 @@ namespace Minecraft
             set
             {
                 stepOffset = Mathf.Max(0f, value);
-                _controller.stepOffset = stepOffset;
+                controller.stepOffset = stepOffset;
             }
+        }
+
+        public float PushResistance
+        {
+            get => pushResistance;
+            set => pushResistance = Mathf.Max(0f, value);
         }
 
         public bool IsStepingOnWater { get; private set; }
@@ -62,23 +68,30 @@ namespace Minecraft
 
         public Vector3 Velocity => _velocity;
 
-        public bool IsGrounded => _controller.isGrounded;
+        public bool IsGrounded => controller.isGrounded;
 
 
         private Vector3 _velocity;
         private Vector3 _moveDirection;
+        private Vector3 _outerPushForce;
 
         private void Reset()
         {
-            if(_controller != null)
+            if (controller != null)
             {
-                _controller = GetComponent<CharacterController>();
+                controller = GetComponent<CharacterController>();
             }
         }
 
         private void OnValidate()
         {
-            _controller.stepOffset = stepOffset;
+            if (controller == null)
+                TryGetComponent(out controller);
+
+            if (controller == null)
+                return;
+
+            controller.stepOffset = stepOffset;
         }
 
         private void Update()
@@ -90,12 +103,13 @@ namespace Minecraft
         {
             ApplyGravity();
             Move();
-            _controller.Move(_velocity * Time.fixedDeltaTime);
+            ApplyPushForce();
+            controller.Move(_velocity * Time.fixedDeltaTime);
         }
 
         private void Move()
         {
-            float drag = IsStepingOnWater ? waterDrag : 1f; 
+            float drag = IsStepingOnWater ? waterDrag : 1f;
             Vector3 moveDirection = _moveDirection.normalized;
             Vector3 moveVelocity = drag * moveSpeed * moveDirection;
             _velocity.x = moveVelocity.x;
@@ -106,13 +120,13 @@ namespace Minecraft
         {
             if (IsInWater)
             {
-                _velocity.y = math.lerp(_velocity.y, waterPushForce, waterPower * Time.fixedDeltaTime);
+                _velocity.y = Mathf.Lerp(_velocity.y, waterPushForce, waterPower * Time.fixedDeltaTime);
                 return;
             }
 
-            if(IsGrounded)
+            if (IsGrounded)
             {
-                _velocity.y = -1f;
+                _velocity.y = Mathf.Lerp(_velocity.y, -1f, Time.fixedDeltaTime);
                 return;
             }
             _velocity.y += gravity * Time.fixedDeltaTime;
@@ -120,8 +134,26 @@ namespace Minecraft
 
         private void WaterCheck()
         {
-            IsInWater = Chunk.CheckWater(transform.position.Add(y: bodyPositionOffset));
-            IsStepingOnWater = Chunk.CheckWater(transform.position);
+            Vector3 position = transform.position;
+            IsStepingOnWater = Chunk.CheckWater(position);
+            IsInWater = Chunk.CheckWater(position.Add(y: bodyPositionOffset));
+        }
+
+        private void ApplyPushForce()
+        {
+            if (_outerPushForce.sqrMagnitude < 0.1f)
+            {
+                _outerPushForce = Vector3.zero;
+                return;
+            }
+
+            _outerPushForce = Vector3.Lerp(_outerPushForce, Vector3.zero, pushResistance * Time.fixedDeltaTime);
+            _velocity += _outerPushForce;
+        }
+
+        public void Push(Vector3 pushForce)
+        {
+            _outerPushForce += pushForce;
         }
     }
 }

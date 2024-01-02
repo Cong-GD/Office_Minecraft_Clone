@@ -17,7 +17,7 @@ namespace CongTDev.Collection
 
         public bool IsReadOnly => false;
 
-        public BinaryHeap() : this(3, null)
+        public BinaryHeap() : this(0, null)
         {
         }
 
@@ -26,12 +26,24 @@ namespace CongTDev.Collection
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException("Capacity can't less than 0");
 
-            _heap = new T[capacity];
+            if(capacity == 0)
+            {
+                _heap = Array.Empty<T>();
+            }
+            else
+            {
+                _heap = new T[capacity];
+            }
             _comparer = comparer ?? Comparer<T>.Default;
         }
 
         private void DoubleSize()
         {
+            if(Length == 0)
+            {
+                _heap = new T[4];
+                return;
+            }
             Array.Resize(ref _heap, (int)Math.Min((uint)Length * 2u, int.MaxValue));
         }
 

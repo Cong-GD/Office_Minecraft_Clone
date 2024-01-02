@@ -15,17 +15,18 @@ MonoBehaviour:
   <WalkSpeed>k__BackingField: 4.317
   <SprintMultilier>k__BackingField: 1.3
   <CrounchMultilier>k__BackingField: 0.3
-  <JumpForce>k__BackingField: 11
+  <JumpForce>k__BackingField: 8.5
   <JumpCooldown>k__BackingField: 0.3
-  <WaterPushForce>k__BackingField: 5
-  <HelpForceToLeaveWater>k__BackingField: 1.1
-  <AirMultilier>k__BackingField: 0.4
+  <WaterPushForce>k__BackingField: 8
+  <SwinForce>k__BackingField: 10
+  <DiveForce>k__BackingField: 15
+  <HelpForceToLeaveWater>k__BackingField: 2
+  <AirMultilier>k__BackingField: 0.05
+  <WaterMultilier>k__BackingField: 0.5
   <GroundDrag>k__BackingField: 8
-  <AirDrag>k__BackingField: 3
+  <AirDrag>k__BackingField: 0.1
   <WaterDrag>k__BackingField: 12
-  <BodyOffset>k__BackingField: {x: 0, y: 1, z: 0}
-  <GroundOffset>k__BackingField: 0.03
-  <GroundRadius>k__BackingField: 0.2
+  <GroundRadius>k__BackingField: 0.15
   <GroundLayer>k__BackingField:
     serializedVersion: 2
     m_Bits: 64

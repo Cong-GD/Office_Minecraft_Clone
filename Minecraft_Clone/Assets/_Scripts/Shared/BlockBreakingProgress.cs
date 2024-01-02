@@ -36,17 +36,7 @@ public class BlockBreakingProgress : ProgressDisplayer
         _material.mainTexture = breakingTextures[0];
     }
 
-    public override void Enable()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public override void Disable()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public override void SetValue(float value)
+    public void OnValueChanged(float value)
     {
         _material.mainTexture = breakingTextures[GetTextureIndex(value)];
     }

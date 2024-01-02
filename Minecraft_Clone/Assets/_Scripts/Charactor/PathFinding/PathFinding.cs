@@ -15,9 +15,19 @@ namespace Minecraft.AI
         [Tooltip("Highly recommended to use SquaredEuclidean for performance reason")]
         private DistanceType distanceType = DistanceType.SquaredEuclidean;
 
-        private void Awake()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Initialize()
         {
             ThreadSafePool<VoxelNode>.Capacity = 1_000_000;
+            for (int i = 0; i < ThreadSafePool<VoxelNode>.Capacity; i++)
+            {
+                ThreadSafePool<VoxelNode>.Release(new VoxelNode());
+            }
+            ThreadSafePool<VoxelSearchContext>.Capacity = 50;
+            for (int i = 0; i < ThreadSafePool<VoxelSearchContext>.Capacity; i++)
+            {
+                ThreadSafePool<VoxelSearchContext>.Release(new VoxelSearchContext());
+            }
         }
 
         public void FindPath(ISearcher searcher, Vector3 start, Vector3 end)

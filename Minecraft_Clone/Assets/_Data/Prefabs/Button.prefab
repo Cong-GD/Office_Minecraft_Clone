@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6836586709245355137}
+  - component: {fileID: 3604217515233947869}
   - component: {fileID: 5147464447322149460}
   - component: {fileID: 2976933032443397269}
-  - component: {fileID: 3604217515233947869}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -37,8 +37,41 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -208.6941, y: -28.7886}
-  m_SizeDelta: {x: 417.3881, y: 57.5773}
+  m_SizeDelta: {x: 520, y: 72}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &3604217515233947869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1263224260897388410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae48face419af374cb9c0892c1e4a273, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonImage: {fileID: 2976933032443397269}
+  subGraphic: {fileID: 8592035126642615272}
+  clickSoundEvent:
+    Guid:
+      Data1: -1637670633
+      Data2: 1239776636
+      Data3: 1281086644
+      Data4: 336336940
+    Path: event:/GUI/ButtonClicked
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  highlightedColor: {r: 0.62408334, g: 0.8773585, b: 0.83514595, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 1}
+  subGraphicNormalColor: {r: 1, g: 1, b: 1, a: 1}
+  subGraphicHighlightedColor: {r: 0.94509804, g: 0.8862745, b: 0.101960786, a: 1}
+  subGraphicDisabledColor: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 1}
+  normalSprite: {fileID: 21300000, guid: 3ba5f33b375d3a247bc7d730414a8791, type: 3}
+  disabledSprite: {fileID: 21300000, guid: 569352e6629c3c9438ce5809a86b6af7, type: 3}
+  interactable: 1
+  <OnClick>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!222 &5147464447322149460
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -63,7 +96,7 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 0
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -77,32 +110,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3604217515233947869
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1263224260897388410}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae48face419af374cb9c0892c1e4a273, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  buttonImage: {fileID: 2976933032443397269}
-  buttonText: {fileID: 8592035126642615272}
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  highlightedColor: {r: 0.62408334, g: 0.8773585, b: 0.83514595, a: 1}
-  disabledColor: {r: 1, g: 1, b: 1, a: 1}
-  textNormalColor: {r: 1, g: 1, b: 1, a: 1}
-  textHighlightedColor: {r: 0.9150943, g: 0.84317505, b: 0.5214311, a: 1}
-  textDisabledColor: {r: 0.41509432, g: 0.41509432, b: 0.41509432, a: 1}
-  normalSprite: {fileID: 21300000, guid: 3ba5f33b375d3a247bc7d730414a8791, type: 3}
-  disabledSprite: {fileID: 21300000, guid: 569352e6629c3c9438ce5809a86b6af7, type: 3}
-  interactable: 1
-  <OnClick>k__BackingField:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &6394223851520061913
 GameObject:
   m_ObjectHideFlags: 0
@@ -138,7 +145,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -20, y: -10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5430761816304017810
 CanvasRenderer:
@@ -164,7 +171,7 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 0
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -196,12 +203,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 39.6
+  m_fontSize: 72.6
   m_fontSizeBase: 39.6
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 9
+  m_fontSizeMax: 120
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512

@@ -1,8 +1,10 @@
+using CongTDev.Collection;
+using Cysharp.Threading.Tasks;
+using Minecraft;
 using Minecraft.ProceduralTerrain.Structures;
 using NaughtyAttributes;
 using ObjectPooling;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +16,12 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
-    [ShowNonSerializedField]
-    public static int WorldSeed = 1;
-
     public int seed;
 
     [SerializeField]
     private TerrainGenerator terrainGenerator;
 
-    [SerializeField] 
+    [SerializeField]
     private ObjectPool chunkRendererPool;
 
     [SerializeField]
@@ -34,9 +33,6 @@ public class World : MonoBehaviour
     [field: ShowNonSerializedField]
     public Vector3Int PlayerCoord { get; private set; }
 
-    [SerializeField ,Header("Chunk render properties")]
-    private int viewDistance = 3;
-
     [SerializeField, Range(1, 12)]
     private int startMaxDegreeOfParallelism = 6;
 
@@ -45,6 +41,9 @@ public class World : MonoBehaviour
 
     [SerializeField, Range(1, 1000)]
     private int chunkRenderPerFrame;
+
+    [SerializeField]
+    private PlayerDataLoader playerDataLoader;
 
     [Header("Testing Purpose")]
     public bool multiThread;
@@ -67,9 +66,9 @@ public class World : MonoBehaviour
     private readonly ConcurrentDictionary<Vector3Int, ChunkData> _hasModifierChunks = new();
     private readonly ConcurrentStack<Vector3Int> _chunkNeedToHide = new();
     private readonly List<ChunkData> _haveStructuresChunks = new();
-
     private readonly Dictionary<Vector3Int, ChunkRenderer> _chunkRendererDictionary = new();
-
+    private Dictionary<Vector3Int, MyNativeList<LocalBlock>> _playerModifications = new();
+    private Dictionary<Vector3Int, List<IBlockState>> _blockStates = new();
     private CancellationToken _cancellationToken;
     private ParallelOptions _parallelOptions;
     private bool _isEditing;
@@ -78,14 +77,14 @@ public class World : MonoBehaviour
 
     private void Awake()
     {
-        if(Instance != null)
+        if (Instance != null)
         {
             Destroy(gameObject);
             return;
         }
-            
+
         Instance = this;
-        WorldSeed = seed;
+        WorldSettings.WorldSeed = seed;
         ThreadSafePool<MeshData>.Capacity = 50;
 
         _cancellationToken = destroyCancellationToken;
@@ -94,37 +93,45 @@ public class World : MonoBehaviour
             CancellationToken = _cancellationToken,
             MaxDegreeOfParallelism = startMaxDegreeOfParallelism
         };
+        GameSettings.Instance.Apply();
+        GameManager.Instance.OnGameSave += SaveWorldDatas;
+        GameManager.Instance.OnGameLoad += LoadWorldDatas;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.Instance.OnGameSave -= SaveWorldDatas;
+        GameManager.Instance.OnGameLoad -= LoadWorldDatas;
+        Instance = null;
     }
 
     private async void Start()
     {
-        await Task.Delay(50);
-        int viewDistance = this.viewDistance;
-        Vector3Int playerCoord = Chunk.GetChunkCoord(playerData.PlayerBody.position.With(y: 0));
-        if (!multiThread)
-        {
-            _parallelOptions.MaxDegreeOfParallelism = 1;
-            PrepareChunkData(playerCoord, viewDistance);
-            BuildStructures();
-            PrepareMeshDatas(playerCoord, viewDistance);
-        }
-
+        await UniTask.DelayFrame(10);
+        Debug.Log("World: Start generate world");
+        int renderDistance = GameSettings.Instance.RenderDistance;
+        Vector3 playerPosition = playerData.PlayerBody.position;
+        Vector3Int playerCoord = Chunk.GetChunkCoord(playerPosition.With(y: 0));
         try
         {
             if (multiThread)
             {
-                await Task.Run(() =>
-                {
-                    PrepareChunkData(playerCoord, viewDistance);
-                    BuildStructures();
-                    PrepareMeshDatas(playerCoord, viewDistance);
-                }, _cancellationToken);
+                await UniTask.SwitchToThreadPool();
             }
+            else
+            {
+                _parallelOptions.MaxDegreeOfParallelism = 1;
+            }
+
+            PrepareChunkData(playerCoord, renderDistance);
+            BuildStructures();
+            PrepareMeshDatas(playerCoord, renderDistance);
+            await UniTask.SwitchToMainThread();
             while (_preparedMeshs.TryDequeue(out MeshData meshData))
             {
                 RenderMesh(meshData);
             }
-            SpawnPlayer();
+            playerDataLoader.SpawnPlayer();
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
         }
         catch (Exception ex)
@@ -133,7 +140,7 @@ public class World : MonoBehaviour
         }
         if (continueGenerate)
         {
-            Task _ = Task.Run(LongtermViewCheckTask, _cancellationToken);
+            LongtermViewCheckTask().Forget();
         }
     }
 
@@ -154,31 +161,129 @@ public class World : MonoBehaviour
         {
             RenderMesh(meshData);
             renderedCount++;
-        }  
+        }
+
         while (renderedCount++ < chunkRenderPerFrame && _preparedMeshs.TryDequeue(out MeshData preparedMesh))
         {
             RenderMesh(preparedMesh);
         }
     }
 
-    private void SpawnPlayer()
+    private int ChunkLoadRange(int renderDistance)
     {
-        if(Physics.Raycast(new Vector3(SpawnOffset.x, 250,SpawnOffset.z), Vector3.down, 
-            out RaycastHit hit, 250, LayerMask.GetMask("Ground")))
+        return renderDistance + 1;
+    }
+
+    private int ChunkHideRange(int renderDistance)
+    {
+        return renderDistance + 3;
+    }
+
+    private void SaveWorldDatas(Dictionary<string, ByteString> dictionary)
+    {
+        lock (_playerModifications)
         {
-            playerData.PlayerBody.position = hit.point.Add(y: SpawnOffset.y);
-            playerData.PlayerBody.velocity = Vector3.zero;
+            ByteString byteString = ByteString.Create(10000);
+            byteString.WriteValue(_playerModifications.Count);
+            foreach ((Vector3Int coord, MyNativeList<LocalBlock> localBlocks) in _playerModifications)
+            {
+                byteString.WriteValue(coord);
+                byteString.WriteValue(localBlocks.Count);
+                byteString.WriteValues<LocalBlock>(localBlocks.AsSpan());
+            }
+            dictionary["ChunkModifications.dat"] = byteString;
+        }
+
+        ByteString blockStateData = ByteString.Create(10000);
+        blockStateData.WriteValue(_blockStates.Count);
+        foreach ((Vector3Int coord, List<IBlockState> blockStates) in _blockStates)
+        {
+            blockStateData.WriteValue(coord);
+            blockStateData.WriteValue(blockStates.Count);
+            foreach (IBlockState blockState in blockStates)
+            {
+                BlockStateSerializeHelper.GetSerializedData(blockStateData ,blockState);
+            }
+        }
+        dictionary["BlockStates.dat"] = blockStateData;
+
+    }
+
+    private void LoadWorldDatas(Dictionary<string, ByteString> dictionary)
+    {
+        if (dictionary.Remove("ChunkModifications.dat", out ByteString byteString))
+        {
+            ByteString.BytesReader byteReader = byteString.GetBytesReader();
+            int count = byteReader.ReadValue<int>();
+
+            Dictionary<Vector3Int, MyNativeList<LocalBlock>> chunksModifiedByPlayer = new Dictionary<Vector3Int, MyNativeList<LocalBlock>>(count);
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector3Int coord = byteReader.ReadValue<Vector3Int>();
+                int localBlockCount = byteReader.ReadValue<int>();
+                MyNativeList<LocalBlock> localBlocks = new(byteReader.ReadValues<LocalBlock>(localBlockCount));
+                chunksModifiedByPlayer[coord] = localBlocks;
+            }
+
+            lock (_playerModifications)
+            {
+                _playerModifications = chunksModifiedByPlayer;
+            }
+            byteString.Dispose();
+        }
+
+
+        if (dictionary.Remove("BlockStates.dat", out byteString))
+        {
+            ByteString.BytesReader byteReader = byteString.GetBytesReader();
+            int chunkCount = byteReader.ReadValue<int>();
+            Dictionary<Vector3Int, List<IBlockState>> blockStates = new Dictionary<Vector3Int, List<IBlockState>>(chunkCount);
+            for (int i = 0; i < chunkCount; i++)
+            {
+                Vector3Int coord = byteReader.ReadValue<Vector3Int>();
+                int blockStateCount = byteReader.ReadValue<int>();
+                List<IBlockState> blockStateList = new List<IBlockState>(blockStateCount);
+                for (int j = 0; j < blockStateCount; j++)
+                {
+                    IBlockState blockState = BlockStateSerializeHelper.GetBlockState(ref byteReader);
+                    if(blockState != null)
+                    {
+                        blockStateList.Add(blockState);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Can't deserialize block state at {coord}");
+                    }
+                }
+                blockStates[coord] = blockStateList;
+            }
+            _blockStates = blockStates;
         }
     }
 
-    private int ChunkLoadRange(int viewDistance)
+    public List<IBlockState> GetOrAddBlockStates(Vector3Int chunkCoord)
     {
-        return viewDistance + 1;
+        if (!_blockStates.TryGetValue(chunkCoord, out List<IBlockState> blockStates))
+        {
+            blockStates = new List<IBlockState>();
+            _blockStates[chunkCoord] = blockStates;
+        }
+        return blockStates;
     }
 
-    private int ChunkHideRange(int viewDistance)
+    public void ValidateBlockState(Vector3Int chunkCoord)
     {
-        return viewDistance + 3;
+        if (!_blockStates.TryGetValue(chunkCoord, out List<IBlockState> blockStates))
+            return;
+
+        for (int i = blockStates.Count - 1; i >= 0; i--)
+        {
+            if (!blockStates[i].ValidateBlockState())
+            {
+                blockStates.RemoveAt(i);
+            }
+        }
     }
 
     /// <summary>
@@ -186,29 +291,28 @@ public class World : MonoBehaviour
     /// Method LongtermViewCheckTask() only call once on Start(), Don't call any of these methods from outside of this region
     /// </summary>
     #region Long term world operation method group
-    private async void LongtermViewCheckTask()
+    private async UniTaskVoid LongtermViewCheckTask()
     {
-        var playerCoord = PlayerCoord;
+        Vector3Int playerCoord = PlayerCoord;
         while (!_cancellationToken.IsCancellationRequested)
         {
             try
             {
                 if (playerCoord == PlayerCoord)
                 {
-                    await Task.Delay(1000).ConfigureAwait(false);
+                    await UniTask.Delay(200, cancellationToken: _cancellationToken);
                     continue;
                 }
                 playerCoord = PlayerCoord;
                 _parallelOptions.MaxDegreeOfParallelism = maxDegreeOfParallelism;
-                int viewDistance = this.viewDistance;
+                int renderDistance = GameSettings.Instance.RenderDistance;
+                await UniTask.SwitchToThreadPool();
 
-                RemoveOutOfRangeChunkData(playerCoord, viewDistance);
-                PrepareChunkData(playerCoord, viewDistance);
+                RemoveOutOfRangeChunkData(playerCoord, renderDistance);
+                PrepareChunkData(playerCoord, renderDistance);
                 ExcuseModifyQuery();
                 BuildStructures();
-                PrepareMeshDatas(playerCoord, viewDistance);
-
-                await Task.Delay(100).ConfigureAwait(false);
+                PrepareMeshDatas(playerCoord, renderDistance);
             }
             catch (Exception ex)
             {
@@ -217,14 +321,14 @@ public class World : MonoBehaviour
         }
     }
 
-    private void RemoveOutOfRangeChunkData(Vector3Int playerCoord, int viewDistance)
+    private void RemoveOutOfRangeChunkData(Vector3Int playerCoord, int renderDistance)
     {
         bool IsThisChunkNeedToReturn(ChunkData chunkData)
         {
-            if (chunkData.state != ChunkState.Generated && chunkData.state != ChunkState.Rendering)
+            if (chunkData.state is not (ChunkState.Generated or ChunkState.Rendering))
                 return false;
 
-            if (Chunk.IsPositionInRange(playerCoord, chunkData.chunkCoord, ChunkHideRange(viewDistance)))
+            if (Chunk.IsPositionInRange(playerCoord, chunkData.chunkCoord, ChunkHideRange(renderDistance)))
                 return false;
 
             return true;
@@ -250,13 +354,13 @@ public class World : MonoBehaviour
         }
     }
 
-    private void PrepareChunkData(Vector3Int playerCoord, int viewDistance)
+    private void PrepareChunkData(Vector3Int playerCoord, int renderDistance)
     {
-        using TimeExcute _ = TimeExcute.Start("Prepare chunk datas");
+        using TimeExcute timer = TimeExcute.Start("Prepare chunk datas");
         terrainGenerator.CalculateBiomeCenter(playerCoord.x, playerCoord.z);
         if (_parallelOptions.MaxDegreeOfParallelism == 1)
         {
-            foreach (Vector3Int chunkCoord in Chunk.GetCoordsInRange(playerCoord, ChunkLoadRange(viewDistance)))
+            foreach (Vector3Int chunkCoord in Chunk.GetCoordsInRange(playerCoord, ChunkLoadRange(renderDistance)))
             {
                 _cancellationToken.ThrowIfCancellationRequested();
                 if (_chunkDataDictionary.ContainsKey(chunkCoord))
@@ -277,7 +381,7 @@ public class World : MonoBehaviour
         {
             object lockObject = new object();
 
-            Parallel.ForEach(Chunk.GetCoordsInRange(playerCoord, ChunkLoadRange(viewDistance))
+            Parallel.ForEach(Chunk.GetCoordsInRange(playerCoord, ChunkLoadRange(renderDistance))
                 .Where(chunkCoord => !_chunkDataDictionary.ContainsKey(chunkCoord)),
                 _parallelOptions,
                 chunkCoord =>
@@ -300,10 +404,10 @@ public class World : MonoBehaviour
 
     private void ExcuseModifyQuery()
     {
-        using var pooledArray = ArrayPoolHelper.Rent<ChunkData>(_hasModifierChunks.Count, true);
-        _hasModifierChunks.Values.CopyTo(pooledArray.Value, 0);
-        Span<ChunkData> hasModifierChunks = pooledArray.Value.AsSpan(0, _hasModifierChunks.Count);
-        foreach (ChunkData chunkData in hasModifierChunks)
+        List<ChunkData> chunkDatas = ThreadSafePool<List<ChunkData>>.Get();
+        chunkDatas.Clear();
+        chunkDatas.AddRange(_hasModifierChunks.Values);
+        foreach (ChunkData chunkData in chunkDatas)
         {
             _cancellationToken.ThrowIfCancellationRequested();
             int count = chunkData.modifierQueue.Count;
@@ -316,17 +420,20 @@ public class World : MonoBehaviour
                 _hasModifierChunks.TryRemove(chunkData.chunkCoord, out _);
             }
         }
+        chunkDatas.Clear();
+        ThreadSafePool<List<ChunkData>>.Release(chunkDatas);
     }
 
     private void BuildStructures()
     {
-        Queue<ModifierUnit> modifiers = new Queue<ModifierUnit>();
+        MyNativeList<ModifierUnit> modifiers = ThreadSafePool<MyNativeList<ModifierUnit>>.Get();
         foreach (ChunkData chunkData in _haveStructuresChunks)
         {
             foreach ((Vector3Int position, IStructure structure) in chunkData.structures)
             {
+                modifiers.Clear();
                 structure.GetModifications(modifiers, position);
-                while (modifiers.TryDequeue(out ModifierUnit modifier))
+                foreach (ref ModifierUnit modifier in modifiers.AsSpan())
                 {
                     ApplyModification(chunkData, modifier);
                 }
@@ -337,10 +444,12 @@ public class World : MonoBehaviour
                 _hasModifierChunks.TryAdd(chunkData.chunkCoord, chunkData);
             }
         }
+        modifiers.Clear();
+        ThreadSafePool<MyNativeList<ModifierUnit>>.Release(modifiers);
         _haveStructuresChunks.Clear();
     }
 
-    private void ApplyModification(ChunkData chunkData,in ModifierUnit mod)
+    private void ApplyModification(ChunkData chunkData, in ModifierUnit mod)
     {
         if (!Chunk.IsValidWorldY(mod.y))
             return;
@@ -352,9 +461,6 @@ public class World : MonoBehaviour
             chunkData.modifierQueue.Enqueue(mod);
             return;
         }
-
-        if (modifyChunk.modifiedByPlayer)
-            return;
 
         if (modifyChunk.state == ChunkState.Rendering)
             modifyChunk.isDirty = true;
@@ -386,12 +492,13 @@ public class World : MonoBehaviour
 
     private void PrepareMeshDatas(Vector3Int playerCoord, int viewDistance)
     {
-        using TimeExcute _ = TimeExcute.Start("Prepare mesh datas");
+        using TimeExcute timer = TimeExcute.Start("Prepare mesh datas");
         if (_parallelOptions.MaxDegreeOfParallelism == 1)
         {
             foreach (ChunkData chunkData in GetChunkNeedToPrepareMesh(playerCoord, viewDistance))
             {
                 _cancellationToken.ThrowIfCancellationRequested();
+                EnsurePlayerModifications(chunkData);
                 MeshData meshData = Chunk.GetMeshData(chunkData);
                 chunkData.state = ChunkState.MeshPrepared;
                 _preparedMeshs.Enqueue(meshData);
@@ -403,10 +510,32 @@ public class World : MonoBehaviour
             _parallelOptions,
             (chunkData) =>
             {
+                EnsurePlayerModifications(chunkData);
                 MeshData meshData = Chunk.GetMeshData(chunkData);
                 chunkData.state = ChunkState.MeshPrepared;
                 _preparedMeshs.Enqueue(meshData);
             });
+        }
+    }
+
+    private void EnsurePlayerModifications(ChunkData chunkData)
+    {
+        lock (_playerModifications)
+        {
+            if (_playerModifications.TryGetValue(chunkData.chunkCoord, out MyNativeList<LocalBlock> localBlocks))
+            {
+                try
+                {
+                    foreach (LocalBlock localBlock in localBlocks.AsSpan())
+                    {
+                        chunkData.SetBlock(localBlock.x, localBlock.y, localBlock.z, localBlock.blockType, localBlock.direction);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Error when apply player modification to chunk {chunkData.chunkCoord}: {e}");
+                }
+            }
         }
     }
     #endregion
@@ -417,6 +546,7 @@ public class World : MonoBehaviour
         if (!TryGetChunkData(coord, out ChunkData chunkData))
             return;
 
+        ValidateBlockState(coord);
         if (_chunkRendererDictionary.TryGetValue(coord, out ChunkRenderer chunkRenderer))
         {
             if (meshData.HasDataToRender())
@@ -429,16 +559,17 @@ public class World : MonoBehaviour
                 chunkRenderer.ReturnToPool();
             }
         }
-        else if(meshData.HasDataToRender())
+        else if (meshData.HasDataToRender())
         {
             chunkRenderer = (ChunkRenderer)chunkRendererPool.Get();
             chunkRenderer.SetChunkData(chunkData);
+#if UNITY_EDITOR
             chunkRenderer.transform.SetParent(transform);
+#endif
             _chunkRendererDictionary[coord] = chunkRenderer;
             chunkRenderer.RenderMesh(meshData);
         }
 
-        chunkData.ValidateBlockState();
         ThreadSafePool<MeshData>.Release(meshData);
         chunkData.state = ChunkState.Rendering;
     }
@@ -459,27 +590,56 @@ public class World : MonoBehaviour
         return !_isEditing;
     }
 
-    public async Task<bool> EditBlockAsync(Vector3Int worldPosition, BlockType blockType, Direction direction)
+    public async UniTask<bool> EditBlockAsync(Vector3Int worldPosition, BlockType blockType, Direction direction)
     {
-        if(!CanEdit()) 
+        if (_isEditing)
             return false;
 
-        _isEditing = true;
-        Chunk.SetBlock(worldPosition, blockType, direction);
-        await Task.Run(() =>
+        Vector3Int coord = Chunk.GetChunkCoord(worldPosition);
+
+        if (!TryGetChunkData(coord, out ChunkData chunkData))
         {
-            foreach (var chunkCoord in Chunk.GetAdjacentChunkCoords(worldPosition))
+            return false;
+        }
+        _isEditing = true;
+        await UniTask.SwitchToThreadPool();
+        Vector3Int localPos = worldPosition - coord * WorldSettings.ChunkSizeVector;
+        chunkData.SetBlock(localPos.x, localPos.y, localPos.z, blockType, direction);
+        lock (_playerModifications)
+        {
+            if (!_playerModifications.TryGetValue(coord, out MyNativeList<LocalBlock> localBlocks))
             {
-                if (TryGetChunkData(chunkCoord, out ChunkData chunkData) && chunkData.state == ChunkState.Rendering)
-                {
-                    _cancellationToken.ThrowIfCancellationRequested();
-                    _priorityMeshToRenders.Enqueue(Chunk.GetMeshData(chunkData));
-                }
+                localBlocks = new MyNativeList<LocalBlock>();
+                _playerModifications[coord] = localBlocks;
             }
+            LocalBlock localBlock = new LocalBlock()
+            {
+                x = (byte)localPos.x,
+                y = (byte)localPos.y,
+                z = (byte)localPos.z,
+                blockType = blockType,
+                direction = direction
+            };
+            int index = localBlocks.IndexOf(localBlock);
+            if (index == -1)
+            {
+                localBlocks.Add(localBlock);
+            }
+            else
+            {
+                localBlocks[index] = localBlock;
+            }
+        }
 
-        }, _cancellationToken);
+        foreach (Vector3Int chunkCoord in Chunk.GetAdjacentChunkCoords(worldPosition))
+        {
+            if (TryGetChunkData(chunkCoord, out chunkData) && chunkData.state == ChunkState.Rendering)
+            {
+                _priorityMeshToRenders.Enqueue(Chunk.GetMeshData(chunkData));
+            }
+        }
+        await UniTask.SwitchToMainThread();
         _isEditing = false;
-
         return true;
     }
 }

@@ -39,7 +39,7 @@ public class TerrainGenerator : MonoBehaviour
 
     private void Awake()
     {
-        WorldSettings.waterLevel = waterLevel;
+        WorldSettings.WaterLevel = waterLevel;
         _tempoNoiseInstance = biomeTemperateNoiseGenerator.GetNoiseInstance();
         _totalBiomes = biomeGeneratorsData.Length;
         _biomeLookupArray = biomeGeneratorsData.Select(data => data.biome).ToArray();
@@ -173,7 +173,6 @@ public class TerrainGenerator : MonoBehaviour
     public void ReleaseChunk(ChunkData chunkData)
     {
         chunkData.state = ChunkState.InPool;
-        chunkData.modifiedByPlayer = false;
         chunkData.isDirty = false;
         chunkData.structures.Clear();
         chunkData.modifierQueue.Clear();

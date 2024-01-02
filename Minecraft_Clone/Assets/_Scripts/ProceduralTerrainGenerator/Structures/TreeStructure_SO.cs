@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CongTDev.Collection;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Minecraft.ProceduralTerrain.Structures
@@ -9,14 +10,14 @@ namespace Minecraft.ProceduralTerrain.Structures
         [SerializeField] private BlockType body;
         [SerializeField] private BlockType leaves;
 
-        public override void GetModifications(Queue<ModifierUnit> modifiers, Vector3Int position)
+        public override void GetModifications(MyNativeList<ModifierUnit> modifiers, Vector3Int position)
         {
             (int worldX, int worldY, int worldZ) = position;
             int size = 5;
             int whereLeavesStart = worldY + size;
             for (int y = worldY; y < whereLeavesStart; y++)
             {
-                modifiers.Enqueue(new ModifierUnit(worldX, y, worldZ, body));
+                modifiers.Add(new ModifierUnit(worldX, y, worldZ, body));
             }
             int whereLeavesEnd = whereLeavesStart + size;
             size /= 2;
@@ -26,7 +27,7 @@ namespace Minecraft.ProceduralTerrain.Structures
                 {
                     for (int z = worldZ - size; z <= worldZ + size; z++)
                     {
-                        modifiers.Enqueue(new ModifierUnit(x, y, z, leaves));
+                        modifiers.Add(new ModifierUnit(x, y, z, leaves));
                     }
                 }
             }

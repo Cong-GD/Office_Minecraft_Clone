@@ -1,6 +1,7 @@
 ﻿#define UNSAFE
 
 using CongTDev.Collection;
+using Minecraft;
 using Minecraft.ProceduralTerrain.Structures;
 using System;
 using System.Collections.Generic;
@@ -37,11 +38,9 @@ public class ChunkData
     public ChunkState state = ChunkState.InPool;
 
     public bool isDirty;
-    public bool modifiedByPlayer;
 
     public readonly List<ValueTuple<Vector3Int, IStructure>> structures = new();
     public readonly Queue<ModifierUnit> modifierQueue = new();
-    public readonly Dictionary<Vector3Int, IBlockState> blockStates = new();
 
 #if UNSAFE
     private readonly BlockType* _blocks;
@@ -169,25 +168,5 @@ public class ChunkData
         int index = GetIndexOptimized(x, y, z);
         block = _blocks[index];
         direction = _blockDirections[index];
-    }
-
-
-    // Because this list only use for one purpuse and on main theard, so it's safe for cache like this
-    private static readonly MyList<Vector3Int> _cachedRemoveList = new();
-    public void ValidateBlockState()
-    {
-        foreach (var blockState in blockStates)
-        {
-            if (!blockState.Value.Validate())
-            {
-                _cachedRemoveList.Add(blockState.Key);
-            }
-        }
-
-        foreach (var pos in _cachedRemoveList)
-        {
-            blockStates.Remove(pos);
-        }
-        _cachedRemoveList.Clear();
     }
 }

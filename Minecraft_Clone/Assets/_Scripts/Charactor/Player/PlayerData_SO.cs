@@ -25,11 +25,20 @@ public class PlayerData_SO : ScriptableObject
     public float WaterPushForce { get; private set; } = 20f;
 
     [field: SerializeField]
+    public float SwinForce { get; private set; } = 15f;
+
+    [field: SerializeField]
+    public float DiveForce { get; private set; } = 10f;
+
+    [field: SerializeField]
     public float HelpForceToLeaveWater { get; private set; } = 0.5f;
 
     [field: Header("Enviroment")]
     [field: SerializeField]
     public float AirMultilier { get; private set; } = 0.4f;
+
+    [field: SerializeField]
+    public float WaterMultilier { get; private set; } = 0.2f;
 
     [field: SerializeField]
     public float GroundDrag { get; private set; } = 5f;
@@ -40,12 +49,7 @@ public class PlayerData_SO : ScriptableObject
     [field: SerializeField]
     public float WaterDrag { get; private set; } = 20f;
 
-    [field: SerializeField]
-    public Vector3 BodyOffset { get; private set; }
-
     [field: Header("Ground check")]
-    [field: SerializeField]
-    public float GroundOffset { get; private set; }
 
     [field: SerializeField]
     public float GroundRadius { get; private set; }
@@ -59,7 +63,9 @@ public class PlayerData_SO : ScriptableObject
         get
         {
             if(_playerBody == null)
+            {
                 _playerBody = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
+            }
 
             return _playerBody;
         }
@@ -89,6 +95,9 @@ public class PlayerData_SO : ScriptableObject
 
     [NonSerialized, ShowNonSerializedField]
     public bool isBobyInWater;
+
+    [NonSerialized, ShowNonSerializedField]
+    public bool isHeadInWater;
 
     public void ClearTempData()
     {

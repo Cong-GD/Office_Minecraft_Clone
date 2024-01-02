@@ -32,7 +32,7 @@ namespace Minecraft
 
         public FastNoise GetDomainWrapper()
         {
-            FastNoise fastNoise = new FastNoise(World.WorldSeed + seed);
+            FastNoise fastNoise = new FastNoise(WorldSettings.WorldSeed + seed);
             fastNoise.SetFractalType((FastNoise.FractalType)(int)domainWrappingType);
             fastNoise.SetDomainWarpType(domainWrappingType);
             fastNoise.SetFrequency(frequency);

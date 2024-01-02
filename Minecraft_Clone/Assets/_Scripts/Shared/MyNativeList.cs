@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
 
 namespace CongTDev.Collection
 {
@@ -40,6 +39,24 @@ namespace CongTDev.Collection
 
             _capacity = capacity;
             _buffer = Allocate(capacity);
+        }
+
+        public MyNativeList(ReadOnlySpan<T> span)
+        {
+            AddRange(span);
+        }
+
+        public MyNativeList(MyNativeList<T> list) : this(list.AsSpan())
+        {
+        }
+
+        public MyNativeList(NativeArray<T> array) : this(array.AsSpan())
+        {
+        }
+
+        public MyNativeList(IEnumerable<T> collection)
+        {
+            AddRange(collection);
         }
 
         ~MyNativeList()
@@ -78,6 +95,40 @@ namespace CongTDev.Collection
             _buffer[_count++] = item;
         }
 
+        public void AddRange(ReadOnlySpan<T> span)
+        {
+            if (span.Length == 0)
+                return;
+
+            EnsureCapacity(_count + span.Length);
+            span.CopyTo(new Span<T>(_buffer + _count, span.Length));
+            _count += span.Length;
+        }
+
+        public void AddRange(IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
+
+            foreach (T item in collection)
+            {
+                Add(item);
+            }
+        }
+
+        public void AddRange(List<T> list)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+
+            EnsureCapacity(_count + list.Count);
+            for (int i = 0; i < list.Count; ++i)
+            {
+                _buffer[_count + i] = list[i];
+            }
+            _count += list.Count;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
@@ -88,7 +139,7 @@ namespace CongTDev.Collection
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0180:Use tuple to swap values", Justification = "<Pending>")]
         public void Reverse()
         {
-            if(_count == 0)
+            if (_count == 0)
                 return;
 
             T* left = _buffer;
@@ -136,9 +187,14 @@ namespace CongTDev.Collection
             }
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public Enumerator GetEnumerator()
         {
             return new Enumerator(this);
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -153,14 +209,10 @@ namespace CongTDev.Collection
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            if(array == null)
+            if (array == null)
                 throw new ArgumentNullException(nameof(array));
 
-            int end = Mathf.Min(array.Length, _count);
-            for (int i = arrayIndex, j = 0; i < end && j < end; ++i, ++j)
-            {
-                array[i] = _buffer[j];
-            }
+            AsSpan().CopyTo(array.AsSpan(arrayIndex));
         }
 
         public Span<T> AsSpan()
@@ -238,11 +290,11 @@ namespace CongTDev.Collection
                 _index = -1;
             }
 
-            public T Current => _list[_index];
+            public readonly T Current => _list[_index];
 
-            object IEnumerator.Current => Current;
+            readonly object IEnumerator.Current => Current;
 
-            public void Dispose()
+            public readonly void Dispose()
             {
             }
 

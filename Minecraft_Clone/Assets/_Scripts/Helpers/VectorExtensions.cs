@@ -7,24 +7,6 @@ using UnityEngine;
 
 public static class VectorExtensions
 {
-    public readonly static ReadOnlyCollection<Vector2Int> FourDirectionsVector2Int = new List<Vector2Int>
-    {
-        new Vector2Int(1, 0),
-        new Vector2Int(0, 1),
-        new Vector2Int(-1, 0),
-        new Vector2Int(0, -1),
-    }.AsReadOnly();
-
-    public readonly static ReadOnlyCollection<Vector2Int> EightDirectionsVector2Int = new List<Vector2Int>
-    {
-        new Vector2Int( 0,  1),
-        new Vector2Int( 1,  1),
-        new Vector2Int( 1,  0),
-        new Vector2Int( 1, -1),
-        new Vector2Int( 0, -1),
-        new Vector2Int(-1, -1),
-        new Vector2Int(-1,  0),
-    }.AsReadOnly();
 
     public readonly static ReadOnlyCollection<Vector3Int> SixDirectionsVector3Int = new List<Vector3Int>
     {
@@ -34,16 +16,6 @@ public static class VectorExtensions
             new Vector3Int( 0, -1,  0),
             new Vector3Int( 1,  0,  0),
             new Vector3Int(-1,  0,  0),
-    }.AsReadOnly();
-
-    public readonly static ReadOnlyCollection<Vector3> SixDirectionsVector3 = new List<Vector3>
-    {
-            new Vector3( 0,  0,  1),
-            new Vector3( 0,  0, -1),
-            new Vector3( 0,  1,  0),
-            new Vector3( 0, -1,  0),
-            new Vector3( 1,  0,  0),
-            new Vector3(-1,  0,  0),
     }.AsReadOnly();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

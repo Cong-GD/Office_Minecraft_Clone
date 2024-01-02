@@ -12,7 +12,7 @@ public static class BlockDataHelper
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
-        var blockResources = Resources.LoadAll<BlockData_SO>("BlockDatas");
+        var blockResources = Resources.LoadAll<BlockData_SO>("Items");
         var blockTypeCount = Enum.GetNames(typeof(BlockType)).Length;
 
         _blockDataMap = new BlockData_SO[blockTypeCount];

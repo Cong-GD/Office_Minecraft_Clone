@@ -1,8 +1,11 @@
+using FMODUnity;
+using Minecraft.Audio;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace Minecraft
 {
@@ -20,7 +23,10 @@ namespace Minecraft
         private Image buttonImage;
 
         [SerializeField]
-        private TextMeshProUGUI buttonText;
+        private Graphic subGraphic;
+
+        [SerializeField]
+        private EventReference clickSoundEvent;
 
         [Header("Colors")]
         [SerializeField]
@@ -33,13 +39,13 @@ namespace Minecraft
         private Color disabledColor = Color.white;
 
         [SerializeField]
-        private Color textNormalColor = Color.white;
+        private Color subGraphicNormalColor = Color.white;
 
         [SerializeField]
-        private Color textHighlightedColor = Color.white;
+        private Color subGraphicHighlightedColor = Color.white;
 
         [SerializeField]
-        private Color textDisabledColor = Color.white;
+        private Color subGraphicDisabledColor = Color.white;
 
         [Header("Sprites")]
         [SerializeField]
@@ -75,7 +81,7 @@ namespace Minecraft
         private void Reset()
         {
             buttonImage = GetComponent<Image>();
-            buttonText = GetComponentInChildren<TextMeshProUGUI>();
+            subGraphic = GetComponentInChildren<TextMeshProUGUI>();
         }
 
         private void OnEnable()
@@ -88,7 +94,7 @@ namespace Minecraft
             ResetState();
         }
 
-        private void SetInteractable(bool value)
+        public void SetInteractable(bool value)
         {
             interactable = value;
             ResetState();
@@ -103,16 +109,16 @@ namespace Minecraft
             {
                 case ButtonState.Highlighted:
                     buttonImage.color = highlightedColor;
-                    buttonText.color = textHighlightedColor;
+                    subGraphic.color = subGraphicHighlightedColor;
                     break;
                 case ButtonState.Disabled:
                     buttonImage.color = disabledColor;
-                    buttonText.color = textDisabledColor;
+                    subGraphic.color = subGraphicDisabledColor;
                     break;
                 case ButtonState.Normal:
                 default:
                     buttonImage.color = normalColor;
-                    buttonText.color = textNormalColor;
+                    subGraphic.color = subGraphicNormalColor;
                     break;
             }
 
@@ -130,6 +136,8 @@ namespace Minecraft
                 buttonImage.sprite = disabledSprite;
                 SetState(ButtonState.Disabled);
             }
+
+            buttonImage.raycastTarget = interactable;
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -146,6 +154,7 @@ namespace Minecraft
             {
                 OnClick.Invoke();
                 ResetState();
+                AudioManager.PlayOneShot(clickSoundEvent);
             }
         }
 

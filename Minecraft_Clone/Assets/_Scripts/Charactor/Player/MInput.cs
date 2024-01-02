@@ -65,6 +65,8 @@ namespace Minecraft.Input
 
         public static InputAction Debugging { get; private set; }
 
+        public static InputAction OpenMenu { get; private set; }
+
         public static Vector2 PointerPosition => Pointer.ReadValue<Vector2>();
 
 
@@ -73,10 +75,12 @@ namespace Minecraft.Input
         {
             InputActions = new PlayerInputActions();
 
+            //Actions
             _gamePlayActions = InputActions.GamePlay;
             _uiActions = InputActions.UI;
             _generalActions = InputActions.General;
 
+            //Gameplay
             Move = _gamePlayActions.Move;
             Jump = _gamePlayActions.Jump;
             Crounch = _gamePlayActions.Crounch;
@@ -87,11 +91,14 @@ namespace Minecraft.Input
             OpenInventory = _gamePlayActions.OpenInventory;
             Sprint = _gamePlayActions.Sprint;
             Throw = _gamePlayActions.Throw;
+            OpenMenu = _gamePlayActions.OpenMenu;
 
+            //UI
             UI_LeftClick = _uiActions.UI_LeftClick;
             UI_RightClick = _uiActions.UI_RightClick;
             UI_Exit = _uiActions.UI_Exit;
 
+            //General
             Pointer = _generalActions.Pointer;
             Shift = _generalActions.Shift;
             Debugging = _generalActions.Debugging;

@@ -1,4 +1,5 @@
-﻿using Minecraft.ProceduralMeshGenerate;
+﻿using Minecraft;
+using Minecraft.ProceduralMeshGenerate;
 using NaughtyAttributes;
 using System;
 using UnityEditor;
@@ -19,6 +20,10 @@ public class BlockData_SO : BaseItem_SO
 
     [field: SerializeField] 
     public bool IsTransparent { get; private set; }
+
+    [Tooltip("Used for sound effect")]
+    [field: SerializeField]
+    public BlockMaterial BlockMaterial { get; private set; }
 
 
     [field: SerializeField]
@@ -59,11 +64,11 @@ public class BlockData_SO : BaseItem_SO
         return MeshGenerator.CreateMaterial();
     }
 
-    public Mesh GetMeshWithoutUvAtlas()
+    public Mesh GetMeshFlattenUV()
     {
         if(_cachedMesh == null)
         {
-            _cachedMesh = MeshGenerator.CreateMeshWithoutUvAtlas();
+            _cachedMesh = MeshGenerator.CreateMeshFlattenUV();
         }
         return _cachedMesh;
     }

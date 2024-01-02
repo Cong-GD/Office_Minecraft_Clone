@@ -191,9 +191,9 @@ public static class Chunk
         const int yEnd = MAP_HEIGHT_IN_CHUNK;
         int zEnd = center.z + range;
 
-        for (int x = xStart;x <= xEnd; x++)
+        for (int x = xStart; x <= xEnd; x++)
         {
-            for (int y = yStart;y < yEnd; y++)
+            for (int y = yStart; y < yEnd; y++)
             {
                 for (int z = zStart; z <= zEnd; z++)
                 {
@@ -207,9 +207,9 @@ public static class Chunk
     {
         Vector3Int center = GetChunkCoord(worldPosition);
         yield return center;
-        foreach (var direction in VectorExtensions.SixDirectionsVector3Int)
+        foreach (Vector3Int direction in VectorExtensions.SixDirectionsVector3Int)
         {
-            var newCoord = GetChunkCoord(worldPosition + direction);
+            Vector3Int newCoord = GetChunkCoord(worldPosition + direction);
             if (newCoord != center)
             {
                 yield return newCoord;

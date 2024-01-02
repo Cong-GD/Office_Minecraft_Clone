@@ -1,6 +1,8 @@
-﻿using System;
+﻿using CongTDev.Collection;
+using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Furnace : IResultGiver, IBlockState
 {
@@ -25,20 +27,22 @@ public class Furnace : IResultGiver, IBlockState
 
 
     public float BurnProgressValue => IsBurning ? 1f - (Time.time - _startBurnTime) / _burnTime : 0f;
+
     public float SmeltProgressValue => IsSmelting ? (Time.time - _startCookTime) / _cookTime : 0f;
 
     public bool IsBurning { get; private set; }
+
     public bool IsSmelting { get; private set; }
+
+    public Vector3Int Position => _position;
 
 
     private float _startBurnTime;
     private float _startCookTime;
     private float _burnTime;
     private float _cookTime;
-
     private BaseItem_SO _smeltItem;
     private readonly ItemSlot _resultSlot = new();
-
     private Coroutine _smeltCoroutine;
     private Coroutine _burningCoroutine;
     private Vector3Int _position;
@@ -50,6 +54,16 @@ public class Furnace : IResultGiver, IBlockState
         _position = position;
     }
 
+    public Furnace(ref ByteString.BytesReader bytesReader)
+    {
+        smeltSlot.OnItemModified += ValidateState;
+        burnSlot.OnItemModified += ValidateState;
+        _position = bytesReader.ReadValue<Vector3Int>();
+        smeltSlot.SetItem(ItemPacked.ReadFormByteString(ref bytesReader));
+        burnSlot.SetItem(ItemPacked.ReadFormByteString(ref bytesReader));
+        _resultSlot.SetItem(ItemPacked.ReadFormByteString(ref bytesReader));
+    }
+
     ~Furnace()
     {
         CoroutineHelper.Stop(ref _smeltCoroutine);
@@ -58,7 +72,15 @@ public class Furnace : IResultGiver, IBlockState
         burnSlot.OnItemModified -= ValidateState;
     }
 
-    public bool Validate()
+    public void GetSerializedData(ByteString byteString)
+    {
+        byteString.WriteValue(_position);
+        smeltSlot.GetPacked().WriteToByteString(byteString);
+        burnSlot.GetPacked().WriteToByteString(byteString);
+        _resultSlot.GetPacked().WriteToByteString(byteString);
+    }
+
+    public bool ValidateBlockState()
     {
         if (Chunk.GetBlock(_position) != BlockType.Furnace)
         {
@@ -95,7 +117,6 @@ public class Furnace : IResultGiver, IBlockState
         IsSmelting = false;
         CoroutineHelper.Stop(ref _smeltCoroutine);
     }
-
 
     private void CheckForBurning()
     {

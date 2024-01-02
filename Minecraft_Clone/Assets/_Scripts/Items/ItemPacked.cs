@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CongTDev.Collection;
+using System;
 using UnityEngine;
 
 [Serializable]
@@ -22,7 +23,31 @@ public struct ItemPacked
         {
             this.amount = Mathf.Clamp(amount, 0, item.MaxStack);
         }
-        
+    }
+
+    public static ItemPacked ReadFormByteString(ref ByteString.BytesReader bytesReader)
+    {
+        bool isEmpty = bytesReader.ReadValue<bool>();
+        if (isEmpty)
+        {
+            return Empty;
+        }
+        string itemName = bytesReader.ReadChars().ToString();
+        BaseItem_SO item = ItemUtilities.GetItemByName(itemName);
+        int amount = bytesReader.ReadValue<int>();
+        return new ItemPacked(item, amount);
+    }
+
+    public readonly void WriteToByteString(ByteString byteString)
+    {
+        bool isEmpty = IsEmpty();
+        byteString.WriteValue(isEmpty);
+        if (isEmpty)
+        {
+            return;
+        }
+        byteString.WriteChars(item.Name);
+        byteString.WriteValue(amount);
     }
 
     public readonly bool IsEmpty()

@@ -6,7 +6,7 @@
         protected override bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
         {
             int yPos = chunkData.worldPosition.y + y;
-            if (yPos > surfaceHeightNoise && yPos <= WorldSettings.waterLevel)
+            if (yPos > surfaceHeightNoise && yPos <= WorldSettings.WaterLevel)
             {
                 chunkData.SetBlock(x, y, z, BlockType.Water);
                 if (yPos == surfaceHeightNoise + 1 && y > 0)

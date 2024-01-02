@@ -1,22 +1,24 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Runtime.InteropServices;
+using UnityEngine;
 
-public readonly struct ModifierUnit
+namespace Minecraft
 {
-    public readonly int x; 
-    public readonly int y; 
-    public readonly int z;
-    public readonly BlockType blockType;
-    public readonly Direction direction;
-
-    public readonly Vector3Int GetPosition() => new Vector3Int(x, y, z);
-
-    public ModifierUnit(int x, int y, int z, BlockType blockType, Direction direction = Direction.Forward)
+    public readonly struct ModifierUnit
     {
-        this.x = x; 
-        this.y = y;
-        this.z = z;
-        this.blockType = blockType;
-        this.direction = direction;
-    }
+        public readonly int x;
+        public readonly int y;
+        public readonly int z;
+        public readonly BlockType blockType;
+        public readonly Direction direction;
 
+        public ModifierUnit(int x, int y, int z, BlockType blockType, Direction direction = Direction.Forward)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.blockType = blockType;
+            this.direction = direction;
+        }
+    }
 }

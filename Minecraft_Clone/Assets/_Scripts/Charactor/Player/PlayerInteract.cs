@@ -1,246 +1,316 @@
-﻿using DG.Tweening.Core.Easing;
-using Minecraft;
+﻿using Cysharp.Threading.Tasks;
+using DG.Tweening.Core.Easing;
+using FMOD.Studio;
+using FMODUnity;
 using Minecraft.Input;
 using NaughtyAttributes;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInteract : MonoBehaviour
+namespace Minecraft
 {
-    [SerializeField, Required]
-    private Transform eye;
 
-    [SerializeField]
-    private PlayerData_SO playerData;
-
-    [SerializeField]
-    private Animator animator;
-
-    [SerializeField]
-    private BlockBreakingProgress blockBreakingProgress;
-
-    [Min(1f)]
-    public float checkDistance;
-
-    public float dropForce = 1f;
-
-    [SerializeField]
-    private float buildInputCoolTime = 0.3f;
-
-    [SerializeField]
-    private int destroyInputReceiveDelayInMilisecond;
-
-    [SerializeField]
-    private LayerMask entityLayer;
-
-    [SerializeField]
-    private LayerMask groundLayer;
-
-    private bool isCastHit;
-
-    private Vector3Int hitPosition;
-    private Vector3Int adjacentHitPosition;
-
-    private bool _isDigging;
-    private float _allowReceiveBuildInputTime;
-
-    private Vector3 _halfOne = new Vector3(0.5f, 0.5f, 0.5f);
-
-    private bool AllowReceiveBuildInput => Time.time > _allowReceiveBuildInputTime;
-
-    public bool IsCastHit => isCastHit;
-    public Vector3Int HitPosition => hitPosition;
-    public Vector3Int AdjacentHitPosition => adjacentHitPosition;
-
-    private void OnEnable()
+    public class PlayerInteract : MonoBehaviour
     {
-        MInput.Throw.performed += ProcessThrowInput;
-    }
+        [SerializeField]
+        private Transform eye;
 
-    private void OnDisable()
-    {
-        MInput.Throw.performed -= ProcessThrowInput;
-    }
+        [SerializeField]
+        private PlayerData_SO playerData;
 
-    private void Update()
-    {
-        RayCast();
-        ProcessDestroyInput();
-        ProcessBuildInput();
-    }
+        [SerializeField]
+        private PlayerAttack attacker;
 
-    private void ProcessDestroyInput()
-    {
-        if (MInput.Destroy.IsPressed() && !_isDigging && isCastHit)
+        [SerializeField]
+        private Animator animator;
+
+        [SerializeField]
+        private BlockBreakingProgress blockBreakingProgress;
+
+        [Min(1f)]
+        public float checkDistance;
+
+        public float dropForce = 1f;
+
+        [SerializeField]
+        private float buildInputCoolTime = 0.3f;
+
+        [SerializeField]
+        private LayerMask entityLayer;
+
+        [SerializeField]
+        private LayerMask groundLayer;
+
+        [SerializeField]
+        private EventReference diggingSoundEvent;
+
+        public bool IsCastHit => _isCastHitGround;
+
+        public Vector3Int HitPosition => _hitPosition;
+
+        public Vector3Int AdjacentHitPosition => _adjacentHitPosition;
+
+        private bool AllowReceiveBuildInput => Time.time > _allowReceiveBuildInputTime;
+
+        private bool _isCastHitGround;
+        private bool _isCastHitEntity;
+        private Vector3Int _hitPosition;
+        private Vector3Int _adjacentHitPosition;
+        private bool _isDigging;
+        private float _allowReceiveBuildInputTime;
+        private Vector3 _halfOne = new Vector3(0.5f, 0.5f, 0.5f);
+        private float _destroyAnimationTriggedTime;
+        private EventInstance _diggingSoundInstance;
+        private PARAMETER_ID _blockMaterialParameterId;
+
+        [SerializeField, ReadOnly]
+        private GameObject _hitEntity;
+
+        private void Start()
         {
-            StartCoroutine(DiggingCoroutine());
+            _allowReceiveBuildInputTime = 0f;
+            _destroyAnimationTriggedTime = 0f;
+            _diggingSoundInstance = RuntimeManager.CreateInstance(diggingSoundEvent);
+            Audio.AudioManager.GetParameterID(_diggingSoundInstance, "BlockMaterial", out _blockMaterialParameterId);
+            _diggingSoundInstance.set3DAttributes(Vector3.zero.To3DAttributes());
         }
-    }
 
-    private void ProcessBuildInput()
-    {
-        if (!MInput.Build.IsPressed() || !AllowReceiveBuildInput)
-            return;
-
-        StartBuildInputCoolDown();
-
-        if (!isCastHit)
-            return;
-
-        if (!HasInteractedWithBlock())
+        private void OnDestroy()
         {
-            CheckForPlaceBlock();
+            _diggingSoundInstance.release();
         }
-    }
 
-    private void StartBuildInputCoolDown()
-    {
-        _allowReceiveBuildInputTime = Time.time + buildInputCoolTime;
-    }
-
-    private void CheckForPlaceBlock()
-    {
-        if (!IsSafeForPlaceBlock(adjacentHitPosition))
-            return;
-
-        if (!World.Instance.CanEdit())
-            return;
-
-        var rightHand = InventorySystem.Instance.RightHand;
-        if (rightHand.IsNullOrEmpty())
-            return;
-
-        if (rightHand.RootItem is not BlockData_SO blockData)
-            return;
-
-        rightHand.TakeAmount(1);
-        var direction = GetDirectionWithPlayer(hitPosition + _halfOne);
-        var _ = World.Instance.EditBlockAsync(adjacentHitPosition, blockData.BlockType, direction);
-    }
-
-    private IEnumerator DiggingCoroutine()
-    {
-        var hitPosition = this.hitPosition;
-        var block = Chunk.GetBlock(hitPosition).Data();
-        if (block.BlockType == BlockType.Air)
-            yield break;
-
-        _isDigging = true;
-        ITool toolInHand = InventorySystem.Instance.RightHand.GetTool();
-        blockBreakingProgress.Enable();
-        blockBreakingProgress.SetMeshAndPosition(block.GetMeshWithoutUvAtlas(), hitPosition);
-        float progress = 0f;
-        while (MInput.Destroy.IsPressed())
+        private void OnEnable()
         {
-            DiggingCalculation(toolInHand, block, ref progress);
-            animator.Play(AnimID.Attack, 1);
-            if (progress >= 1f || hitPosition != this.hitPosition)
-                break;
-
-            blockBreakingProgress.SetValue(progress);
-            yield return null;
+            MInput.Throw.performed += ProcessThrowInput;
         }
-        blockBreakingProgress.Disable();
-        _isDigging = false;
-        if (progress < 1f)
-            yield break;
 
-        var task = World.Instance.EditBlockAsync(hitPosition, BlockType.Air, Direction.Backward);
-        yield return Wait.ForTask(task);
-
-        var isSuccess = task.Result;
-        if (isSuccess)
+        private void OnDisable()
         {
-            Vector3 randomForce = Vector3.up + Random.insideUnitSphere * dropForce;
-            PickupManager.Instance.ThrowItem(block.GetHarvestResult(toolInHand), hitPosition + _halfOne, randomForce);
-        }  
-    }
+            MInput.Throw.performed -= ProcessThrowInput;
+        }
 
-    private Direction GetDirectionWithPlayer(Vector3 pos)
-    {
-        var direction = Vector2Int.RoundToInt((eye.position - pos).XZ().normalized);
-
-        if (direction.x == 0)
-            return direction.y >= 0 ? Direction.Forward : Direction.Backward;
-
-        return direction.x >= 0 ? Direction.Right : Direction.Left;
-    }
-
-    private void ProcessThrowInput(InputAction.CallbackContext obj)
-    {
-        var rightHand = InventorySystem.Instance.RightHand;
-        if (rightHand.IsNullOrEmpty())
-            return;
-
-        var itemPacked = rightHand.TakeAmount(1);
-        PickupManager.Instance.ThrowItem(itemPacked, eye.position + eye.forward, eye.forward * 1.5f);
-    }
-
-    private bool HasInteractedWithBlock()
-    {
-        if (MInput.Shift.IsPressed())
-            return false;
-
-        var blockHit = Chunk.GetBlock(hitPosition).Data();
-
-        if (blockHit is IInteractable interactable)
+        private void Update()
         {
-            interactable.Interact(hitPosition);
+            RayCast();
+            ProcessDestroyInput();
+            ProcessBuildInput();
+        }
+
+        private void ProcessDestroyInput()
+        {
+            if (MInput.Destroy.IsPressed())
+            {
+                if (Time.time > _destroyAnimationTriggedTime)
+                {
+                    _destroyAnimationTriggedTime = Time.time + 0.1f;
+                    animator.Play(AnimID.Attack, 1);
+                }
+                if (!_isDigging && _isCastHitGround)
+                {
+                    StartCoroutine(DiggingCoroutine());
+                }
+                else if (_isCastHitEntity)
+                {
+                    attacker.TryAttack(InventorySystem.Instance.RightHand, _hitEntity);
+                }
+            }
+        }
+
+        private void ProcessBuildInput()
+        {
+            if (!MInput.Build.IsPressed() || !AllowReceiveBuildInput)
+                return;
+
+            StartBuildInputCoolDown();
+
+            if (_isCastHitGround)
+            {
+                if (CheckAndInteractWithBlock())
+                {
+                    return;
+                }
+                CheckAndPlaceBlock();
+            }
+            else if (_isCastHitEntity)
+            {
+                // TODO: Interact with entity
+            }
+        }
+
+        private void StartBuildInputCoolDown()
+        {
+            _allowReceiveBuildInputTime = Time.time + buildInputCoolTime;
+        }
+
+        private bool CheckAndPlaceBlock()
+        {
+            if (!IsSafeForPlaceBlock(_adjacentHitPosition))
+                return false;
+
+            if (!World.Instance.CanEdit())
+                return false;
+
+            var rightHand = InventorySystem.Instance.RightHand;
+            if (rightHand.IsNullOrEmpty())
+                return false;
+
+            if (rightHand.RootItem is not BlockData_SO blockData)
+                return false;
+
+            Direction direction = GetDirectionWithPlayer(_hitPosition + _halfOne);
+            World.Instance.EditBlockAsync(_adjacentHitPosition, blockData.BlockType, direction).Forget();
+            rightHand.TakeAmount(1);
+            _diggingSoundInstance.set3DAttributes(RuntimeUtils.To3DAttributes(_adjacentHitPosition));
+            _diggingSoundInstance.setParameterByID(_blockMaterialParameterId, (float)blockData.BlockMaterial);
+            _diggingSoundInstance.start();
             return true;
         }
-        return false;
-    }
 
-
-    private void RayCast()
-    {
-        var ray = new Ray(eye.transform.position, eye.transform.forward);
-
-        if (Physics.Raycast(ray, out var hit, checkDistance, groundLayer))
+        private IEnumerator DiggingCoroutine()
         {
-            hitPosition = Vector3Int.FloorToInt(hit.point - hit.normal * 0.5f);
-            adjacentHitPosition = Vector3Int.FloorToInt(hit.point + hit.normal * 0.5f);
+            Vector3Int hitPosition = _hitPosition;
+            BlockData_SO block = Chunk.GetBlock(hitPosition).Data();
+            if (block.BlockType == BlockType.Air)
+                yield break;
 
-            isCastHit = true;
+            _isDigging = true;
+            ITool toolInHand = InventorySystem.Instance.RightHand.GetTool();
+            blockBreakingProgress.Enable();
+            blockBreakingProgress.SetMeshAndPosition(block.GetMeshFlattenUV(), hitPosition);
+            float progress = 0f;
+            while (MInput.Destroy.IsPressed())
+            {
+                DiggingCalculation(toolInHand, block, ref progress);
+                //animator.Play(AnimID.Attack, 1);
+                if (progress >= 1f || !_isCastHitGround || hitPosition != _hitPosition)
+                    break;
+
+                blockBreakingProgress.SetValue(progress);
+                yield return null;
+            }
+            blockBreakingProgress.Disable();
+            _isDigging = false;
+            if (progress < 1f)
+                yield break;
+
+            _diggingSoundInstance.set3DAttributes(RuntimeUtils.To3DAttributes(hitPosition));
+            _diggingSoundInstance.setParameterByID(_blockMaterialParameterId, (float)block.BlockMaterial);
+            _diggingSoundInstance.start();
+            BreakBlockAsync(hitPosition, block, toolInHand).Forget();
         }
-        else
+
+        private async UniTaskVoid BreakBlockAsync(Vector3Int position, BlockData_SO block, ITool toolInHand)
         {
-            isCastHit = false;
+            bool isSuccess = await World.Instance.EditBlockAsync(position, BlockType.Air, Direction.Backward);
+            if (isSuccess)
+            {
+                Vector3 randomForce = Vector3.up + Random.insideUnitSphere * dropForce;
+                PickupManager.Instance.ThrowItem(block.GetHarvestResult(toolInHand), position + _halfOne, randomForce);
+            }
         }
-    }
 
-    private bool IsSafeForPlaceBlock(Vector3Int position)
-    {
-        return !Physics.CheckBox(position + _halfOne, _halfOne, Quaternion.identity, entityLayer);
-    }
-
-
-    private void DiggingCalculation(ITool tool, BlockData_SO block, ref float progress)
-    {
-        bool isBestTool = block.BestTool == tool.ToolType;
-        bool canHarvest = block.CanHarvestBy(tool);
-
-        float speedMultilier = 1f;
-        if(isBestTool && canHarvest)
-            speedMultilier = tool.GetToolMultilier();
-
-        if (!playerData.isGrounded)
-            speedMultilier /= 5f;
-
-        float damage = speedMultilier / block.Hardness;
-        damage *= canHarvest ? 1f : 0.3f;
-        damage *= Time.deltaTime;
-
-        progress = Mathf.Clamp01(progress + damage);
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (isCastHit)
+        private Direction GetDirectionWithPlayer(Vector3 pos)
         {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireCube(adjacentHitPosition + _halfOne, Vector3.one);
-        } 
+            Vector2Int direction = Vector2Int.RoundToInt((eye.position - pos).XZ().normalized);
+
+            if (direction.x == 0)
+                return direction.y >= 0 ? Direction.Forward : Direction.Backward;
+
+            return direction.x > 0 ? Direction.Right : Direction.Left;
+        }
+
+        private void ProcessThrowInput(InputAction.CallbackContext _)
+        {
+            ItemSlot rightHand = InventorySystem.Instance.RightHand;
+            if (rightHand.IsNullOrEmpty())
+                return;
+
+            ItemPacked itemPacked = rightHand.TakeAmount(1);
+            PickupManager.Instance.ThrowItem(itemPacked, eye.position + eye.forward, eye.forward * 1.5f);
+        }
+
+        private bool CheckAndInteractWithBlock()
+        {
+            if (MInput.Shift.IsPressed())
+                return false;
+
+            BlockData_SO blockHit = Chunk.GetBlock(_hitPosition).Data();
+
+            if (blockHit is IInteractableBlock interactable)
+            {
+                interactable.Interact(_hitPosition);
+                return true;
+            }
+            return false;
+        }
+
+
+        private void RayCast()
+        {
+            Ray ray = new Ray(eye.transform.position, eye.transform.forward);
+            if (!Physics.Raycast(ray, out RaycastHit hit, checkDistance, groundLayer | entityLayer))
+            {
+                _isCastHitGround = false;
+                _isCastHitEntity = false;
+                _hitEntity = null;
+                return;
+            }
+
+            GameObject hitObject = hit.collider.gameObject;
+
+            _isCastHitGround = IsGround(hitObject.layer);
+            _isCastHitEntity = !_isCastHitGround;
+            if (_isCastHitEntity)
+            {
+                _hitEntity = hitObject;
+            }
+            else
+            {
+                _hitPosition = Vector3Int.FloorToInt(hit.point - hit.normal * 0.5f);
+                _adjacentHitPosition = Vector3Int.FloorToInt(hit.point + hit.normal * 0.5f);
+            }
+        }
+
+        private bool IsGround(int layer)
+        {
+            return (groundLayer.value & 1 << layer) != 0;
+        }
+
+        private bool IsSafeForPlaceBlock(Vector3Int position)
+        {
+            return !Physics.CheckBox(position + _halfOne, _halfOne, Quaternion.identity, entityLayer);
+        }
+
+
+        private void DiggingCalculation(ITool tool, BlockData_SO block, ref float progress)
+        {
+            bool isBestTool = block.BestTool == tool.ToolType;
+            bool canHarvest = block.CanHarvestBy(tool);
+
+            float speedMultilier = 1f;
+            if (isBestTool && canHarvest)
+                speedMultilier = tool.GetToolMultilier();
+
+            if (!playerData.isGrounded)
+                speedMultilier /= 5f;
+
+            float damage = speedMultilier / block.Hardness;
+            damage *= canHarvest ? 1f : 0.3f;
+            damage *= Time.deltaTime;
+
+            progress = Mathf.Clamp01(progress + damage);
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (_isCastHitGround)
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireCube(_adjacentHitPosition + _halfOne, Vector3.one);
+            }
+        }
     }
 }

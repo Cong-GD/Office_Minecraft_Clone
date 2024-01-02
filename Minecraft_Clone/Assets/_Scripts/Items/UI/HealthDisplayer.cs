@@ -28,12 +28,18 @@ public class HealthDisplayer : PoolObject
     [SerializeField]
     private Image healthImage;
 
+    [SerializeField]
     private HealthPoint displaying = default;
 
-    public bool DisplayHealth(HealthPoint healthPoint)
+    private void Awake()
+    {
+        DisplayHealth(displaying);
+    }
+
+    public void DisplayHealth(HealthPoint healthPoint)
     {
         if (healthPoint == displaying)
-            return false;
+            return;
 
         displaying = healthPoint;
 
@@ -47,6 +53,5 @@ public class HealthDisplayer : PoolObject
             { amount: HealthPoint.Amount.Half, state: HealthPoint.State.Absorbing} => absorbingHalfHealth,
             _ => empty,
         };
-        return true;
     }
 }

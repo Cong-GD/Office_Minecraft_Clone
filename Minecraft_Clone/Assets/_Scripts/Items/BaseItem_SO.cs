@@ -1,21 +1,13 @@
 ﻿using Minecraft.ProceduralMeshGenerate;
+using Minecraft.Serialization;
 using NaughtyAttributes;
 using System;
 using UnityEngine;
 
 public abstract class BaseItem_SO : ScriptableObject
 {
-    private string _name = null;
-    public string Name
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(_name))
-                _name = name;
-
-            return _name;
-        }
-    }
+    [HideInInspector]
+    public string Name;
 
     [field: Header("Base Info")]
     [field: SerializeField]
@@ -63,6 +55,20 @@ public abstract class BaseItem_SO : ScriptableObject
     [field: SerializeField]
     [field: BoxGroup("Smelt And Burn"), ShowIf("CanSmelt")]
     public ItemPacked SmeltResult { get; private set; }
+
+
+    [field: SerializeField]
+    [field: BoxGroup("As Weapon")]
+    public int AttackDamage { get; private set; } = 1;
+
+    [field: SerializeField]
+    [field: BoxGroup("As Weapon")]
+    public float AttackSpeed { get; private set; } = 4f;
+
+    private void OnValidate()
+    {
+        Name = name;
+    }
 
     public ObjectMeshData GetObjectMeshData()
     {

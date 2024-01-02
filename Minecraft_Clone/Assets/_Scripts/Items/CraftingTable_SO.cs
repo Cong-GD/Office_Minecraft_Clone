@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Minecraft/Item/Block/Crafting Table")]
-public class CraftingTable_SO : BlockData_SO, IInteractable
+public class CraftingTable_SO : BlockData_SO, IInteractableBlock
 {
     public void Interact(Vector3Int worldPosition)
     {

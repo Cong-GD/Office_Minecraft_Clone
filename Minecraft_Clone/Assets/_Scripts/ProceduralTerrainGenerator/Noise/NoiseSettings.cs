@@ -54,7 +54,7 @@ namespace Minecraft
 
         public FastNoise GetFastNoise()
         {
-            FastNoise fastNoise = new FastNoise(World.WorldSeed + seedOffset);
+            FastNoise fastNoise = new FastNoise(WorldSettings.WorldSeed + seedOffset);
             fastNoise.SetNoiseType(noiseType);
 
             if(noiseType == FastNoise.NoiseType.Cellular)

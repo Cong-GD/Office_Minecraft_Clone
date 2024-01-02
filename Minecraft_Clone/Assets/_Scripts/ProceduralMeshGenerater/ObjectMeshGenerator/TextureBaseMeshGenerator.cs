@@ -124,9 +124,9 @@ namespace Minecraft.ProceduralMeshGenerate
         {
             Mesh mesh = new Mesh();
             ObjectManager.AddToManagingList(mesh);
-            var meshGenerator = ClassCache<MeshGenerator>.Get();
+            var meshGenerator = ThreadSafePool<MeshGenerator>.Get();
             meshGenerator.GetMesh(mesh, texture2D, size);
-            ClassCache<MeshGenerator>.Release(meshGenerator);
+            ThreadSafePool<MeshGenerator>.Release(meshGenerator);
             return mesh;
         }      
     }
