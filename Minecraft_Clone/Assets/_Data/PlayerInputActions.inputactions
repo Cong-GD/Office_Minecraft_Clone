@@ -103,6 +103,15 @@
                     "processors": "",
                     "interactions": "Press",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Fly",
+                    "type": "Button",
+                    "id": "3d57819d-1fb3-47fb-a142-d5bbf880c2ad",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -281,6 +290,17 @@
                     "action": "OpenMenu",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8a320de1-04f5-43a1-9d8b-1bbe6eec1c6a",
+                    "path": "<Keyboard>/space",
+                    "interactions": "MultiTap(pressPoint=0.3)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fly",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -341,17 +361,6 @@
                 },
                 {
                     "name": "",
-                    "id": "abbb3364-e935-492c-a217-3b0e322c36df",
-                    "path": "<Keyboard>/e",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "UI_Exit",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "d09a0a92-fc6b-4036-89f0-b613d46bd53b",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
@@ -393,6 +402,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "AddAnHour",
+                    "type": "Button",
+                    "id": "d937338f-4ea9-496e-bc66-01f11a847781",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -426,6 +444,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Debugging",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "52dbb1c2-67ec-4d2d-b5bb-6bd4f1926e50",
+                    "path": "<Keyboard>/f4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AddAnHour",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

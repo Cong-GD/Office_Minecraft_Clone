@@ -157,9 +157,7 @@ public static class Chunk
         return GetBlock(
                Mathf.FloorToInt(worldPosition.x), 
                Mathf.FloorToInt(worldPosition.y), 
-               Mathf.FloorToInt(worldPosition.z))
-               .Data()
-               .BlockType == BlockType.Water;
+               Mathf.FloorToInt(worldPosition.z)) == BlockType.Water;
     }
 
     public static void SetBlock(Vector3Int worldPos, BlockType blockType, Direction direction = Direction.Forward)

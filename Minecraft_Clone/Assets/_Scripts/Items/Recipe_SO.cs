@@ -141,4 +141,61 @@ public class Recipe_SO : ScriptableObject
             throw new Exception($"Recipe binding can't be empty: {name}");
     }
 
+
+
+    // Use For UI display, because previous code is not support for displaying, just a temporary solution
+    #region Patch
+    public IEnumerable<BaseItem_SO> GetRelativeItems()
+    {
+        if (!result.IsEmpty())
+        {
+            yield return result.item;
+        }
+        foreach (ItemBindings binding in itemBindings)
+        {
+            if (binding.item != null)
+            {
+                yield return binding.item;
+            }
+        }
+    }
+
+    public BaseItem_SO GetItem(int x, int y)
+    {
+        if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE)
+            return null;
+
+        int id = recipeBinding[x][2 - y];
+        foreach (var itemBinding in itemBindings)
+        {
+            if (itemBinding.id == id)
+            {
+                return itemBinding.item;
+            }
+        }
+        return null;
+    }
+
+    public int3x3 GetBindingId()
+    {
+        return new int3x3(
+            recipeBinding[0][2], recipeBinding[1][2], recipeBinding[2][2],
+            recipeBinding[0][1], recipeBinding[1][1], recipeBinding[2][1],
+            recipeBinding[0][0], recipeBinding[1][0], recipeBinding[2][0]
+            );
+    }
+
+    public BaseItem_SO BindingIdToItem(int id)
+    {
+        foreach (var itemBinding in itemBindings)
+        {
+            if (itemBinding.id == id)
+            {
+                return itemBinding.item;
+            }
+        }
+        return null;
+    } 
+    #endregion
+
 }

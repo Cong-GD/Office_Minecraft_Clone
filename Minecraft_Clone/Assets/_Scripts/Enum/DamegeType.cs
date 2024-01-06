@@ -7,5 +7,7 @@
         Poison,
         Explosion,
         InstantDeath,
+        Drowning,
+        Starving
     }
 }

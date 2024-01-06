@@ -10,7 +10,8 @@ namespace Minecraft.Serialization
     {
         public string name = string.Empty;
         public string seed = string.Empty;
-        public DateTime creationTime;
+        public DateTime firstPlayTime;
+        public DateTime lastPlayTime;
         public GameMode gameMode;
         public Texture2D icon;
 
@@ -20,21 +21,22 @@ namespace Minecraft.Serialization
 
         public WorldMetaData Clone()
         {
-            return new WorldMetaData
-            {
-                name = name,
-                seed = seed,
-                creationTime = creationTime,
-                gameMode = gameMode,
-                icon = icon
-            };
+            WorldMetaData clone = new();
+            clone.name = name;
+            clone.seed = seed;
+            clone.firstPlayTime = firstPlayTime;
+            clone.lastPlayTime = lastPlayTime;
+            clone.gameMode = gameMode;
+            clone.icon = icon;
+            return clone;
         }
 
         public WorldMetaData(ByteString byteString)
         {
             ByteString.BytesReader byteReader = byteString.GetBytesReader();
             seed = byteReader.ReadChars().ToString();
-            creationTime = byteReader.ReadValue<DateTime>();
+            firstPlayTime = byteReader.ReadValue<DateTime>();
+            lastPlayTime = byteReader.ReadValue<DateTime>();
             gameMode = byteReader.ReadValue<GameMode>();
         }
 
@@ -42,7 +44,8 @@ namespace Minecraft.Serialization
         {
             ByteString byteString = ByteString.Create(200);
             byteString.WriteChars(seed);
-            byteString.WriteValue(creationTime);
+            byteString.WriteValue(firstPlayTime);
+            byteString.WriteValue(lastPlayTime);
             byteString.WriteValue(gameMode);
             return byteString;
         }

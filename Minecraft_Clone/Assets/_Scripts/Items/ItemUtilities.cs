@@ -1,15 +1,21 @@
-﻿using System;
+﻿using CongTDev.Collection;
+using Minecraft.Serialization;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Unity.Mathematics;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 public static class ItemUtilities
 {
     private static Dictionary<int3x3, Recipe_SO> _recipes;
 
-    private static Dictionary<string, BaseItem_SO> _allItems;
+    private static BaseItem_SO[] _allItems;
+
+    public static ReadOnlySpan<BaseItem_SO> AllItems => _allItems;
+
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
@@ -35,23 +41,43 @@ public static class ItemUtilities
         }
         Debug.Log("Recipes generated: " + _recipes.Count);
 
-        BaseItem_SO[] allItems = Resources.LoadAll<BaseItem_SO>("Items");
-        _allItems = allItems.ToDictionary(item => item.name, item => item);   
-        Debug.Log("Items loaded: " + _allItems.Count);
+        _allItems = Resources.LoadAll<BaseItem_SO>("Items").Where(item => item.IsValidItem).ToArray();
+        Array.Sort(_allItems, (item1, item2) => item1.Name.AsSpan().CompareTo(item2.Name.AsSpan(), StringComparison.Ordinal));
+        Debug.Log("Items loaded: " + _allItems.Length);
     }
 
-    public static BaseItem_SO GetItemByName(string name)
+    public static BaseItem_SO GetItemByName(ReadOnlySpan<char> name)
     {
-        if (_allItems.TryGetValue(name, out BaseItem_SO item))
+        if(name.IsEmpty)
         {
-            return item;
+            return null;
+        }
+
+        int left = 0;
+        int right = _allItems.Length - 1;
+        while (left <= right)
+        {
+            int mid = (left + right) / 2;
+            int compareResult = _allItems[mid].Name.AsSpan().CompareTo(name, StringComparison.Ordinal);
+            if (compareResult == 0)
+            {
+                return _allItems[mid];
+            }
+            else if (compareResult < 0)
+            {
+                left = mid + 1;
+            }
+            else
+            {
+                right = mid - 1;
+            }
         }
         return null;
     }
 
     public static ItemPacked CheckRecipe(ReadOnlySpan<ItemSlot> slots)
     {
-        if(slots.Length != 9)
+        if (slots.Length != 9)
             throw new ArgumentException("Manufacture space must have 9 slots");
 
         int3x3 hashCodes = new int3x3(
@@ -67,30 +93,7 @@ public static class ItemUtilities
         return ItemPacked.Empty;
     }
 
-    public static bool HasAnyItem(ReadOnlySpan<ItemSlot> slots)
-    {
-        for (int i = 0; i < slots.Length; i++)
-        {
-            if (!slots[i].IsEmpty())
-                return true;
-        }
-        return false;
-    }
-
     public static ItemSlot[] NewStogare(int count)
-    {
-        if(count <= 0)
-            return Array.Empty<ItemSlot>();
-
-        ItemSlot[] storage = new ItemSlot[count];
-        for (int i = 0; i < count; i++)
-        {
-            storage[i] = new ItemSlot();
-        }
-        return storage;
-    }
-
-    public static ItemSlot[] NewStogare(int count, IItemSlotRequiment slotRequiment)
     {
         if (count <= 0)
             return Array.Empty<ItemSlot>();
@@ -98,7 +101,7 @@ public static class ItemUtilities
         ItemSlot[] storage = new ItemSlot[count];
         for (int i = 0; i < count; i++)
         {
-            storage[i] = new ItemSlot(slotRequiment);
+            storage[i] = new ItemSlot();
         }
         return storage;
     }
@@ -129,5 +132,55 @@ public static class ItemUtilities
     public static int GetItemID(this BaseItem_SO item)
     {
         return item == null ? 0 : item.GetInstanceID();
+    }
+
+    public static void SortStogare(ReadOnlySpan<ItemSlot> stogare, IComparer<ItemPacked> comparer)
+    {
+        try
+        {
+            List<ItemPacked> packed = new List<ItemPacked>(stogare.Length);
+            foreach (ItemSlot slot in stogare)
+            {
+                packed.Add(slot.TakeAmount(slot.Amount));
+            }
+            packed.Sort(comparer);
+            ItemSlot holder = new ItemSlot();
+            foreach (ItemPacked item in packed)
+            {
+                holder.SetItem(item);
+                AddItem(stogare, holder);
+            }
+        }
+        catch (Exception)
+        {
+            Debug.LogWarning("Fail to sort stogare");
+        }
+    }
+
+    public static ByteString ToByteString(ReadOnlySpan<ItemSlot> stogare)
+    {
+        ByteString byteString = ByteString.Create(stogare.Length * 25);
+        byteString.WriteValue(stogare.Length);
+        foreach (ItemSlot slot in stogare)
+        {
+            slot.GetPacked().WriteTo(byteString);
+        }
+        return byteString;
+    }
+
+    public static void ParseToStogare(ByteString byteString, ReadOnlySpan<ItemSlot> stogare)
+    {
+        ByteString.BytesReader bytesReader = byteString.GetBytesReader();
+        int count = bytesReader.ReadValue<int>();
+        count = math.min(count, stogare.Length);
+        int i = 0;
+        for (; i < count; i++)
+        {
+            stogare[i].SetItem(ItemPacked.ParseFrom(ref bytesReader));
+        }
+        for (; i < stogare.Length; i++)
+        {
+            stogare[i].SetItem(ItemPacked.Empty);
+        }
     }
 }

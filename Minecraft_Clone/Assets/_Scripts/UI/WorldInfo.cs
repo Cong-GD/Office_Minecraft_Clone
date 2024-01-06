@@ -1,7 +1,4 @@
 using Minecraft.Serialization;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -50,7 +47,7 @@ namespace Minecraft
 
         public Sprite ToSprite(Texture2D texture)
         {
-            if(texture == null)
+            if (texture == null)
             {
                 return defautIcon;
             }
@@ -61,14 +58,14 @@ namespace Minecraft
 
         public void RefreshUI()
         {
-            if(WorldData == null)
+            if (WorldData == null)
             {
                 return;
             }
 
             iconImage.sprite = ToSprite(WorldData.icon);
             worldNameText.text = WorldData.name;
-            creationTimeText.text = $"{WorldData.name} ({WorldData.creationTime:dd/MM/yyyy - hh:mm tt})";
+            creationTimeText.text = $"{WorldData.name} ({WorldData.lastPlayTime:dd/MM/yyyy - hh:mm tt})";
             gameModeText.text = $"{WorldData.gameMode} Mode, Version 1.12.1";
         }
 

@@ -33,9 +33,9 @@ namespace Minecraft.ProceduralMeshGenerate
                 MeshDrawerHelper.AddQuadTriangle(triangles, vertices.Count);
                 MeshDrawerHelper.AddQuadUvs(uvs, GetUvIndex(sixDirections[i]));
             }
-            mesh.SetVertices(vertices.Items, 0, vertices.Count);
-            mesh.SetTriangles(triangles.Items, 0, triangles.Count, 0);
-            mesh.SetUVs(0, uvs.Items, 0, uvs.Count);
+            mesh.SetVertices(vertices.Array, 0, vertices.Count);
+            mesh.SetTriangles(triangles.Array, 0, triangles.Count, 0);
+            mesh.SetUVs(0, uvs.Array, 0, uvs.Count);
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
             return mesh;

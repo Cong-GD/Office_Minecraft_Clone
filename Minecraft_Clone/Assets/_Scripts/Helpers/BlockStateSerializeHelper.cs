@@ -1,4 +1,5 @@
 ﻿using CongTDev.Collection;
+using Minecraft;
 
 public static class BlockStateSerializeHelper
 {
@@ -6,6 +7,7 @@ public static class BlockStateSerializeHelper
     {
         Null = 0,
         Furnace = 1,
+        Stogare = 2,
     }
 
     public static void GetSerializedData(ByteString byteString, IBlockState blockState)
@@ -15,11 +17,15 @@ public static class BlockStateSerializeHelper
             byteString.WriteValue(BlockStateID.Null);
             return;
         }
-
-        if (blockState is Furnace furnace)
+        else if (blockState is Furnace furnace)
         {
             byteString.WriteValue(BlockStateID.Furnace);
             furnace.GetSerializedData(byteString);
+        }
+        else if (blockState is Stogare storage)
+        {
+            byteString.WriteValue(BlockStateID.Stogare);
+            storage.GetSerializedData(byteString);
         }
     }
 
@@ -34,6 +40,9 @@ public static class BlockStateSerializeHelper
         {
             case BlockStateID.Furnace:
                 blockState = new Furnace(ref byteReader);
+                break;
+            case BlockStateID.Stogare:
+                blockState = new Stogare(ref byteReader);
                 break;
         }
         return blockState;

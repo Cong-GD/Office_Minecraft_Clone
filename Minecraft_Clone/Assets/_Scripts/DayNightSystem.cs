@@ -1,9 +1,16 @@
-﻿using System;
+﻿using CongTDev.Collection;
+using Minecraft;
+using Minecraft.Input;
+using System;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class DayNightSystem : MonoBehaviour
 {
+    public const string FILE_NAME = "DayNightSystem.dat";
+
     [SerializeField]
     private float timeMultilier;
 
@@ -56,13 +63,18 @@ public class DayNightSystem : MonoBehaviour
 
         _skyBoxMaterial = new Material(skyBoxMaterialPrefab);
         RenderSettings.skybox = _skyBoxMaterial;
-
+        GameManager.Instance.OnGameSave += SaveTime;
+        GameManager.Instance.OnGameLoad += LoadTime;
+        MInput.InputActions.General.AddAnHour.performed += AddHourHandle;
     }
 
     private void OnDestroy()
     {
+        GameManager.Instance.OnGameSave -= SaveTime;
+        GameManager.Instance.OnGameLoad -= LoadTime;
         RenderSettings.skybox = skyBoxMaterialPrefab;
         DestroyImmediate(_skyBoxMaterial);
+        MInput.InputActions.General.AddAnHour.performed -= AddHourHandle;
     }
 
     private void FixedUpdate()
@@ -73,6 +85,31 @@ public class DayNightSystem : MonoBehaviour
         BlendSkyBox();
         UpdateSunDirection();
         DuskAndDawnEffect();
+    }
+
+    private void SaveTime(Dictionary<string, ByteString> dictionary)
+    {
+        ByteString byteString = ByteString.Create();
+        byteString.WriteValue(_currentTime);
+        dictionary[FILE_NAME] = byteString;
+    }
+
+    private void LoadTime(Dictionary<string, ByteString> dictionary)
+    {
+        if(dictionary.Remove(FILE_NAME, out ByteString byteString))
+        {
+            ByteString.BytesReader byteReader = byteString.GetBytesReader();
+            _currentTime = byteReader.ReadValue<TimeSpan>();
+        }
+    }
+    private void AddHourHandle(InputAction.CallbackContext context)
+    {
+        AddHours(1);
+    }
+
+    public void AddHours(int hours)
+    {
+        AddSencondToCurrent(hours * 3600f);
     }
 
     private void AddSencondToCurrent(float seconds)

@@ -16,6 +16,10 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
+    public const string BLOCK_STATE_FILE_NAME = "BlockStates.dat";
+    public const string CHUNK_MODIFICATIONS_FILE_NAME = "ChunkModifications.dat";
+
+
     public int seed;
 
     [SerializeField]
@@ -41,9 +45,6 @@ public class World : MonoBehaviour
 
     [SerializeField, Range(1, 1000)]
     private int chunkRenderPerFrame;
-
-    [SerializeField]
-    private PlayerDataLoader playerDataLoader;
 
     [Header("Testing Purpose")]
     public bool multiThread;
@@ -84,7 +85,6 @@ public class World : MonoBehaviour
         }
 
         Instance = this;
-        WorldSettings.WorldSeed = seed;
         ThreadSafePool<MeshData>.Capacity = 50;
 
         _cancellationToken = destroyCancellationToken;
@@ -131,7 +131,7 @@ public class World : MonoBehaviour
             {
                 RenderMesh(meshData);
             }
-            playerDataLoader.SpawnPlayer();
+            PlayerController.Instance.SpawnPlayer();
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
         }
         catch (Exception ex)
@@ -181,84 +181,113 @@ public class World : MonoBehaviour
 
     private void SaveWorldDatas(Dictionary<string, ByteString> dictionary)
     {
-        lock (_playerModifications)
+        try
         {
-            ByteString byteString = ByteString.Create(10000);
-            byteString.WriteValue(_playerModifications.Count);
-            foreach ((Vector3Int coord, MyNativeList<LocalBlock> localBlocks) in _playerModifications)
+            lock (_playerModifications)
             {
-                byteString.WriteValue(coord);
-                byteString.WriteValue(localBlocks.Count);
-                byteString.WriteValues<LocalBlock>(localBlocks.AsSpan());
+                ByteString byteString = ByteString.Create(5000);
+                byteString.WriteValue(_playerModifications.Count);
+                foreach ((Vector3Int coord, MyNativeList<LocalBlock> localBlocks) in _playerModifications)
+                {
+                    byteString.WriteValue(coord);
+                    byteString.WriteValue(localBlocks.Count);
+                    byteString.WriteValues<LocalBlock>(localBlocks.AsSpan());
+                }
+                dictionary[CHUNK_MODIFICATIONS_FILE_NAME] = byteString;
             }
-            dictionary["ChunkModifications.dat"] = byteString;
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Error while save {CHUNK_MODIFICATIONS_FILE_NAME}: {e}");
         }
 
-        ByteString blockStateData = ByteString.Create(10000);
-        blockStateData.WriteValue(_blockStates.Count);
-        foreach ((Vector3Int coord, List<IBlockState> blockStates) in _blockStates)
+        try
         {
-            blockStateData.WriteValue(coord);
-            blockStateData.WriteValue(blockStates.Count);
-            foreach (IBlockState blockState in blockStates)
+            ByteString blockStateData = ByteString.Create(5000);
+            blockStateData.WriteValue(_blockStates.Count);
+            foreach ((Vector3Int coord, List<IBlockState> blockStates) in _blockStates)
             {
-                BlockStateSerializeHelper.GetSerializedData(blockStateData ,blockState);
+                blockStateData.WriteValue(coord);
+                blockStateData.WriteValue(blockStates.Count);
+                foreach (IBlockState blockState in blockStates)
+                {
+                    BlockStateSerializeHelper.GetSerializedData(blockStateData, blockState);
+                }
             }
+            dictionary[BLOCK_STATE_FILE_NAME] = blockStateData;
         }
-        dictionary["BlockStates.dat"] = blockStateData;
+        catch (Exception e)
+        {
+
+            Debug.LogWarning($"Error while save {BLOCK_STATE_FILE_NAME}: {e}");
+        }
 
     }
 
     private void LoadWorldDatas(Dictionary<string, ByteString> dictionary)
     {
-        if (dictionary.Remove("ChunkModifications.dat", out ByteString byteString))
+        try
         {
-            ByteString.BytesReader byteReader = byteString.GetBytesReader();
-            int count = byteReader.ReadValue<int>();
-
-            Dictionary<Vector3Int, MyNativeList<LocalBlock>> chunksModifiedByPlayer = new Dictionary<Vector3Int, MyNativeList<LocalBlock>>(count);
-
-            for (int i = 0; i < count; i++)
+            if (dictionary.Remove(CHUNK_MODIFICATIONS_FILE_NAME, out ByteString byteString))
             {
-                Vector3Int coord = byteReader.ReadValue<Vector3Int>();
-                int localBlockCount = byteReader.ReadValue<int>();
-                MyNativeList<LocalBlock> localBlocks = new(byteReader.ReadValues<LocalBlock>(localBlockCount));
-                chunksModifiedByPlayer[coord] = localBlocks;
-            }
+                ByteString.BytesReader byteReader = byteString.GetBytesReader();
+                int count = byteReader.ReadValue<int>();
 
-            lock (_playerModifications)
-            {
-                _playerModifications = chunksModifiedByPlayer;
+                Dictionary<Vector3Int, MyNativeList<LocalBlock>> chunksModifiedByPlayer = new Dictionary<Vector3Int, MyNativeList<LocalBlock>>(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    Vector3Int coord = byteReader.ReadValue<Vector3Int>();
+                    int localBlockCount = byteReader.ReadValue<int>();
+                    MyNativeList<LocalBlock> localBlocks = new(byteReader.ReadValues<LocalBlock>(localBlockCount));
+                    chunksModifiedByPlayer[coord] = localBlocks;
+                }
+
+                lock (_playerModifications)
+                {
+                    _playerModifications = chunksModifiedByPlayer;
+                }
+                byteString.Dispose();
             }
-            byteString.Dispose();
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Error while load {CHUNK_MODIFICATIONS_FILE_NAME}: {e}");
         }
 
-
-        if (dictionary.Remove("BlockStates.dat", out byteString))
+        try
         {
-            ByteString.BytesReader byteReader = byteString.GetBytesReader();
-            int chunkCount = byteReader.ReadValue<int>();
-            Dictionary<Vector3Int, List<IBlockState>> blockStates = new Dictionary<Vector3Int, List<IBlockState>>(chunkCount);
-            for (int i = 0; i < chunkCount; i++)
+
+            if (dictionary.Remove(BLOCK_STATE_FILE_NAME, out ByteString byteString))
             {
-                Vector3Int coord = byteReader.ReadValue<Vector3Int>();
-                int blockStateCount = byteReader.ReadValue<int>();
-                List<IBlockState> blockStateList = new List<IBlockState>(blockStateCount);
-                for (int j = 0; j < blockStateCount; j++)
+                ByteString.BytesReader byteReader = byteString.GetBytesReader();
+                int chunkCount = byteReader.ReadValue<int>();
+                Dictionary<Vector3Int, List<IBlockState>> blockStates = new Dictionary<Vector3Int, List<IBlockState>>(chunkCount);
+                for (int i = 0; i < chunkCount; i++)
                 {
-                    IBlockState blockState = BlockStateSerializeHelper.GetBlockState(ref byteReader);
-                    if(blockState != null)
+                    Vector3Int coord = byteReader.ReadValue<Vector3Int>();
+                    int blockStateCount = byteReader.ReadValue<int>();
+                    List<IBlockState> blockStateList = new List<IBlockState>(blockStateCount);
+                    for (int j = 0; j < blockStateCount; j++)
                     {
-                        blockStateList.Add(blockState);
+                        IBlockState blockState = BlockStateSerializeHelper.GetBlockState(ref byteReader);
+                        if (blockState != null)
+                        {
+                            blockStateList.Add(blockState);
+                        }
+                        else
+                        {
+                            Debug.LogError($"Can't deserialize block state at {coord}");
+                        }
                     }
-                    else
-                    {
-                        Debug.LogError($"Can't deserialize block state at {coord}");
-                    }
+                    blockStates[coord] = blockStateList;
                 }
-                blockStates[coord] = blockStateList;
+                _blockStates = blockStates;
             }
-            _blockStates = blockStates;
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Error while load {BLOCK_STATE_FILE_NAME}: {e}");
         }
     }
 
@@ -314,9 +343,14 @@ public class World : MonoBehaviour
                 BuildStructures();
                 PrepareMeshDatas(playerCoord, renderDistance);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException)
             {
-                Debug.LogException(ex);
+                Debug.Log("LongtermViewCheckTask canceled");
+                return;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
     }
@@ -492,7 +526,7 @@ public class World : MonoBehaviour
 
     private void PrepareMeshDatas(Vector3Int playerCoord, int viewDistance)
     {
-        using TimeExcute timer = TimeExcute.Start("Prepare mesh datas");
+        //using TimeExcute timer = TimeExcute.Start("Prepare mesh datas");
         if (_parallelOptions.MaxDegreeOfParallelism == 1)
         {
             foreach (ChunkData chunkData in GetChunkNeedToPrepareMesh(playerCoord, viewDistance))

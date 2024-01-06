@@ -1,10 +1,10 @@
 using CongTDev.Collection;
 using Cysharp.Threading.Tasks;
+using Minecraft.Input;
 using Minecraft.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Enumeration;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,11 +22,23 @@ namespace Minecraft
 
         public event Action<Dictionary<string, ByteString>> OnGameLoad;
 
+        public event Action<GameMode> OnGameModeChange;
+
         public string WorldName => _currentWorld.name;
 
-        public GameMode GameMode => _currentWorld.gameMode;
-
         public Camera MainCamera => _mainCamera ? _mainCamera : _mainCamera = Camera.main;
+
+        public GameMode GameMode
+        {
+            get => _currentWorld.gameMode;
+            set
+            {
+                _currentWorld.gameMode = value;
+                OnGameModeChange?.Invoke(value);
+            }
+        }
+
+        public Statictics Statictics { get; private set; } = new Statictics();
 
         private WorldMetaData _currentWorld = new WorldMetaData();
 
@@ -41,6 +53,8 @@ namespace Minecraft
             }
         }
 
+        
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
         {
@@ -52,57 +66,57 @@ namespace Minecraft
         {
             _currentWorld = metaWorldData;
             WorldSettings.WorldSeed = metaWorldData.seed.GetHashCode();
+
+            string staticticsPath = Path.Combine(FileHandler.PersistentDataPath, WorldName, "Statictics.dat");
+            if(File.Exists(staticticsPath))
+            {
+                using ByteString staticticsData = FileHandler.LoadByteData(staticticsPath);
+                Statictics.Load(staticticsData);
+            }
+            else
+            {
+                Statictics = new Statictics();
+            }
+           
+            Statictics.totalPlayCount++;
+            string path = Path.Combine(FileHandler.PersistentDataPath, WorldName, "World");
+            Dictionary<string, ByteString> byteDatas = await UniTask.RunOnThreadPool(() => FileHandler.LoadByteDatas(path));
             await SceneManager.LoadSceneAsync("VoxelWorld");
-            Debug.Log($"Enter voxel world name: {WorldName}");
-            LoadWorldData();
+            MInput.state = MInput.State.Gameplay;
+            OnGameLoad?.Invoke(byteDatas);
         }
 
         public async UniTaskVoid SaveAndReturnToMainMenu()
         {
             await SaveWorldDatasAsync();
             await SceneManager.LoadSceneAsync("MainMenu");
+            MInput.state = MInput.State.None;
         }
 
-        public void LoadWorldData()
-        {
-            string path = Path.Combine(FileHandler.PersistentDataPath, WorldName, "Datas");
-            Dictionary<string, ByteString> byteDatas = FileHandler.LoadByteDatas(path);
-            OnGameLoad?.Invoke(byteDatas);
-            Debug.Log($"Loaded world data: {WorldName}");
-        }
-
-        public void SaveWorldData()
-        {
-            Debug.Log($"Save world data: {WorldName}");
-            Dictionary<string, ByteString> byteDatas = new Dictionary<string, ByteString>();
-            OnGameSave?.Invoke(byteDatas);
-            string path = Path.Combine(FileHandler.PersistentDataPath, WorldName, "Datas");
-            FileHandler.SaveByteDatas(path, byteDatas, true);
-        }
-
-        public async UniTask LoadWorldDatasAsync()
-        {
-            Debug.Log($"Load world data: {WorldName}");
-            string path = Path.Combine(FileHandler.PersistentDataPath, WorldName, "Datas");
-            Dictionary<string, ByteString> byteDatas = 
-                await UniTask.RunOnThreadPool(() => FileHandler.LoadByteDatas(path));
-            OnGameLoad?.Invoke(byteDatas);
-        }
 
         public async UniTask SaveWorldDatasAsync()
         {
             Debug.Log($"Save world data: {WorldName}");
             Dictionary<string, ByteString> byteDatas = new Dictionary<string, ByteString>();
             OnGameSave?.Invoke(byteDatas);
-            string path = Path.Combine(FileHandler.PersistentDataPath, WorldName, "Datas");
+            string path = Path.Combine(FileHandler.PersistentDataPath, WorldName, "World");
             await UniTask.RunOnThreadPool(() => FileHandler.SaveByteDatas(path, byteDatas, true));
-            if(MainCamera.TryGetComponent(out CameraCapture cameraCapture))
+
+            if (MainCamera.TryGetComponent(out CameraCapture cameraCapture))
             {
                 _currentWorld.icon = cameraCapture.Capture();
             }
+            _currentWorld.firstPlayTime = DateTime.Now;
+
+            using(ByteString byteString = Statictics.ToByteString())
+            {
+                string staticticsPath = Path.Combine(FileHandler.PersistentDataPath, WorldName, "Statictics.dat");
+                FileHandler.SaveByteData(staticticsPath, byteString);
+            }
+
             FileHandler.SaveWorldData(_currentWorld);
         }
 
     }
-        
+
 }

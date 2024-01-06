@@ -1,5 +1,5 @@
 ﻿// This enum is add only
-// Don't set value for this enum or reorder it, that will generate a lot of problem or bug
+// Don't set value for this enum or reorder it
 public enum BlockType : byte
 {
     Air,
@@ -20,4 +20,10 @@ public enum BlockType : byte
     Furnace,
     IronOre,
     CoalOre,
+    GoldOre,
+    GoldBlock,
+    IronBlock,
+    DiamondOre,
+    DiamondBlock,
+    Barrel,
 }

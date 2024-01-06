@@ -125,6 +125,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": ""Press"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Fly"",
+                    ""type"": ""Button"",
+                    ""id"": ""3d57819d-1fb3-47fb-a142-d5bbf880c2ad"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -303,6 +312,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""OpenMenu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8a320de1-04f5-43a1-9d8b-1bbe6eec1c6a"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": ""MultiTap(pressPoint=0.3)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fly"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -363,17 +383,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""abbb3364-e935-492c-a217-3b0e322c36df"",
-                    ""path"": ""<Keyboard>/e"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""UI_Exit"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""d09a0a92-fc6b-4036-89f0-b613d46bd53b"",
                     ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
@@ -415,6 +424,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""AddAnHour"",
+                    ""type"": ""Button"",
+                    ""id"": ""d937338f-4ea9-496e-bc66-01f11a847781"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -450,6 +468,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Debugging"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""52dbb1c2-67ec-4d2d-b5bb-6bd4f1926e50"",
+                    ""path"": ""<Keyboard>/f4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""AddAnHour"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -469,6 +498,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_GamePlay_Sprint = m_GamePlay.FindAction("Sprint", throwIfNotFound: true);
         m_GamePlay_Throw = m_GamePlay.FindAction("Throw", throwIfNotFound: true);
         m_GamePlay_OpenMenu = m_GamePlay.FindAction("OpenMenu", throwIfNotFound: true);
+        m_GamePlay_Fly = m_GamePlay.FindAction("Fly", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_UI_LeftClick = m_UI.FindAction("UI_LeftClick", throwIfNotFound: true);
@@ -479,6 +509,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_General_Pointer = m_General.FindAction("Pointer", throwIfNotFound: true);
         m_General_Shift = m_General.FindAction("Shift", throwIfNotFound: true);
         m_General_Debugging = m_General.FindAction("Debugging", throwIfNotFound: true);
+        m_General_AddAnHour = m_General.FindAction("AddAnHour", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -551,6 +582,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_GamePlay_Sprint;
     private readonly InputAction m_GamePlay_Throw;
     private readonly InputAction m_GamePlay_OpenMenu;
+    private readonly InputAction m_GamePlay_Fly;
     public struct GamePlayActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -566,6 +598,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Sprint => m_Wrapper.m_GamePlay_Sprint;
         public InputAction @Throw => m_Wrapper.m_GamePlay_Throw;
         public InputAction @OpenMenu => m_Wrapper.m_GamePlay_OpenMenu;
+        public InputAction @Fly => m_Wrapper.m_GamePlay_Fly;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -608,6 +641,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @OpenMenu.started += instance.OnOpenMenu;
             @OpenMenu.performed += instance.OnOpenMenu;
             @OpenMenu.canceled += instance.OnOpenMenu;
+            @Fly.started += instance.OnFly;
+            @Fly.performed += instance.OnFly;
+            @Fly.canceled += instance.OnFly;
         }
 
         private void UnregisterCallbacks(IGamePlayActions instance)
@@ -645,6 +681,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @OpenMenu.started -= instance.OnOpenMenu;
             @OpenMenu.performed -= instance.OnOpenMenu;
             @OpenMenu.canceled -= instance.OnOpenMenu;
+            @Fly.started -= instance.OnFly;
+            @Fly.performed -= instance.OnFly;
+            @Fly.canceled -= instance.OnFly;
         }
 
         public void RemoveCallbacks(IGamePlayActions instance)
@@ -731,6 +770,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_General_Pointer;
     private readonly InputAction m_General_Shift;
     private readonly InputAction m_General_Debugging;
+    private readonly InputAction m_General_AddAnHour;
     public struct GeneralActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -738,6 +778,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Pointer => m_Wrapper.m_General_Pointer;
         public InputAction @Shift => m_Wrapper.m_General_Shift;
         public InputAction @Debugging => m_Wrapper.m_General_Debugging;
+        public InputAction @AddAnHour => m_Wrapper.m_General_AddAnHour;
         public InputActionMap Get() { return m_Wrapper.m_General; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -756,6 +797,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Debugging.started += instance.OnDebugging;
             @Debugging.performed += instance.OnDebugging;
             @Debugging.canceled += instance.OnDebugging;
+            @AddAnHour.started += instance.OnAddAnHour;
+            @AddAnHour.performed += instance.OnAddAnHour;
+            @AddAnHour.canceled += instance.OnAddAnHour;
         }
 
         private void UnregisterCallbacks(IGeneralActions instance)
@@ -769,6 +813,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Debugging.started -= instance.OnDebugging;
             @Debugging.performed -= instance.OnDebugging;
             @Debugging.canceled -= instance.OnDebugging;
+            @AddAnHour.started -= instance.OnAddAnHour;
+            @AddAnHour.performed -= instance.OnAddAnHour;
+            @AddAnHour.canceled -= instance.OnAddAnHour;
         }
 
         public void RemoveCallbacks(IGeneralActions instance)
@@ -799,6 +846,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnSprint(InputAction.CallbackContext context);
         void OnThrow(InputAction.CallbackContext context);
         void OnOpenMenu(InputAction.CallbackContext context);
+        void OnFly(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
@@ -811,5 +859,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnPointer(InputAction.CallbackContext context);
         void OnShift(InputAction.CallbackContext context);
         void OnDebugging(InputAction.CallbackContext context);
+        void OnAddAnHour(InputAction.CallbackContext context);
     }
 }

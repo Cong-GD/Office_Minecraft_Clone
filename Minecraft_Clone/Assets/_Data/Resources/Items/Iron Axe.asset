@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fca4d29a31bd2b94eb7cf306a37d1221, type: 3}
+  m_Name: Iron Axe
+  m_EditorClassIdentifier: 
+  <Name>k__BackingField: Iron Axe
+  <Description>k__BackingField: 
+  <Icon>k__BackingField: {fileID: 21300000, guid: b521a270446ee144bbeaec0070b01a08,
+    type: 3}
+  <MaxStack>k__BackingField: 1
+  relativeTransforms:
+    rightHand:
+      <position>k__BackingField: {x: -0.012, y: -0.173, z: 0.028}
+      <rotation>k__BackingField: {x: 0, y: 90, z: 28.67}
+      <scale>k__BackingField: {x: 1.8, y: 1.8, z: 1.5}
+    leftHand:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+    freeObject:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 1.2, y: 1.2, z: 1.5}
+  <CanBurn>k__BackingField: 0
+  <BurnDuration>k__BackingField: 0
+  <CanSmelt>k__BackingField: 0
+  <SmeltDuration>k__BackingField: 0
+  <SmeltResult>k__BackingField:
+    item: {fileID: 0}
+    amount: 0
+  <AttackDamage>k__BackingField: 1
+  <AttackSpeed>k__BackingField: 4
+  meshGenerator:
+    texture2D: {fileID: 2800000, guid: b521a270446ee144bbeaec0070b01a08, type: 3}
+    materialPrefab: {fileID: 2100000, guid: b556ba27a63fc234080a5458cd5f464d, type: 2}
+    size: 0.02
+  <ToolTier>k__BackingField: 8
+  <ToolType>k__BackingField: 8

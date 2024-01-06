@@ -17,7 +17,7 @@ namespace CongTDev.Collection
 
         private int _count;
 
-        public T[] Items => _items;
+        public T[] Array => _items;
 
         public int Count => _count;
 
@@ -34,7 +34,7 @@ namespace CongTDev.Collection
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException("Cappacity can't less than 0");
 
-            _items = capacity == 0 ? Array.Empty<T>() : new T[capacity];
+            _items = capacity == 0 ? System.Array.Empty<T>() : new T[capacity];
         }
 
         public ref T this[int index]
@@ -74,7 +74,7 @@ namespace CongTDev.Collection
                 int newCapacity = _items.Length == 0 ? DEFAULT_CAPACITY : _items.Length * 2;
                 if ((uint)newCapacity > _maxSize) newCapacity = _maxSize;
                 if (newCapacity < min) newCapacity = min;
-                Array.Resize(ref _items, newCapacity);
+                System.Array.Resize(ref _items, newCapacity);
             }
         }
 
@@ -95,7 +95,7 @@ namespace CongTDev.Collection
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            Array.Copy(_items, 0, array, arrayIndex, _items.Length);
+            System.Array.Copy(_items, 0, array, arrayIndex, _items.Length);
         }
 
         public Span<T> AsSpan()
@@ -114,7 +114,7 @@ namespace CongTDev.Collection
 
         public int IndexOf(T item)
         {
-            return Array.IndexOf(_items, item, 0, _count);
+            return System.Array.IndexOf(_items, item, 0, _count);
         }
 
         public void Insert(int index, T item)

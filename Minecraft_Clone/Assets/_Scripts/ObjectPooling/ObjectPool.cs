@@ -36,6 +36,7 @@ namespace ObjectPooling
             _inactive.RemoveLast();
             _active.AddLast(id);
             IPoolObject instance = id.Value.Instance;
+            instance.gameObject.SetActive(true);
             instance.transform.SetParent(parent);
             return instance;
         }
@@ -45,6 +46,7 @@ namespace ObjectPooling
             Prefab prefabInstance = Instantiate(prefab);
             InstanceID id = _inactive.AddLast(prefabInstance);
             prefabInstance.Init(id, this);
+            prefabInstance.gameObject.SetActive(false);
         }
 
         public void Release(InstanceID id)

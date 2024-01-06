@@ -21,20 +21,23 @@ MonoBehaviour:
       cellularDistanceFunction: 0
       cellularReturnType: 0
       cellularJitterModifier: 1
-    fractalType: 0
-    octaves: 5
+    fractalType: 1
+    octaves: 3
     gain: 0.5
     lucunarity: 2
     weightedStrength: 0
     pingpongStrength: 2
   useDomainWrapper: 1
   domainWrapper:
-    seed: 0
+    seed: 52
     domainWrappingType: 0
     domainFractalType: 4
     frequency: 0.01
-    amplitude: 150
-    octaves: 3
+    amplitude: 100
+    octaves: 2
     gain: 0.5
     lucunarity: 2
   postProcessors: []
+  references:
+    version: 2
+    RefIds: []

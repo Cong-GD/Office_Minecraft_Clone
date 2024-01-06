@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class ThreadSafePool<T> where T : class, new()
 {
-    private const int DEFAULT_CAPACITY = 5;
+    private const int DEFAULT_CAPACITY = 2;
 
     public static int Capacity
     {

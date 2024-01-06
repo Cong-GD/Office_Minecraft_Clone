@@ -137,11 +137,6 @@ namespace CongTDev.Collection
             WriteBytes(byteString.AsSpan());
         }
 
-        public void ReadToStream(Stream stream)
-        {
-            stream.Write(new Span<byte>(_buffer, _count));
-        }
-
         public ref T ReadValue<T>(int position) where T : unmanaged
         {
             CheckPosition(position, sizeof(T));
@@ -289,6 +284,12 @@ namespace CongTDev.Collection
             {
                 Position += _byteString.ReadUTF8String(Position, out string str);
                 return str;
+            }
+
+            public string ReadString()
+            {
+                Position += _byteString.ReadChars(Position, out Span<char> chars);
+                return chars.ToString();
             }
 
             public ByteString ReadByteString()

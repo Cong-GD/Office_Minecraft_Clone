@@ -2,23 +2,21 @@
 using Minecraft.ProceduralMeshGenerate;
 using NaughtyAttributes;
 using System;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 [CreateAssetMenu(menuName = "Minecraft/Item/Block Data")]
 public class BlockData_SO : BaseItem_SO
 {
 
-    [field: Header("Block data"), SerializeField] 
+    [field: Header("Block data"), SerializeField]
     public BlockType BlockType { get; private set; }
 
 
-    [field: SerializeField] 
+    [field: SerializeField]
     public bool IsSolid { get; private set; }
 
 
-    [field: SerializeField] 
+    [field: SerializeField]
     public bool IsTransparent { get; private set; }
 
     [Tooltip("Used for sound effect")]
@@ -48,7 +46,7 @@ public class BlockData_SO : BaseItem_SO
     [field: BoxGroup("Mining")]
     public ItemPacked HarvestResult { get; private set; }
 
-    [field: SerializeField, Expandable] 
+    [field: SerializeField, Expandable]
     public BlockMeshDataGenerator_SO MeshGenerator { get; private set; }
 
     [NonSerialized]
@@ -66,7 +64,7 @@ public class BlockData_SO : BaseItem_SO
 
     public Mesh GetMeshFlattenUV()
     {
-        if(_cachedMesh == null)
+        if (_cachedMesh == null)
         {
             _cachedMesh = MeshGenerator.CreateMeshFlattenUV();
         }

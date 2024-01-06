@@ -6,10 +6,13 @@ using UnityEngine;
 
 public abstract class BaseItem_SO : ScriptableObject
 {
-    [HideInInspector]
-    public string Name;
-
     [field: Header("Base Info")]
+    [field: SerializeField, ReadOnly]
+    public string Name { get; private set; }
+
+    [field: SerializeField, TextArea]
+    public string Description { get; private set; }
+
     [field: SerializeField]
     [field: ShowAssetPreview]
     public Sprite Icon { get; private set; }
@@ -65,9 +68,20 @@ public abstract class BaseItem_SO : ScriptableObject
     [field: BoxGroup("As Weapon")]
     public float AttackSpeed { get; private set; } = 4f;
 
+    [field: SerializeField]
+    public bool IsValidItem { get; private set; } = true;
+
     private void OnValidate()
     {
         Name = name;
+    }
+
+    public string GetTooltipText()
+    {
+        if (string.IsNullOrEmpty(Description))
+            return Name;
+
+        return $"{Name}\n{Description}";
     }
 
     public ObjectMeshData GetObjectMeshData()

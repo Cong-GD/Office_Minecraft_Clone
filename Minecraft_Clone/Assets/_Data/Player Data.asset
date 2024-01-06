@@ -21,6 +21,11 @@ MonoBehaviour:
   <SwinForce>k__BackingField: 10
   <DiveForce>k__BackingField: 15
   <HelpForceToLeaveWater>k__BackingField: 2
+  <FlyingDragForce>k__BackingField: 5
+  <FlySpeed>k__BackingField: 4
+  <FlySprintSpeed>k__BackingField: 8
+  <FlyUpForce>k__BackingField: 1.5
+  <FlyDownForce>k__BackingField: 1.5
   <AirMultilier>k__BackingField: 0.05
   <WaterMultilier>k__BackingField: 0.5
   <GroundDrag>k__BackingField: 8
@@ -30,3 +35,8 @@ MonoBehaviour:
   <GroundLayer>k__BackingField:
     serializedVersion: 2
     m_Bits: 64
+  <MaxOxygen>k__BackingField: 20
+  <OxyConsumedTime>k__BackingField: 0.5
+  <MaxFood>k__BackingField: 20
+  <FoodConsumedTime>k__BackingField: 10
+  <DefaultMaxHealth>k__BackingField: 20

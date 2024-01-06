@@ -67,6 +67,8 @@ namespace Minecraft.Input
 
         public static InputAction OpenMenu { get; private set; }
 
+        public static InputAction Fly { get; private set; }
+
         public static Vector2 PointerPosition => Pointer.ReadValue<Vector2>();
 
 
@@ -92,6 +94,7 @@ namespace Minecraft.Input
             Sprint = _gamePlayActions.Sprint;
             Throw = _gamePlayActions.Throw;
             OpenMenu = _gamePlayActions.OpenMenu;
+            Fly = _gamePlayActions.Fly;
 
             //UI
             UI_LeftClick = _uiActions.UI_LeftClick;
@@ -103,7 +106,6 @@ namespace Minecraft.Input
             Shift = _generalActions.Shift;
             Debugging = _generalActions.Debugging;
 
-            state = State.Gameplay;
             _generalActions.Enable();
 
         }

@@ -9,7 +9,7 @@ namespace Minecraft.AI
     public class PathFinding : MonoBehaviour
     {
         [SerializeField, Min(10)]
-        private int maxSearchrPocess = 10_000;
+        private int maxSearchProcess = 10_000;
 
         [SerializeField]
         [Tooltip("Highly recommended to use SquaredEuclidean for performance reason")]
@@ -23,7 +23,7 @@ namespace Minecraft.AI
             {
                 ThreadSafePool<VoxelNode>.Release(new VoxelNode());
             }
-            ThreadSafePool<VoxelSearchContext>.Capacity = 50;
+            ThreadSafePool<VoxelSearchContext>.Capacity = 20;
             for (int i = 0; i < ThreadSafePool<VoxelSearchContext>.Capacity; i++)
             {
                 ThreadSafePool<VoxelSearchContext>.Release(new VoxelSearchContext());
@@ -42,7 +42,7 @@ namespace Minecraft.AI
                 context.SetEndPosition(end);
                 context.DistanceType = distanceType;
                 context.Searcher = searcher;
-                AStarPathFinding.FindPath(context, maxSearchrPocess);
+                AStarPathFinding.FindPath(context, maxSearchProcess);
             }
             catch(System.Exception e)
             {
@@ -80,7 +80,7 @@ namespace Minecraft.AI
             {
                 await Task.Run(() =>
                 {
-                    AStarPathFinding.FindPath(context, maxSearchrPocess);
+                    AStarPathFinding.FindPath(context, maxSearchProcess);
                 });
             }
             catch (System.Exception e)

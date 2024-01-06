@@ -45,7 +45,7 @@ public class DebugCanvas : MonoBehaviour
         AppendPlayerChunkCoord();
         AppendCurrentBlockLookingAt();
         AppendCurrentDayTime();
-        AppendFrameRate();
+        //AppendFrameRate();
         UpdateDebugText();
     }
 

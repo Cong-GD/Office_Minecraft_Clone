@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c1cfe0f8dd73f14c969dfbac431d54a, type: 3}
+  m_Name: Leather Leggings
+  m_EditorClassIdentifier: 
+  itemBindings:
+  - id: 1
+    item: {fileID: 11400000, guid: bf1de838d7545be47ac1cee0907b8232, type: 2}
+  result:
+    item: {fileID: 11400000, guid: fd6ae5887ac80cc4b9c4d3a198de0464, type: 2}
+    amount: 1
+  recipeBinding:
+    c0:
+      x: 1
+      y: 1
+      z: 1
+    c1:
+      x: 1
+      y: 0
+      z: 0
+    c2:
+      x: 1
+      y: 1
+      z: 1

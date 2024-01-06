@@ -15,7 +15,7 @@ namespace Minecraft
         private Transform orientation;
 
         [SerializeField]
-        private Animator animator;
+        private PlayerController playerController;
 
         [field: SerializeField]
         public Rigidbody Rigidbody { get; private set; }
@@ -23,10 +23,6 @@ namespace Minecraft
         [SerializeField]
         private PlayerData_SO playerData;
 
-        [SerializeField]
-        private float blendSpeedChangeRate;
-
-        private float _blendSpeedValue;
         private Vector2 _moveInput;
 
         public Vector3 Velocity => Rigidbody.velocity;
@@ -37,32 +33,19 @@ namespace Minecraft
         {
             MInput.Move.performed += ProcessMoveInput;
             MInput.Move.canceled += ProcessMoveInput;
-
-            MInput.Sprint.performed += ProcessSprintInput;
-            MInput.Crounch.performed += ProcessCronchInput;
-            MInput.Crounch.canceled += ProcessCronchInput;
         }
 
         private void OnDisable()
         {
             MInput.Move.performed -= ProcessMoveInput;
             MInput.Move.canceled -= ProcessMoveInput;
-
-            MInput.Sprint.performed -= ProcessSprintInput;
-            MInput.Crounch.performed -= ProcessCronchInput;
-            MInput.Crounch.canceled -= ProcessCronchInput;
-        }
-
-        private void Awake()
-        {
-            playerData.ClearTempData();
         }
 
         private void Update()
         {
             ProcessJumpInput();
             ResetSprintState();
-            BlendAnimation();
+            FoodConsumeCheck();
         }
 
         private void FixedUpdate()
@@ -77,14 +60,6 @@ namespace Minecraft
         public void Push(Vector3 pushForce)
         {
             Rigidbody.AddForce(pushForce * 2f, ForceMode.Impulse);
-        }
-
-        private void ProcessSprintInput(InputAction.CallbackContext context)
-        {
-            if (playerData.isCrounching)
-                return;
-
-            playerData.isSprinting = true;
         }
 
         private void ProcessMoveInput(InputAction.CallbackContext context)
@@ -102,15 +77,6 @@ namespace Minecraft
 
             playerData.allowJumpTime = Time.time + playerData.JumpCooldown;
             Jump();
-        }
-
-        private void ProcessCronchInput(InputAction.CallbackContext context)
-        {
-            playerData.isCrounching = context.performed;
-            if(playerData.isCrounching)
-            {
-                playerData.isSprinting = false;
-            }
         }
 
         private void Move()
@@ -148,12 +114,6 @@ namespace Minecraft
             playerData.currentMoveSpeed = playerData.WalkSpeed * sprintMultilier * crounchMultilier * waterMultilier;
 
             Rigidbody.AddForce(airMultilier * playerData.currentMoveSpeed * moveDirection, ForceMode.Force);
-        }
-
-        private void BlendAnimation()
-        {
-            _blendSpeedValue = math.lerp(_blendSpeedValue, playerData.currentMoveSpeed, blendSpeedChangeRate * Time.deltaTime);
-            animator.SetFloat(AnimID.Speed, _blendSpeedValue);
         }
 
         private void ResetSprintState()
@@ -232,5 +192,14 @@ namespace Minecraft
             Vector3 dragForce = (flatSpeed - playerData.currentMoveSpeed) * 2f * -flatVelocity;
             Rigidbody.AddForce(dragForce, ForceMode.Force);
         }
+
+        private void FoodConsumeCheck()
+        {
+            if(playerData.isSprinting || playerData.currentFood < 5)
+            {
+                playerData.isSprinting = false;
+            }   
+        }
+
     }
 }

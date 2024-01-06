@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0aae6c0dff6f0f4b934d6ea85cb4dce, type: 3}
+  m_Name: Mineral Noise
+  m_EditorClassIdentifier: 
+  noiseSettings:
+    seedOffset: 0
+    noiseType: 1
+    rotationType3d: 2
+    frequency: 0.01
+    cellularField:
+      cellularDistanceFunction: 0
+      cellularReturnType: 0
+      cellularJitterModifier: 1
+    fractalType: 1
+    octaves: 5
+    gain: 0.5
+    lucunarity: 5
+    weightedStrength: 0
+    pingpongStrength: 2
+  useDomainWrapper: 1
+  domainWrapper:
+    seed: 52
+    domainWrappingType: 0
+    domainFractalType: 4
+    frequency: 0.1
+    amplitude: 10000
+    octaves: 5
+    gain: 0.5
+    lucunarity: 2
+  postProcessors: []
+  references:
+    version: 2
+    RefIds: []

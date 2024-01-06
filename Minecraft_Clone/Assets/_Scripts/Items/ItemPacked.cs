@@ -1,5 +1,6 @@
 ﻿using CongTDev.Collection;
 using System;
+using System.Text;
 using UnityEngine;
 
 [Serializable]
@@ -25,20 +26,20 @@ public struct ItemPacked
         }
     }
 
-    public static ItemPacked ReadFormByteString(ref ByteString.BytesReader bytesReader)
+    public static ItemPacked ParseFrom(ref ByteString.BytesReader bytesReader)
     {
         bool isEmpty = bytesReader.ReadValue<bool>();
         if (isEmpty)
         {
             return Empty;
         }
-        string itemName = bytesReader.ReadChars().ToString();
+        ReadOnlySpan<char> itemName = bytesReader.ReadChars();
         BaseItem_SO item = ItemUtilities.GetItemByName(itemName);
         int amount = bytesReader.ReadValue<int>();
         return new ItemPacked(item, amount);
     }
 
-    public readonly void WriteToByteString(ByteString byteString)
+    public readonly void WriteTo(ByteString byteString)
     {
         bool isEmpty = IsEmpty();
         byteString.WriteValue(isEmpty);
@@ -53,5 +54,10 @@ public struct ItemPacked
     public readonly bool IsEmpty()
     {
         return amount <= 0 || item == null; 
+    }
+
+    public readonly override string ToString()
+    {
+        return $"ItemPacked: {item.GetName()} x{amount}";
     }
 }

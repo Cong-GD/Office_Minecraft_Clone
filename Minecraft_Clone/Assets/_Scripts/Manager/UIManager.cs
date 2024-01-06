@@ -1,23 +1,29 @@
 ﻿using Minecraft;
 using Minecraft.Input;
+using NaughtyAttributes;
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class UIManager : GlobalReference<UIManager>
 {
-    [SerializeField] 
+    [SerializeField]
     private UIInventory inventory;
 
-    [SerializeField] 
+    [SerializeField]
     private GameObject debuggingGameobject;
 
-    [SerializeField] 
+    [SerializeField]
     private Canvas menuCanvas;
 
-    [SerializeField] 
+    [SerializeField]
     private SettingUI settingsUI;
+
+    [SerializeField]
+    private CreavityCanvas creavityCanvas;
+
+    [SerializeField]
+    private UIRecipeDictionary recipeDictionary;
 
     [field: SerializeField]
     public ItemDragingSystem DraggingSystem { get; private set; }
@@ -28,7 +34,7 @@ public class UIManager : GlobalReference<UIManager>
     {
         base.Awake();
         Cursor.lockState = CursorLockMode.Locked;
-        MInput.OpenInventory.performed += OpenInventory;
+        MInput.OpenInventory.performed += ProcessOpenInvenrotyInput;
         MInput.UI_Exit.performed += ProcessExitUIInput;
         MInput.Debugging.performed += ProcessDebuggingInput;
         MInput.OpenMenu.performed += ProcessOpenMenuInput;
@@ -36,44 +42,45 @@ public class UIManager : GlobalReference<UIManager>
 
     private void OnDestroy()
     {
-        MInput.OpenInventory.performed -= OpenInventory;
+        MInput.OpenInventory.performed -= ProcessOpenInvenrotyInput;
         MInput.UI_Exit.performed -= ProcessExitUIInput;
         MInput.Debugging.performed -= ProcessDebuggingInput;
         MInput.OpenMenu.performed -= ProcessOpenMenuInput;
         Cursor.lockState = CursorLockMode.None;
     }
-
-    public void OpenCraftingTable()
-    {
-        EnterUIMode();
-        inventory.SetState(UIInventory.State.FullCraftingTable);
-    }
-
-    public void OpenFurnace(Furnace blastFurnace)
-    {
-        EnterUIMode();
-        inventory.SetFurnace(blastFurnace);
-        inventory.SetState(UIInventory.State.BlastFurnace);
-    }
-
     private void ProcessOpenMenuInput(InputAction.CallbackContext context)
     {
-        MInput.state = MInput.State.UI;
-        Cursor.lockState = CursorLockMode.None;
-        menuCanvas.enabled = true;
-        _isInMenu = true;
-        Time.timeScale = 0f;
+        if (context.performed)
+        {
+            MInput.state = MInput.State.UI;
+            Cursor.lockState = CursorLockMode.None;
+            menuCanvas.enabled = true;
+            _isInMenu = true;
+            Time.timeScale = 0f;
+        }
+    }
+    private void ProcessOpenInvenrotyInput(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            OpenInventory();
+        }
     }
 
-
-    private void ProcessExitUIInput(InputAction.CallbackContext _)
+    private void ProcessExitUIInput(InputAction.CallbackContext context)
     {
-        ExitUIMode();
+        if (context.performed)
+        {
+            ExitUIMode();
+        }
     }
 
-    private void ProcessDebuggingInput(InputAction.CallbackContext obj)
+    private void ProcessDebuggingInput(InputAction.CallbackContext context)
     {
-        debuggingGameobject.SetActive(!debuggingGameobject.activeSelf);
+        if (context.performed)
+        {
+            debuggingGameobject.SetActive(!debuggingGameobject.activeSelf);
+        }
     }
 
     private void EnterUIMode()
@@ -95,19 +102,65 @@ public class UIManager : GlobalReference<UIManager>
             settingsUI.Close();
             return;
         }
+        recipeDictionary.enabled = false;
+        creavityCanvas.enabled = false;
         DraggingSystem.gameObject.SetActive(false);
         inventory.SetState(UIInventory.State.None);
+    }
+
+    public void OpenCraftingTable()
+    {
+        EnterUIMode();
+        recipeDictionary.enabled = false;
+        creavityCanvas.enabled = false;
+        inventory.SetState(UIInventory.State.FullCraftingTable);
+    }
+
+    public void OpenFurnace(Furnace blastFurnace)
+    {
+        EnterUIMode();
+        recipeDictionary.enabled = false;
+        creavityCanvas.enabled = false;
+        inventory.SetFurnace(blastFurnace);
+        inventory.SetState(UIInventory.State.BlastFurnace);
+    }
+
+    public void OpenRecipeDictionary()
+    {
+        EnterUIMode();
+        creavityCanvas.enabled = false;
+        inventory.SetState(UIInventory.State.None);
+        recipeDictionary.enabled = true;
+    }
+
+    public void OpenCreavityCanvas()
+    {
+        EnterUIMode();
+        recipeDictionary.enabled = false;
+        inventory.SetState(UIInventory.State.None);
+        creavityCanvas.enabled = true;
+    }
+
+    public void OpenInventory()
+    {
+        EnterUIMode();
+        recipeDictionary.enabled = false;
+        creavityCanvas.enabled = false;
+        inventory.SetState(UIInventory.State.Inventory);
+    }
+
+    public void OpenStogare(Stogare storage)
+    {
+        EnterUIMode();
+        recipeDictionary.enabled = false;
+        creavityCanvas.enabled = false;
+        inventory.SetStogare(storage);
+        inventory.SetState(UIInventory.State.Stogare);
     }
 
     public void OnSaveAndQuitButtonClick()
     {
         ExitUIMode();
         GameManager.Instance.SaveAndReturnToMainMenu().Forget();
-    }
-
-    private void OpenInventory(InputAction.CallbackContext _)
-    {
-        EnterUIMode();
-        inventory.SetState(UIInventory.State.Inventory);
     }
 }

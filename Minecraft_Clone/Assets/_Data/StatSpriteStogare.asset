@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f36a00e19e2821e468a8a0cef008839f, type: 3}
+  m_Name: StatSpriteStogare
+  m_EditorClassIdentifier: 
+  <HealthContainer>k__BackingField: {fileID: 21300000, guid: c25187f2883071f4eb47fd8df1f1b062,
+    type: 3}
+  <NormalFullHealth>k__BackingField: {fileID: 21300000, guid: 6ad1ccfae3bb82446a1a1865510f9557,
+    type: 3}
+  <NormalHalfHealth>k__BackingField: {fileID: 21300000, guid: 6832971ca6b6736498b27f61bc769469,
+    type: 3}
+  <PoisonedFullHealth>k__BackingField: {fileID: 21300000, guid: 3f966d9b6ff7e024ea446e3ec21cfdf5,
+    type: 3}
+  <PoisonedHalfHealth>k__BackingField: {fileID: 21300000, guid: 67f1ca3795b4a0541af9c7066695dc0b,
+    type: 3}
+  <AbsorbingFullHealth>k__BackingField: {fileID: 21300000, guid: 351e95930060fe342b25a8493096ffd6,
+    type: 3}
+  <AbsorbingHalfHealth>k__BackingField: {fileID: 21300000, guid: 28cc6492658599545aec0a1656cff8ce,
+    type: 3}
+  <OxygenContainer>k__BackingField: {fileID: 0}
+  <OxygenFull>k__BackingField: {fileID: 21300000, guid: 7a0c09b2e34eb484ea4191c716d2ec49,
+    type: 3}
+  <OxygenHalf>k__BackingField: {fileID: 21300000, guid: 12b3142d802a29b42bf80feb6d153bb2,
+    type: 3}
+  <ArmorContainer>k__BackingField: {fileID: 21300000, guid: 0a3d078922a58654e8698a17e2c416c3,
+    type: 3}
+  <ArmorFull>k__BackingField: {fileID: 21300000, guid: 3ba42f7b5f7d1dc41bb4d276abad2efa,
+    type: 3}
+  <ArmorHalf>k__BackingField: {fileID: 21300000, guid: 32a08e4e19f6bfc4b9add585361d16aa,
+    type: 3}
+  <FoodContainer>k__BackingField: {fileID: 21300000, guid: 0d372d0c7fd91c74d90939771c1259f1,
+    type: 3}
+  <FoodFull>k__BackingField: {fileID: 21300000, guid: 66753694dc659ce409530bf294ea8f8c,
+    type: 3}
+  <FoodHalf>k__BackingField: {fileID: 21300000, guid: 64f9656e99edd914c8c03579debcbbe9,
+    type: 3}
+  <FoodSaturatureFull>k__BackingField: {fileID: 21300000, guid: 4fbe5cb424eb22a4da876e4438f5f941,
+    type: 3}
+  <FoodSaturatureHalf>k__BackingField: {fileID: 21300000, guid: 2343e7223987b6b4f950afc9dcef184a,
+    type: 3}

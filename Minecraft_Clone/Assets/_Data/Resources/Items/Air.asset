@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a73e99d00359d745b5d399ee215a664, type: 3}
   m_Name: Air
   m_EditorClassIdentifier: 
+  <Name>k__BackingField: Air
+  <Description>k__BackingField: 
   <Icon>k__BackingField: {fileID: 0}
   <MaxStack>k__BackingField: 64
-  statedTransforms:
+  relativeTransforms:
     rightHand:
       <position>k__BackingField: {x: 0, y: 0, z: 0}
       <rotation>k__BackingField: {x: 0, y: 0, z: 0}
@@ -34,9 +36,19 @@ MonoBehaviour:
   <SmeltResult>k__BackingField:
     item: {fileID: 0}
     amount: 0
+  <AttackDamage>k__BackingField: 1
+  <AttackSpeed>k__BackingField: 4
+  <IsValidItem>k__BackingField: 0
   <BlockType>k__BackingField: 0
   <IsSolid>k__BackingField: 0
   <IsTransparent>k__BackingField: 1
-  <HardNess>k__BackingField: 0
+  <BlockMaterial>k__BackingField: 0
+  <Hardness>k__BackingField: 1
+  <BestTool>k__BackingField: 0
+  <HarvestableTier>k__BackingField: 0
+  <HarvestableTool>k__BackingField: 0
+  <HarvestResult>k__BackingField:
+    item: {fileID: 0}
+    amount: 0
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 6b285fa297bffa94fb64649cc91d9f61,
     type: 2}

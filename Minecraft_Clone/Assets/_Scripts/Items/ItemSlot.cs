@@ -18,10 +18,7 @@ public class ItemSlot
 
     public ItemSlot(IItemSlotRequiment slotRequiment)
     {
-        if (slotRequiment is null)
-            throw new ArgumentNullException("Slot requiment");
-
-        _slotRequiment = slotRequiment;
+        _slotRequiment = slotRequiment ?? IItemSlotRequiment.Empty;
     }
 
     public bool IsEmpty()

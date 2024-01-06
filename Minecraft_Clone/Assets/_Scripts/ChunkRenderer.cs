@@ -43,8 +43,8 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
         mesh.subMeshCount = 2;
 
         mesh.SetVertices(meshData.vertices.AsNativeArray());
-        mesh.SetTriangles(meshData.triangles.Items, 0, meshData.triangles.Count, 0);
-        mesh.SetTriangles(meshData.waterTriangles.Items, 0, meshData.waterTriangles.Count, 1);
+        mesh.SetTriangles(meshData.triangles.Array, 0, meshData.triangles.Count, 0);
+        mesh.SetTriangles(meshData.waterTriangles.Array, 0, meshData.waterTriangles.Count, 1);
         mesh.SetUVs(0, meshData.uvs.AsNativeArray());
         mesh.SetNormals(meshData.normals.AsNativeArray());
 
@@ -54,7 +54,7 @@ public class ChunkRenderer : MonoBehaviour, IPoolObject
 
         colliderMesh.Clear();
         colliderMesh.SetVertices(meshData.vertices.AsNativeArray());
-        colliderMesh.SetTriangles(meshData.colliderTriangles.Items, 0, meshData.colliderTriangles.Count, 0);
+        colliderMesh.SetTriangles(meshData.colliderTriangles.Array, 0, meshData.colliderTriangles.Count, 0);
         meshCollider.sharedMesh = colliderMesh;
     }
 

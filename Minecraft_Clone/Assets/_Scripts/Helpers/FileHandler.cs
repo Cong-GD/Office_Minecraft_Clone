@@ -48,6 +48,7 @@ namespace Minecraft.Serialization
                     Debug.LogWarning($"Failed to load world meta data from {directory.FullName}: {e}");
                 }
             }
+            worldMetaDatas.Sort((a, b) => -b.lastPlayTime.CompareTo(a.lastPlayTime));
             if(configureAwait)
             {
                 await UniTask.SwitchToMainThread();
@@ -71,7 +72,8 @@ namespace Minecraft.Serialization
             {
                 name = worldName,
                 seed = seed,
-                creationTime = DateTime.Now,
+                firstPlayTime = DateTime.Now,
+                lastPlayTime = DateTime.Now,
                 gameMode = gameMode,
             };
             using ByteString byteString = world.ToByteString();

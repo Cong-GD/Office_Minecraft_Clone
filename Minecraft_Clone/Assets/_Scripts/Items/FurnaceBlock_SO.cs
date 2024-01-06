@@ -7,10 +7,16 @@ public class FurnaceBlock_SO : BlockData_SO, IInteractableBlock
     public void Interact(Vector3Int worldPosition)
     {
         if (!World.Instance.TryGetChunkData(Chunk.GetChunkCoord(worldPosition), out var chunkData))
-            throw new System.Exception($"Invalid furnace position {worldPosition}");
+        {
+            Debug.LogWarning($"Invalid furnace position {worldPosition}");
+            return;
+        }
 
-        if(chunkData.GetBlock(worldPosition - chunkData.worldPosition) != BlockType.Furnace)
-            throw new System.Exception($"Can't found furnace at {worldPosition}");
+        if (chunkData.GetBlock(worldPosition - chunkData.worldPosition) != BlockType.Furnace)
+        {
+            Debug.LogWarning($"Can't found furnace at {worldPosition}");
+            return;
+        }
 
         List<IBlockState> blockStates = World.Instance.GetOrAddBlockStates(chunkData.chunkCoord);
 
@@ -25,7 +31,7 @@ public class FurnaceBlock_SO : BlockData_SO, IInteractableBlock
                 }
                 else
                 {
-                    throw new System.Exception($"Can't found furnace at {worldPosition}");
+                    Debug.LogWarning($"Can't found furnace at {worldPosition}");
                 }
             }
         }
@@ -33,6 +39,5 @@ public class FurnaceBlock_SO : BlockData_SO, IInteractableBlock
         Furnace furnace1 = new Furnace(worldPosition);
         blockStates.Add(furnace1);
         UIManager.Instance.OpenFurnace(furnace1);
-        return;
     }
 }

@@ -50,9 +50,6 @@ public class AtlasPacker : EditorWindow
             try
             {
                 File.WriteAllBytes(Path.Combine(Application.dataPath, "Textures", "Resources", "Packed_Atlas.png"), bytes);
-                //var texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Textures/Packed_Atlas.png");
-                //texture.alphaIsTransparency = true;
-                //Debug.Log(texture.name);
             }
             catch
             {

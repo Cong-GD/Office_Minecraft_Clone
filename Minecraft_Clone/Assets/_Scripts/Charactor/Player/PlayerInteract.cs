@@ -1,17 +1,14 @@
 ﻿using Cysharp.Threading.Tasks;
-using DG.Tweening.Core.Easing;
 using FMOD.Studio;
 using FMODUnity;
 using Minecraft.Input;
 using NaughtyAttributes;
 using System.Collections;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Minecraft
 {
-
     public class PlayerInteract : MonoBehaviour
     {
         [SerializeField]
@@ -184,7 +181,6 @@ namespace Minecraft
             while (MInput.Destroy.IsPressed())
             {
                 DiggingCalculation(toolInHand, block, ref progress);
-                //animator.Play(AnimID.Attack, 1);
                 if (progress >= 1f || !_isCastHitGround || hitPosition != _hitPosition)
                     break;
 
@@ -294,8 +290,8 @@ namespace Minecraft
             if (isBestTool && canHarvest)
                 speedMultilier = tool.GetToolMultilier();
 
-            if (!playerData.isGrounded)
-                speedMultilier /= 5f;
+            //if (!playerData.isGrounded)
+                //speedMultilier /= 5f;
 
             float damage = speedMultilier / block.Hardness;
             damage *= canHarvest ? 1f : 0.3f;

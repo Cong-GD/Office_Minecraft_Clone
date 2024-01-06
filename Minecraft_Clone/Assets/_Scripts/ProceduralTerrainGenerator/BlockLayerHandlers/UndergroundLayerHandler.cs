@@ -1,18 +1,40 @@
-﻿namespace Minecraft.ProceduralTerrain
+﻿using NaughtyAttributes;
+using UnityEngine;
+
+namespace Minecraft.ProceduralTerrain
 {
+    [System.Serializable]
+    public struct MineralThreshold
+    {
+        [Range(0, 1)]
+        public float threshold;
+        public int heightThreshold;
+        public BlockType blockType;
+    }
+
+
     public class UndergroundLayerHandler : BlockLayerHandler
     {
-        public BlockType underGroundBlockType;
+        //[SerializeField, Expandable]
+        //private NoiseGenerator_SO caveNoiseGenerator;
 
-        public float caveThreashold = 0.5f;
+        //[SerializeField]
+        //private float caveThreshold = 0.3f;
 
-        public NoiseGenerator_SO caveNoiseGenerator;
+        [SerializeField ,Expandable]
+        private NoiseGenerator_SO mineralNoiseGenerator;
 
-        private NoiseInstance _caveNoiseInstance;
+        [SerializeField]
+        private MineralThreshold[] mineralThresholds;
+
+
+        private NoiseInstance _mineralNoiseInstance;
+        //private NoiseInstance _caveNoiseInstance;
 
         private void Awake()
         {
-            _caveNoiseInstance = caveNoiseGenerator.GetNoiseInstance();
+            _mineralNoiseInstance = mineralNoiseGenerator.GetNoiseInstance();
+            //_caveNoiseInstance = caveNoiseGenerator.GetNoiseInstance();
         }
 
         protected override bool TryHandling(ChunkData chunkData, int x, int y, int z, int surfaceHeightNoise)
@@ -21,19 +43,24 @@
 
             if (worldY < surfaceHeightNoise)
             {
-                //var caveNoiseValue = _caveNoiseInstance.GetNoise(chunkData.worldPosition.x + x +0.1f, worldY+0.1f, chunkData.worldPosition.z + z + 0.1f);
-                //if (caveNoiseValue > caveThreashold)
+                //float caveNoiseValue = _caveNoiseInstance.GetNoise(chunkData.worldPosition.x + x + 0.1f, worldY + 0.1f, chunkData.worldPosition.z + z + 0.1f);
+                //if (caveNoiseValue < caveThreshold)
                 //{
                 //    chunkData.SetBlock(x, y, z, BlockType.Air);
+                //    return false;
                 //}
-                //else
-                //{
-                //    chunkData.SetBlock(x, y, z, BlockType.Stone);
-                //}
-                //return false;
-                chunkData.SetBlock(x, y, z, underGroundBlockType);
-                return true;
+
+                float mineralNoiseValue = _mineralNoiseInstance.GetNoise(chunkData.worldPosition.x + x + 0.1f, worldY + 0.1f, chunkData.worldPosition.z + z + 0.1f);
+                foreach (MineralThreshold mineralThreshold in mineralThresholds)
+                {
+                    if (mineralNoiseValue < mineralThreshold.threshold && worldY < mineralThreshold.heightThreshold)
+                    {
+                        chunkData.SetBlock(x, y, z, mineralThreshold.blockType);
+                        return false;
+                    }
+                }
             }
+
             return false;
         }
     }

@@ -14,13 +14,17 @@ namespace Minecraft
         [SerializeField]
         private int _baseToughness;
 
-        private readonly List<IArmorSource> _sources = new();
-
         [field: SerializeField]
-        public UnityEvent OnArmorChanged { get; private set; } = new();
+        public UnityEvent OnValueChanged { get; private set; } = new();
+
+        public int MaxArmorPoint => 20;
+
+        public int MaxToughness => 20;
 
         public int ArmorPoint { get; private set; }
         public int Toughness { get; private set; }
+
+        private readonly List<ArmorSource> _sources = new();
 
         private void Start()
         {
@@ -38,16 +42,13 @@ namespace Minecraft
             }
         }
 
-        private void OnValidate()
-        {
-            ArmorPoint = _baseArmorPoint;
-            Toughness = _baseToughness;
-        }
-
         public void PreprocessDamage(ref int damage, ref DamegeType damegeType)
         {
-            if (damegeType == DamegeType.Physic && ArmorPoint > 0)
+            if (damegeType == DamegeType.Physic)
             {
+                if(ArmorPoint <= 0)
+                    return;
+
                 float totaldamage = damage * 
                     (1f - math.min(20f, math.max(ArmorPoint / 5f, ArmorPoint - (4f * damage) / (Toughness + 8f))) 
                     / 25f);
@@ -56,28 +57,43 @@ namespace Minecraft
             }
         }
 
-        public void AddArmorSource(IArmorSource source)
+        public void AddArmorSource(ArmorSource source)
         {
+
+            if (source == null)
+                return;
+
             _sources.Add(source);
-            ValidatePoint();
+            source.OnValueChanged += ValidateValue;
+            ValidateValue();
         }
 
-        public void RemoveArmorSource(IArmorSource source)
+        public void RemoveArmorSource(ArmorSource source)
         {
+            if(source == null)
+                return;
+
             _sources.Remove(source);
-            ValidatePoint();
+            source.OnValueChanged -= ValidateValue;
+            ValidateValue();
         }
 
-        public void ValidatePoint()
+        private void ValidateValue()
         {
             ArmorPoint = _baseArmorPoint;
-            Toughness = _baseToughness;
-            foreach (var source in _sources)
+            foreach (ArmorSource source in _sources)
             {
                 ArmorPoint += source.ArmorPoint;
+            }
+            ArmorPoint = math.clamp(ArmorPoint, 0, MaxArmorPoint);
+
+            Toughness = _baseToughness;
+            foreach (ArmorSource source in _sources)
+            {
                 Toughness += source.Toughness;
             }
-            OnArmorChanged.Invoke();
+            Toughness = math.clamp(Toughness, 0, MaxToughness);
+            OnValueChanged.Invoke();
         }
     }
 }
