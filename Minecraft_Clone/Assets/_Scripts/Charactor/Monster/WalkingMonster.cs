@@ -1,16 +1,19 @@
 using CongTDev.Collection;
 using NaughtyAttributes;
+using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Minecraft.AI
 {
-    public class SampleAI : MonoBehaviour, ISearcher
+    public class WalkingMonster : MonoBehaviour, ISearcher
     {
         [SerializeField]
         private EntityPhysicsMovement movement;
 
         [SerializeField]
-        private Transform target;
+        private PlayerData_SO playerData;
 
         [SerializeField]
         private PathFinding pathFinding;
@@ -18,12 +21,16 @@ namespace Minecraft.AI
         [SerializeField]
         private float endNodeDistance = 1f;
 
+        [SerializeField]
+        private float detectRange = 10f;
+
         [ShowNativeProperty]
         public int PathLength => _path.Count;
 
         private MyNativeList<Vector3> _path = new MyNativeList<Vector3>();
         private int _pathIndex;
-        private VoxelSearchContext.Token _searchToken;
+        private VoxelSearchContext.CancelToken _searchToken;
+
 
         private void Update()
         {
@@ -45,15 +52,67 @@ namespace Minecraft.AI
             }
         }
 
+        private void OnEnable()
+        {
+            StartCoroutine(Routine());
+        }
+
         private void OnDisable()
         {
             _searchToken.Cancel();
         }
 
-        [Button]
-        public void FindPlayer()
+        private IEnumerator Routine()
         {
-            _searchToken = pathFinding.FindPathAsync(this, transform.position.Add(y: 0.5f), target.position.Add(y: 0.5f));
+            while (true)
+            {
+                if(Vector3.Distance(transform.position, playerData.PlayerBody.position) < detectRange)
+                {
+                    yield return ChasingState();
+                }
+                else
+                {
+                    yield return PatrolState();
+                }
+            }
+        }
+
+        private IEnumerator ChasingState()
+        {
+            while(true)
+            {
+                if (Vector3.Distance(transform.position, playerData.PlayerBody.position) > detectRange)
+                {
+                    yield break;
+                }
+
+                FindPathTo(playerData.PlayerBody.position.Add(0.5f));
+                yield return Wait.ForSeconds(1f);
+            }
+        }
+
+        private IEnumerator PatrolState()
+        {
+            while (true)
+            {
+                if (Vector3.Distance(transform.position, playerData.PlayerBody.position) < detectRange)
+                {
+                    yield break;
+                }
+
+
+                yield return Wait.ForSeconds(5f);
+            }
+        }
+
+        public void FindPathTo(Vector3 position)
+        {
+            _searchToken.Cancel();
+            _searchToken = pathFinding.FindPathAsync(
+                searcher: this, 
+                start: transform.position.Add(y: 0.2f), 
+                end: position, 
+                flattenY: true);
         }
 
         public bool CanTraverse(VoxelSearchContext.NodeProvider context, NodeView source, NodeView dest)
@@ -96,12 +155,27 @@ namespace Minecraft.AI
                 return isFallingDown;
             }
 
+            if (srcX != destX && srcZ != destZ)
+            {
+                if(destY != srcY)
+                {
+                    return false;
+                }
+                if (context.GetNode(srcX + (destX - srcX), destY, srcZ).BlockData.IsSolid
+                    || context.GetNode(srcX, destY, srcZ + (destZ - srcZ)).BlockData.IsSolid
+                    || context.GetNode(srcX + (destX - srcX), destY + 1, srcZ).BlockData.IsSolid
+                    || context.GetNode(srcX, destY + 1, srcZ + (destZ - srcZ)).BlockData.IsSolid)
+                {
+                    return false;
+                }
+            }
+
             // if there is no ground below the dest, it will fall down
             bool isThereWillBeGround = context.GetNode(destX, destY - 1, destZ).BlockData.IsSolid;
             if (!isThereWillBeGround)
             {
                 bool isStepdown = destY == srcY - 1;
-                return isStepdown;
+                return isStepdown && context.GetNode(destX, destY + 1, destZ).BlockData.IsSolid;
             }
 
             return true;

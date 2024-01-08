@@ -106,7 +106,7 @@ namespace Minecraft
             {
                 _currentWorld.icon = cameraCapture.Capture();
             }
-            _currentWorld.firstPlayTime = DateTime.Now;
+            _currentWorld.lastPlayTime = DateTime.Now;
 
             using(ByteString byteString = Statictics.ToByteString())
             {

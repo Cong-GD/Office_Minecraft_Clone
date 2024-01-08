@@ -19,9 +19,6 @@ public class World : MonoBehaviour
     public const string BLOCK_STATE_FILE_NAME = "BlockStates.dat";
     public const string CHUNK_MODIFICATIONS_FILE_NAME = "ChunkModifications.dat";
 
-
-    public int seed;
-
     [SerializeField]
     private TerrainGenerator terrainGenerator;
 
@@ -30,9 +27,6 @@ public class World : MonoBehaviour
 
     [SerializeField]
     private PlayerData_SO playerData;
-
-    [SerializeField]
-    private Vector3 SpawnOffset;
 
     [field: ShowNonSerializedField]
     public Vector3Int PlayerCoord { get; private set; }
@@ -125,6 +119,7 @@ public class World : MonoBehaviour
 
             PrepareChunkData(playerCoord, renderDistance);
             BuildStructures();
+            OveridePlayerModifications();
             PrepareMeshDatas(playerCoord, renderDistance);
             await UniTask.SwitchToMainThread();
             while (_preparedMeshs.TryDequeue(out MeshData meshData))
@@ -341,6 +336,7 @@ public class World : MonoBehaviour
                 PrepareChunkData(playerCoord, renderDistance);
                 ExcuseModifyQuery();
                 BuildStructures();
+                OveridePlayerModifications();
                 PrepareMeshDatas(playerCoord, renderDistance);
             }
             catch (OperationCanceledException)
@@ -507,6 +503,18 @@ public class World : MonoBehaviour
             mod.direction);
     }
 
+    private void OveridePlayerModifications()
+    {
+        using TimeExcute timer = TimeExcute.Start("Overide player modifications");
+        foreach(ChunkData chunkData in _activeChunkData)
+        {
+            if(chunkData.state != ChunkState.Rendering || chunkData.isDirty)
+            {
+                EnsurePlayerModifications(chunkData);
+            }
+        }
+    }
+
     private IEnumerable<ChunkData> GetChunkNeedToPrepareMesh(Vector3Int playerCoord, int viewDistance)
     {
         foreach (Vector3Int chunkCoord in Chunk.GetCoordsInRange(playerCoord, viewDistance))
@@ -532,7 +540,6 @@ public class World : MonoBehaviour
             foreach (ChunkData chunkData in GetChunkNeedToPrepareMesh(playerCoord, viewDistance))
             {
                 _cancellationToken.ThrowIfCancellationRequested();
-                EnsurePlayerModifications(chunkData);
                 MeshData meshData = Chunk.GetMeshData(chunkData);
                 chunkData.state = ChunkState.MeshPrepared;
                 _preparedMeshs.Enqueue(meshData);
@@ -554,22 +561,28 @@ public class World : MonoBehaviour
 
     private void EnsurePlayerModifications(ChunkData chunkData)
     {
+        MyNativeList<LocalBlock> localBlocks;
         lock (_playerModifications)
         {
-            if (_playerModifications.TryGetValue(chunkData.chunkCoord, out MyNativeList<LocalBlock> localBlocks))
+            if (!_playerModifications.TryGetValue(chunkData.chunkCoord, out localBlocks))
             {
-                try
+                return;
+            }
+        }
+
+        lock (localBlocks)
+        {
+            try
+            {
+                foreach (LocalBlock localBlock in localBlocks.AsSpan())
                 {
-                    foreach (LocalBlock localBlock in localBlocks.AsSpan())
-                    {
-                        chunkData.SetBlock(localBlock.x, localBlock.y, localBlock.z, localBlock.blockType, localBlock.direction);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Error when apply player modification to chunk {chunkData.chunkCoord}: {e}");
+                    chunkData.SetBlock(localBlock.x, localBlock.y, localBlock.z, localBlock.blockType, localBlock.direction);
                 }
             }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error when apply player modification to chunk {chunkData.chunkCoord}: {e}");
+            } 
         }
     }
     #endregion
@@ -595,11 +608,8 @@ public class World : MonoBehaviour
         }
         else if (meshData.HasDataToRender())
         {
-            chunkRenderer = (ChunkRenderer)chunkRendererPool.Get();
+            chunkRenderer = (ChunkRenderer)chunkRendererPool.Get(transform);
             chunkRenderer.SetChunkData(chunkData);
-#if UNITY_EDITOR
-            chunkRenderer.transform.SetParent(transform);
-#endif
             _chunkRendererDictionary[coord] = chunkRenderer;
             chunkRenderer.RenderMesh(meshData);
         }
@@ -639,21 +649,28 @@ public class World : MonoBehaviour
         await UniTask.SwitchToThreadPool();
         Vector3Int localPos = worldPosition - coord * WorldSettings.ChunkSizeVector;
         chunkData.SetBlock(localPos.x, localPos.y, localPos.z, blockType, direction);
+
+        MyNativeList<LocalBlock> localBlocks;
         lock (_playerModifications)
         {
-            if (!_playerModifications.TryGetValue(coord, out MyNativeList<LocalBlock> localBlocks))
+            if (!_playerModifications.TryGetValue(coord, out localBlocks))
             {
                 localBlocks = new MyNativeList<LocalBlock>();
                 _playerModifications[coord] = localBlocks;
             }
-            LocalBlock localBlock = new LocalBlock()
-            {
-                x = (byte)localPos.x,
-                y = (byte)localPos.y,
-                z = (byte)localPos.z,
-                blockType = blockType,
-                direction = direction
-            };
+        }
+
+        LocalBlock localBlock = new LocalBlock()
+        {
+            x = (byte)localPos.x,
+            y = (byte)localPos.y,
+            z = (byte)localPos.z,
+            blockType = blockType,
+            direction = direction
+        };
+
+        lock (localBlocks)
+        {
             int index = localBlocks.IndexOf(localBlock);
             if (index == -1)
             {

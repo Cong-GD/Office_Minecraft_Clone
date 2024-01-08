@@ -50,7 +50,15 @@ namespace Minecraft
             }
         }
 
-        public int CurrentHealth => _currentHealth;
+        public int CurrentHealth
+        {
+            get => _currentHealth;
+            set
+            {
+                SetCurrentHealth(value);
+                OnValueChanged.Invoke();
+            }
+        }
 
 
         public int AbsorptionAmount => _absorptionAmount;

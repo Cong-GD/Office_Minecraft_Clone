@@ -96,10 +96,17 @@ public class DayNightSystem : MonoBehaviour
 
     private void LoadTime(Dictionary<string, ByteString> dictionary)
     {
-        if(dictionary.Remove(FILE_NAME, out ByteString byteString))
+        try
         {
-            ByteString.BytesReader byteReader = byteString.GetBytesReader();
-            _currentTime = byteReader.ReadValue<TimeSpan>();
+            if (dictionary.Remove(FILE_NAME, out ByteString byteString))
+            {
+                ByteString.BytesReader byteReader = byteString.GetBytesReader();
+                _currentTime = byteReader.ReadValue<TimeSpan>();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
     private void AddHourHandle(InputAction.CallbackContext context)

@@ -88,8 +88,7 @@ namespace Minecraft
                 Destroy(worldInfo.gameObject);
             }
             _worldInfoList.Clear();
-            List<WorldMetaData> worldMetaDatas = await FileHandler.GetWorldMetaDatasAsync();
-            foreach (WorldMetaData worldMetaData in worldMetaDatas)
+            foreach (WorldMetaData worldMetaData in await FileHandler.GetWorldMetaDatasAsync())
             {
                 WorldInfo worldInfo = Instantiate(worldInfoPrefab, worldListContent);
                 worldInfo.SetWorldInfo(worldMetaData);

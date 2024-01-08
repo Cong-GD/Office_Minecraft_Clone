@@ -23,7 +23,7 @@ public class UIItemSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     private void OnDestroy()
     {
-        SetSlot(null);
+        ClearSlot();
     }
 
     public bool HasItem() => _slot != null && !_slot.IsEmpty();

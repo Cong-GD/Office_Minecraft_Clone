@@ -22,12 +22,12 @@ namespace Minecraft
 
         public object OnStartUse()
         {
-            EventInstance instance = RuntimeManager.CreateInstance(onEatSound);
-            instance.start();
-            return instance;
+            EventInstance eventInstance = RuntimeManager.CreateInstance(onEatSound);
+            eventInstance.start();
+            return eventInstance;
         }
 
-        public bool Using(ref float holdedTime, ref object useContext)
+        public bool Using(ref float holdedTime, ref object usingContext)
         {
             ItemSlot hand = InventorySystem.Instance.RightHand;
             if (hand.IsEmpty() || hand.RootItem != this)
@@ -41,21 +41,23 @@ namespace Minecraft
                 hand.TakeAmount(1);
                 PlayerController.Instance.AddFood(fillAmount);
                 holdedTime = 0f;
-                return true;
             }
             return false;
         }
 
-        public void OnEndUse(float holdedTime, object useContext)
+        public void OnEndUse(float holdedTime, object usingContext)
         {
-            if (useContext is EventInstance instance)
+            if (usingContext is EventInstance eventInstance)
             {
-                instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-                instance.release();
+                if(eventInstance.isValid())
+                {
+                    eventInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+                    eventInstance.release();
+                }
             }
             else
             {
-                Debug.LogError("Use context is not a EventInstance");
+                Debug.LogError("Using context is not a EventInstance");
             }
         }
     }

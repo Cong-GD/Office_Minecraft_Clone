@@ -40,17 +40,17 @@ namespace Minecraft
         {
             yield return Wait.Until(() => _isUsing == false);
             _isUsing = true;
-            object useContext = item.OnStartUse();
+            object usingContext = item.OnStartUse();
             float holdedTime = 0f;
             while (MInput.Build.IsPressed() || !_isBreaking)
             {
-                if (item.Using(ref holdedTime, ref useContext))
+                if (item.Using(ref holdedTime, ref usingContext))
                 {
                     break;
                 }
                 yield return null;
             }
-            item.OnEndUse(holdedTime, useContext);
+            item.OnEndUse(holdedTime, usingContext);
             _isBreaking = false;
             _isUsing = false;
         }

@@ -48,7 +48,7 @@ namespace Minecraft.Serialization
                     Debug.LogWarning($"Failed to load world meta data from {directory.FullName}: {e}");
                 }
             }
-            worldMetaDatas.Sort((a, b) => -b.lastPlayTime.CompareTo(a.lastPlayTime));
+            worldMetaDatas.Sort((a, b) => b.lastPlayTime.CompareTo(a.lastPlayTime));
             if(configureAwait)
             {
                 await UniTask.SwitchToMainThread();

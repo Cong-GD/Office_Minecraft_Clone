@@ -96,6 +96,7 @@ SpriteAtlas:
     - 54af23a2ca3f8e14fa44cdd1069dab9e: 21300000
     - 3878a6a2b91ad9e40bfdd1695b58ec6a: 21300000
     - 9f353da2370361d4cbf2d9e5476dab0b: 21300000
+    - 9d5110b24038e354d82356c5fbac42a9: 21300000
     - a26fc0d2c45210d41ba84524f8c87473: 21300000
     - ad6e81d232bb90247a4f1f16f70895e8: 21300000
     - da3fa3e2cd7ce304fa5a515a5dad6ef4: 21300000
@@ -411,6 +412,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 54af23a2ca3f8e14fa44cdd1069dab9e, type: 3}
   - {fileID: 21300000, guid: 3878a6a2b91ad9e40bfdd1695b58ec6a, type: 3}
   - {fileID: 21300000, guid: 9f353da2370361d4cbf2d9e5476dab0b, type: 3}
+  - {fileID: 21300000, guid: 9d5110b24038e354d82356c5fbac42a9, type: 3}
   - {fileID: 21300000, guid: a26fc0d2c45210d41ba84524f8c87473, type: 3}
   - {fileID: 21300000, guid: ad6e81d232bb90247a4f1f16f70895e8, type: 3}
   - {fileID: 21300000, guid: da3fa3e2cd7ce304fa5a515a5dad6ef4, type: 3}
@@ -725,6 +727,7 @@ SpriteAtlas:
   - diamond_horse_armor
   - firework_star
   - empty_slot_axe
+  - torch
   - bone
   - cauldron
   - acacia_sign 1

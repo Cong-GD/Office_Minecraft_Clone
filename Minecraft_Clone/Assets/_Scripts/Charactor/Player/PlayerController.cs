@@ -2,9 +2,11 @@
 using Cysharp.Threading.Tasks;
 using Minecraft.Assets._Scripts.Charactor.Player;
 using Minecraft.Input;
+using Minecraft.Serialization;
 using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using Unity.Mathematics;
 using UnityEngine;
@@ -116,25 +118,32 @@ namespace Minecraft
             byteData.WriteValue(playerCamera.XRotation);
             byteData.WriteValue(playerCamera.YRotation);
             byteData.WriteValue(playerData.currentFood);
+            byteData.WriteValue(health.CurrentHealth);
 
             byteDatas[PLAYER_DATA_FILE_NAME] = byteData;
         }
 
         private void LoadPlayerData(Dictionary<string, ByteString> byteDatas)
         {
-            if (byteDatas.Remove(PLAYER_DATA_FILE_NAME, out ByteString byteData))
+            try
             {
-                ByteString.BytesReader byteReader = byteData.GetBytesReader();
-                _loadedPosition = byteReader.ReadValue<Vector3>();
-                playerData.checkPoint = byteReader.ReadValue<Vector3>();
-                playerCamera.XRotation = byteReader.ReadValue<float>();
-                playerCamera.YRotation = byteReader.ReadValue<float>();
-                playerData.currentFood = byteReader.ReadValue<int>();
+                if (byteDatas.Remove(PLAYER_DATA_FILE_NAME, out ByteString byteData))
+                {
+                    ByteString.BytesReader byteReader = byteData.GetBytesReader();
+                    _loadedPosition = byteReader.ReadValue<Vector3>();
+                    playerData.checkPoint = byteReader.ReadValue<Vector3>();
+                    playerCamera.XRotation = byteReader.ReadValue<float>();
+                    playerCamera.YRotation = byteReader.ReadValue<float>();
+                    playerData.currentFood = byteReader.ReadValue<int>();
+                    health.CurrentHealth = byteReader.ReadValue<int>();
 
-                health.FullHeal();
-                playerData.PlayerBody.position = _loadedPosition;
+                    playerData.PlayerBody.position = _loadedPosition;
+                }
             }
-
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         public void SpawnPlayer()
@@ -156,7 +165,7 @@ namespace Minecraft
         public void AddFood(int amount)
         {
             playerData.currentFood = math.min(playerData.MaxFood, playerData.currentFood + amount);
-            playerHUB.ShowFood(playerData.MaxFood, playerData.currentFood, true);
+            playerHUB.ShowFood(playerData.MaxFood, playerData.currentFood, false);
         }
 
         private void ProcessFlyInput(InputAction.CallbackContext context)

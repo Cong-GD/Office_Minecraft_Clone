@@ -33,6 +33,8 @@ namespace Minecraft.AI
 
         public ISearcher Searcher { get; set; }
 
+        public bool FlattenY { get; set; }
+
         public int MaxNeightbours => _direction3Ds.Length;
 
         private int _version;
@@ -139,6 +141,11 @@ namespace Minecraft.AI
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsGoal(VoxelNode node)
         {
+            if(FlattenY)
+            {
+                return node.position.x == End.position.x && node.position.z == End.position.z;
+            }
+
             return node == End;
         }
 
@@ -167,9 +174,9 @@ namespace Minecraft.AI
             Error = false;
         }
 
-        public Token GetToken()
+        public CancelToken GetToken()
         {
-            return new Token(this);
+            return new CancelToken(this);
         }
 
         public SearchResult GetResult()
@@ -193,13 +200,13 @@ namespace Minecraft.AI
             return node;
         }
 
-        public readonly struct Token
+        public readonly struct CancelToken
         {
             private readonly VoxelSearchContext _context;
             private readonly int _version;
             private readonly bool _hasValue;
 
-            public Token(VoxelSearchContext context)
+            public CancelToken(VoxelSearchContext context)
             {
                 _context = context;
                 _hasValue = context is not null;

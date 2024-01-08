@@ -32,6 +32,9 @@ public class UIInventory : MonoBehaviour
     private UIFurnace uiFurnace;
 
     [SerializeField]
+    private UIItemSlot leftHandSlot;
+
+    [SerializeField]
     private UIItemSlot[] toolBarSlots;
 
     [SerializeField]
@@ -75,6 +78,7 @@ public class UIInventory : MonoBehaviour
     {
         var inventorySystem = InventorySystem.Instance;
 
+        leftHandSlot.SetSlot(inventorySystem.LeftHand);
         for (int i = 0; i < toolBarSlots.Length && i < inventorySystem.toolBarItems.Length; i++)
         {
             toolBarSlots[i].SetSlot(inventorySystem.toolBarItems[i]);
