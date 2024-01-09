@@ -40,6 +40,8 @@ public class World : MonoBehaviour
     [SerializeField, Range(1, 1000)]
     private int chunkRenderPerFrame;
 
+    public event Action OnWorldLoaded;
+
     [Header("Testing Purpose")]
     public bool multiThread;
     public bool continueGenerate;
@@ -126,7 +128,7 @@ public class World : MonoBehaviour
             {
                 RenderMesh(meshData);
             }
-            PlayerController.Instance.SpawnPlayer();
+            OnWorldLoaded?.Invoke();
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
         }
         catch (Exception ex)
@@ -342,7 +344,6 @@ public class World : MonoBehaviour
             catch (OperationCanceledException)
             {
                 Debug.Log("LongtermViewCheckTask canceled");
-                return;
             }
             catch (Exception e)
             {
@@ -386,7 +387,7 @@ public class World : MonoBehaviour
 
     private void PrepareChunkData(Vector3Int playerCoord, int renderDistance)
     {
-        using TimeExcute timer = TimeExcute.Start("Prepare chunk datas");
+        //using TimeExcute timer = TimeExcute.Start("Prepare chunk datas");
         terrainGenerator.CalculateBiomeCenter(playerCoord.x, playerCoord.z);
         if (_parallelOptions.MaxDegreeOfParallelism == 1)
         {
@@ -505,7 +506,7 @@ public class World : MonoBehaviour
 
     private void OveridePlayerModifications()
     {
-        using TimeExcute timer = TimeExcute.Start("Overide player modifications");
+        //using TimeExcute timer = TimeExcute.Start("Overide player modifications");
         foreach(ChunkData chunkData in _activeChunkData)
         {
             if(chunkData.state != ChunkState.Rendering || chunkData.isDirty)

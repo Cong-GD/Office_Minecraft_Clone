@@ -63,6 +63,8 @@ namespace Minecraft
             MInput.Sprint.performed += ProcessSprintInput;
             MInput.Crounch.performed += ProcessCronchInput;
             MInput.Crounch.canceled += ProcessCronchInput;
+            World.Instance.OnWorldLoaded += SpawnPlayer;
+            MInput.InputActions.GamePlay.SaveCheckPoint.performed += SaveCheckPoint;
             SlowUpdateLoop().Forget();
         }
 
@@ -74,6 +76,11 @@ namespace Minecraft
             MInput.Sprint.performed -= ProcessSprintInput;
             MInput.Crounch.performed -= ProcessCronchInput;
             MInput.Crounch.canceled -= ProcessCronchInput;
+            MInput.InputActions.GamePlay.SaveCheckPoint.performed -= SaveCheckPoint;
+            if(World.Instance)
+            {
+                World.Instance.OnWorldLoaded -= SpawnPlayer;
+            }
         }
 
         private void Start()
@@ -138,6 +145,7 @@ namespace Minecraft
                     health.CurrentHealth = byteReader.ReadValue<int>();
 
                     playerData.PlayerBody.position = _loadedPosition;
+                    playerHUB.ShowFood(playerData.MaxFood, playerData.currentFood, false);
                 }
             }
             catch (Exception e)
@@ -146,7 +154,7 @@ namespace Minecraft
             }
         }
 
-        public void SpawnPlayer()
+        private void SpawnPlayer()
         {
             if (!IsFirstTimeSpawn)
             {
@@ -159,7 +167,15 @@ namespace Minecraft
             {
                 playerData.PlayerBody.position = hit.point.Add(y: startSpawnOffset.y);
                 playerData.PlayerBody.velocity = Vector3.zero;
+                playerData.checkPoint = playerData.PlayerBody.position;
             }
+        }
+
+        public void Revive()
+        {
+            health.Revive();
+            health.FullHeal();
+            playerData.currentFood = playerData.MaxFood;
         }
 
         public void AddFood(int amount)
@@ -201,6 +217,12 @@ namespace Minecraft
             {
                 playerData.isSprinting = false;
             }
+        }
+
+        private void SaveCheckPoint(InputAction.CallbackContext context)
+        {
+            playerData.checkPoint = playerData.PlayerBody.position;
+            health.Kill();
         }
 
         public void EnterFlyMode()

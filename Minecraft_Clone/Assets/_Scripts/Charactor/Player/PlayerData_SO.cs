@@ -139,9 +139,6 @@ public class PlayerData_SO : ScriptableObject
     public int maxHealth;
 
     [NonSerialized, ShowNonSerializedField]
-    public int currentHealth;
-
-    [NonSerialized, ShowNonSerializedField]
     public Vector3 checkPoint;
 
     [NonSerialized, ShowNonSerializedField]
@@ -158,7 +155,6 @@ public class PlayerData_SO : ScriptableObject
         currentOxygen = MaxOxygen;
         currentFood = MaxFood;
         maxHealth = DefaultMaxHealth;
-        currentHealth = maxHealth;
         isFlying = false;
         isStepInWater = false;
         isBobyInWater = false;

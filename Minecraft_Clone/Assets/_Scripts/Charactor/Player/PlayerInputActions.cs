@@ -134,6 +134,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SaveCheckPoint"",
+                    ""type"": ""Button"",
+                    ""id"": ""788a834e-b2ae-46d7-baea-3b92cf5e3c62"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -323,6 +332,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Fly"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4a5e2c8c-a883-48b4-9791-fac81f7b96dd"",
+                    ""path"": ""<Keyboard>/f5"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SaveCheckPoint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -499,6 +519,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_GamePlay_Throw = m_GamePlay.FindAction("Throw", throwIfNotFound: true);
         m_GamePlay_OpenMenu = m_GamePlay.FindAction("OpenMenu", throwIfNotFound: true);
         m_GamePlay_Fly = m_GamePlay.FindAction("Fly", throwIfNotFound: true);
+        m_GamePlay_SaveCheckPoint = m_GamePlay.FindAction("SaveCheckPoint", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_UI_LeftClick = m_UI.FindAction("UI_LeftClick", throwIfNotFound: true);
@@ -583,6 +604,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_GamePlay_Throw;
     private readonly InputAction m_GamePlay_OpenMenu;
     private readonly InputAction m_GamePlay_Fly;
+    private readonly InputAction m_GamePlay_SaveCheckPoint;
     public struct GamePlayActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -599,6 +621,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Throw => m_Wrapper.m_GamePlay_Throw;
         public InputAction @OpenMenu => m_Wrapper.m_GamePlay_OpenMenu;
         public InputAction @Fly => m_Wrapper.m_GamePlay_Fly;
+        public InputAction @SaveCheckPoint => m_Wrapper.m_GamePlay_SaveCheckPoint;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -644,6 +667,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Fly.started += instance.OnFly;
             @Fly.performed += instance.OnFly;
             @Fly.canceled += instance.OnFly;
+            @SaveCheckPoint.started += instance.OnSaveCheckPoint;
+            @SaveCheckPoint.performed += instance.OnSaveCheckPoint;
+            @SaveCheckPoint.canceled += instance.OnSaveCheckPoint;
         }
 
         private void UnregisterCallbacks(IGamePlayActions instance)
@@ -684,6 +710,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Fly.started -= instance.OnFly;
             @Fly.performed -= instance.OnFly;
             @Fly.canceled -= instance.OnFly;
+            @SaveCheckPoint.started -= instance.OnSaveCheckPoint;
+            @SaveCheckPoint.performed -= instance.OnSaveCheckPoint;
+            @SaveCheckPoint.canceled -= instance.OnSaveCheckPoint;
         }
 
         public void RemoveCallbacks(IGamePlayActions instance)
@@ -847,6 +876,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnThrow(InputAction.CallbackContext context);
         void OnOpenMenu(InputAction.CallbackContext context);
         void OnFly(InputAction.CallbackContext context);
+        void OnSaveCheckPoint(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

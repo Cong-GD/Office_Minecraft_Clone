@@ -244,7 +244,7 @@ namespace CongTDev.Collection
             }
         }
 
-        public ref struct BytesReader
+        public struct BytesReader
         {
             private readonly ByteString _byteString;
             public int Position { get; private set; }

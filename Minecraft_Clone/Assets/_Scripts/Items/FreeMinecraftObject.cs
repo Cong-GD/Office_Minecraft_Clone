@@ -67,5 +67,10 @@ namespace Minecraft
             minecraftObject.RenderObject(itemHolder.RootItem.GetObjectMeshData(), ItemTransformState.FreeObject);
             minecraftObject.transform.Translate(objectOffset);
         }
+
+        public ItemPacked GetItemHolding()
+        {
+            return itemHolder.GetPacked();
+        }
     }
 }

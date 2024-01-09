@@ -1,4 +1,5 @@
 ﻿using CongTDev.AStarPathFinding;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -33,15 +34,15 @@ namespace Minecraft.AI
             context.DistanceType = distanceType;
             context.Searcher = searcher;
             context.FlattenY = flattenY;
-            FindPathAsyncInternal(context, searcher);
+            FindPathAsyncInternal(context, searcher).Forget();
             return context.GetToken();
         }
 
-        private async void FindPathAsyncInternal(VoxelSearchContext context ,ISearcher searcher)
+        private async UniTaskVoid FindPathAsyncInternal(VoxelSearchContext context ,ISearcher searcher)
         {
             try
             {
-                await Task.Run(() =>
+                await UniTask.RunOnThreadPool(() =>
                 {
                     AStarPathFinding.FindPath(context, maxSearchProcess);
                 });

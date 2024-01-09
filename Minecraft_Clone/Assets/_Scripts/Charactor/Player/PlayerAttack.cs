@@ -45,14 +45,12 @@ public class PlayerAttack : MonoBehaviour
         if (target == null || !target.TryGetComponent(out Health health))
             return;
 
-        Debug.Log($"isWeakAttack: {isWeakAttack}");
-
         int attackDamage = defaultAttackDamage;
         float attackSpeed = defaultAttackSpeed;
         if (!weaponSlot.IsEmpty())
         {
-            attackDamage = 3;
-            attackSpeed = 1f;
+            attackDamage = weaponSlot.RootItem.AttackDamage;
+            attackSpeed = weaponSlot.RootItem.AttackSpeed;
         }
 
         if(isWeakAttack)
@@ -63,7 +61,7 @@ public class PlayerAttack : MonoBehaviour
         if (target.TryGetComponent(out IPushAble pushAble))
         {
             Vector3 pushDirection = (target.transform.position - transform.position).With(y: 0).normalized;
-            pushAble.Push(pushDirection.Add(y: 0.5f) * pushForce);
+            pushAble.Push(pushDirection.Add(y: 0.25f) * pushForce);
         }
 
         health.TakeDamage(attackDamage, DamegeType.Physic);

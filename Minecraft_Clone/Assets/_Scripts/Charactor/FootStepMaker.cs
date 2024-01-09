@@ -2,12 +2,13 @@ using FMOD.Studio;
 using FMODUnity;
 using Minecraft.Audio;
 using NaughtyAttributes;
+using System;
+using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Minecraft
 {
-
     public interface IMovementData
     {
         public Vector3 Velocity { get; }
@@ -30,6 +31,9 @@ namespace Minecraft
 
         [MinMaxSlider(0f, 10f)]
         public Vector2 speedRange = new Vector2(0f, 5f);
+
+        [SerializeField]
+        private float speedMultiplier = 2f;
 
         private EventInstance _footStepInstance;
         private PARAMETER_ID _blockMaterialParameterId;
@@ -68,7 +72,7 @@ namespace Minecraft
                 }
 
                 float time = Time.time;
-                if(time - _lastPlayTime > 1f / speed * 2f)
+                if(time - _lastPlayTime > 1f / speed * speedMultiplier)
                 {
                     _lastPlayTime = time;
                     BlockMaterial steppingBlock = Chunk.GetBlock(groundPosition.position).Data().BlockMaterial;
@@ -99,6 +103,5 @@ namespace Minecraft
             _footStepInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
             _footStepInstance.start();
         }
-
     }
 }

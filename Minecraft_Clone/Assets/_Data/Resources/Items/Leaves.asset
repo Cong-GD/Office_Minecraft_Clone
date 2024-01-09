@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a73e99d00359d745b5d399ee215a664, type: 3}
   m_Name: Leaves
   m_EditorClassIdentifier: 
+  <Name>k__BackingField: Leaves
+  <Description>k__BackingField: 
   <Icon>k__BackingField: {fileID: -647956623, guid: 4e94f503a19d0c949b9745303267f02f,
     type: 3}
   <MaxStack>k__BackingField: 64
@@ -37,16 +39,17 @@ MonoBehaviour:
     amount: 0
   <AttackDamage>k__BackingField: 1
   <AttackSpeed>k__BackingField: 4
+  <IsValidItem>k__BackingField: 1
   <BlockType>k__BackingField: 11
   <IsSolid>k__BackingField: 1
   <IsTransparent>k__BackingField: 1
   <BlockMaterial>k__BackingField: 1
   <Hardness>k__BackingField: 0.2
-  <BestTool>k__BackingField: 64
+  <BestTool>k__BackingField: 1
   <HarvestableTier>k__BackingField: -1
-  <HarvestableTool>k__BackingField: 64
+  <HarvestableTool>k__BackingField: -1
   <HarvestResult>k__BackingField:
-    item: {fileID: 11400000}
+    item: {fileID: 11400000, guid: 910716e8b04fe6149a8eaa9c7e60917e, type: 2}
     amount: 1
   <MeshGenerator>k__BackingField: {fileID: 11400000, guid: 6f1f3654c8f9c6c419b5aa8a681efd06,
     type: 2}

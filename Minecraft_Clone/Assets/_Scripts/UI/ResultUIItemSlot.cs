@@ -1,4 +1,6 @@
-﻿using Minecraft;
+﻿using FMODUnity;
+using Minecraft;
+using Minecraft.Audio;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,6 +13,9 @@ public class ResultUIItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
     [SerializeField]
     private TextMeshProUGUI amountText;
+
+    [SerializeField]
+    private EventReference takeResultSound;
 
     private ItemSlot _displaySlot = new();
     private IResultGiver _resultGiver;
@@ -77,6 +82,7 @@ public class ResultUIItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnt
         if (_resultSlot.IsEmpty())
             return;
 
+        AudioManager.PlayOneShot(takeResultSound);
         _resultSlot.TryTransferTo(draggingSystem.DraggingSlot, _resultSlot.Amount);
         if (!_resultSlot.IsEmpty())
             InventorySystem.Instance.AddItemToInventory(_resultSlot);

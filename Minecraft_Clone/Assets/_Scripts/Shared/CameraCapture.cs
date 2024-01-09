@@ -1,13 +1,10 @@
-﻿using Cysharp.Threading.Tasks;
-using Minecraft;
-using NaughtyAttributes;
-using System.IO;
+﻿using NaughtyAttributes;
 using UnityEngine;
 
 public class CameraCapture : MonoBehaviour
 {
     [SerializeField]
-    new private Camera camera;
+    private Camera renderCamera;
 
     [SerializeField]
     private RenderTexture renderTexture;
@@ -17,13 +14,13 @@ public class CameraCapture : MonoBehaviour
     public Texture2D Capture()
     {
         RenderTexture current = RenderTexture.active;
-        camera.targetTexture = renderTexture;
+        renderCamera.targetTexture = renderTexture;
         RenderTexture.active = renderTexture;
-        camera.Render();
+        renderCamera.Render();
         Texture2D renderedTexture = new Texture2D(renderTexture.width, renderTexture.height);
         renderedTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
         RenderTexture.active = current;
-        camera.targetTexture = null;
+        renderCamera.targetTexture = null;
         return renderedTexture;
     }
 }

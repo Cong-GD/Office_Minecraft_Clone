@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fca4d29a31bd2b94eb7cf306a37d1221, type: 3}
   m_Name: Golden Sword
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: Gold Sword
+  <Name>k__BackingField: Golden Sword
   <Description>k__BackingField: 
   <Icon>k__BackingField: {fileID: 21300000, guid: 6e5cbfb416d928f4fadb51c09522eba1,
     type: 3}
@@ -37,8 +37,9 @@ MonoBehaviour:
   <SmeltResult>k__BackingField:
     item: {fileID: 0}
     amount: 0
-  <AttackDamage>k__BackingField: 1
-  <AttackSpeed>k__BackingField: 4
+  <AttackDamage>k__BackingField: 4
+  <AttackSpeed>k__BackingField: 1.6
+  <IsValidItem>k__BackingField: 1
   meshGenerator:
     texture2D: {fileID: 2800000, guid: 6e5cbfb416d928f4fadb51c09522eba1, type: 3}
     materialPrefab: {fileID: 2100000, guid: b556ba27a63fc234080a5458cd5f464d, type: 2}

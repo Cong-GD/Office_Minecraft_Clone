@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82cdfe60d42214043922f0ae28226c9e, type: 3}
+  m_Name: Beef
+  m_EditorClassIdentifier: 
+  <Name>k__BackingField: Beef
+  <Description>k__BackingField: 
+  <Icon>k__BackingField: {fileID: 21300000, guid: 9530307ae88604343bc2bf1bacab25b4,
+    type: 3}
+  <MaxStack>k__BackingField: 64
+  relativeTransforms:
+    rightHand:
+      <position>k__BackingField: {x: 0, y: -0.1, z: 0}
+      <rotation>k__BackingField: {x: -4.5, y: -100, z: 39.999996}
+      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+    leftHand:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 1, y: 1, z: 1}
+    freeObject:
+      <position>k__BackingField: {x: 0, y: 0, z: 0}
+      <rotation>k__BackingField: {x: 0, y: 0, z: 0}
+      <scale>k__BackingField: {x: 2, y: 2, z: 2}
+  <CanBurn>k__BackingField: 0
+  <BurnDuration>k__BackingField: 16
+  <CanSmelt>k__BackingField: 1
+  <SmeltDuration>k__BackingField: 5
+  <SmeltResult>k__BackingField:
+    item: {fileID: 11400000, guid: b46e34b6d760ee642ab1a7b650084471, type: 2}
+    amount: 1
+  <AttackDamage>k__BackingField: 1
+  <AttackSpeed>k__BackingField: 4
+  <IsValidItem>k__BackingField: 1
+  meshGenerator:
+    texture2D: {fileID: 2800000, guid: 9530307ae88604343bc2bf1bacab25b4, type: 3}
+    materialPrefab: {fileID: 2100000, guid: b556ba27a63fc234080a5458cd5f464d, type: 2}
+    size: 0.01
+  fillAmount: 3
+  eatTime: 2
+  onEatSound:
+    Guid:
+      Data1: -766540707
+      Data2: 1177652366
+      Data3: 1904395664
+      Data4: 767928524
+    Path: event:/Charactor/Player/Eating

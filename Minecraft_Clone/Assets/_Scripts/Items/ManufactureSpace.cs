@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FMODUnity;
+using Minecraft.Audio;
+using System;
 
 public class ManufactureSpace : IResultGiver
 {
@@ -56,7 +58,6 @@ public class ManufactureSpace : IResultGiver
             slot.TakeAmount(1);
         }
         _canCheckRecipe = true;
-
         CheckForRecipe();
         return pack;
     }

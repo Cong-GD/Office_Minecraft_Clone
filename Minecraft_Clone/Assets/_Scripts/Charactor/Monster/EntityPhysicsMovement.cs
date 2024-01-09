@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Minecraft
 {
-    public class EntityPhysicsMovement : MonoBehaviour, IPushAble
+    public class EntityPhysicsMovement : MonoBehaviour, IPushAble, IMovementData
     {
         [SerializeField]
         private float gravity = -9.8f;
@@ -153,7 +153,14 @@ namespace Minecraft
 
         public void Push(Vector3 pushForce)
         {
-            _outerPushForce += pushForce;
+            _outerPushForce = pushForce;
+        }
+
+        public void SetPosition(Vector3 position)
+        {
+            controller.enabled = false;
+            transform.position = position;
+            controller.enabled = true;
         }
     }
 }

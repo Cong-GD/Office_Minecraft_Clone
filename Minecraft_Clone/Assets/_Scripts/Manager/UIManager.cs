@@ -1,7 +1,5 @@
 ﻿using Minecraft;
 using Minecraft.Input;
-using NaughtyAttributes;
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -24,6 +22,9 @@ public class UIManager : GlobalReference<UIManager>
 
     [SerializeField]
     private UIRecipeDictionary recipeDictionary;
+
+    [SerializeField]
+    private Canvas playerDeathCanvas;
 
     [field: SerializeField]
     public ItemDragingSystem DraggingSystem { get; private set; }
@@ -163,4 +164,21 @@ public class UIManager : GlobalReference<UIManager>
         ExitUIMode();
         GameManager.Instance.SaveAndReturnToMainMenu().Forget();
     }
+
+    public void OnPlayerDeath()
+    {
+        MInput.state = MInput.State.None;
+        Cursor.lockState = CursorLockMode.None;
+        GameManager.Instance.Statictics.totalDeath++;
+        playerDeathCanvas.enabled = true;
+        Time.timeScale = 0f;
+    }
+
+    public void OnSaveAndQuitButtonClickWhenDeath()
+    {
+        PlayerController.Instance.Revive();
+        Time.timeScale = 1f;
+        GameManager.Instance.SaveAndReturnToMainMenu().Forget();
+    }
+    
 }

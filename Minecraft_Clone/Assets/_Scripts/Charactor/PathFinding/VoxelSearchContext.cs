@@ -38,8 +38,8 @@ namespace Minecraft.AI
         public int MaxNeightbours => _direction3Ds.Length;
 
         private int _version;
-        private readonly Dictionary<int3, VoxelNode> _nodeMap = new(10000);
-        private readonly Stack<VoxelNode> _hasUse = new(10000);
+        private readonly Dictionary<int3, VoxelNode> _nodeMap = new(5000);
+        private readonly Stack<VoxelNode> _hasUse = new(5000);
         private readonly VoxelNode[] _neightbourBuffer = new VoxelNode[_direction3Ds.Length];
 
         private static readonly int3[] _direction3Ds =

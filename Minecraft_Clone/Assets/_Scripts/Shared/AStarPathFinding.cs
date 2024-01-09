@@ -90,7 +90,9 @@ namespace CongTDev.AStarPathFinding
         public static void FindPath<Node>(ISearchContext<Node> context, int maxNodeProcess = 100000)
             where Node : SearchNode<Node>
         {
+#if PATH_FINDING_DEBUG
             using TimeExcute timer = TimeExcute.Start("Find a path");
+#endif
             int count = 0;
 
             BinaryHeap<Node> openList = ThreadSafePool<BinaryHeap<Node>>.Get();
@@ -135,7 +137,7 @@ namespace CongTDev.AStarPathFinding
                     }
                 }
             }
-#if DEBUG
+#if PATH_FINDING_DEBUG
             Debug.Log($"Total nodes processed: {count}");
 #endif
             openList.Clear();

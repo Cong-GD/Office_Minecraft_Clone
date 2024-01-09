@@ -37,8 +37,9 @@ MonoBehaviour:
   <SmeltResult>k__BackingField:
     item: {fileID: 0}
     amount: 0
-  <AttackDamage>k__BackingField: 1
-  <AttackSpeed>k__BackingField: 4
+  <AttackDamage>k__BackingField: 3
+  <AttackSpeed>k__BackingField: 1.2
+  <IsValidItem>k__BackingField: 1
   meshGenerator:
     texture2D: {fileID: 2800000, guid: 5cf08a57f7272584a9372a80a2cd00cb, type: 3}
     materialPrefab: {fileID: 2100000, guid: b556ba27a63fc234080a5458cd5f464d, type: 2}

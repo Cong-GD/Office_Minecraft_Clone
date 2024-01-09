@@ -1,14 +1,12 @@
 ﻿using NaughtyAttributes;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 namespace Minecraft.Entity.Model
 {
     [RequireComponent(typeof(MeshRenderer))]
-    [RequireComponent (typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshFilter))]
     public class SingleBlockRenderer : MonoBehaviour
     {
         [SerializeField]
@@ -35,21 +33,26 @@ namespace Minecraft.Entity.Model
             meshFilter = GetComponent<MeshFilter>();
         }
 
+        private void Awake()
+        {
+            Render();
+        }
+
         [Button]
-        private void Clear()
+        public void Clear()
         {
             DestroyImmediate(_mesh);
             _mesh = null;
         }
 
         [Button]
-        private void Render()
+        public void Render()
         {
             Clear();
             _mesh = CreateMesh(modelData);
             meshFilter.sharedMesh = _mesh;
         }
-         
+
 
         private static Mesh CreateMesh(SingleBlockModelData entityModelData)
         {
@@ -84,5 +87,3 @@ namespace Minecraft.Entity.Model
         }
     }
 }
-
-

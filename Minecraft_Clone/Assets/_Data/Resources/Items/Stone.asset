@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a73e99d00359d745b5d399ee215a664, type: 3}
   m_Name: Stone
   m_EditorClassIdentifier: 
+  <Name>k__BackingField: Stone
+  <Description>k__BackingField: 
   <Icon>k__BackingField: {fileID: 1552663376, guid: 4e94f503a19d0c949b9745303267f02f,
     type: 3}
   <MaxStack>k__BackingField: 64
@@ -37,13 +39,14 @@ MonoBehaviour:
     amount: 0
   <AttackDamage>k__BackingField: 1
   <AttackSpeed>k__BackingField: 4
+  <IsValidItem>k__BackingField: 1
   <BlockType>k__BackingField: 4
   <IsSolid>k__BackingField: 1
   <IsTransparent>k__BackingField: 0
   <BlockMaterial>k__BackingField: 2
   <Hardness>k__BackingField: 1.5
   <BestTool>k__BackingField: 4
-  <HarvestableTier>k__BackingField: 60
+  <HarvestableTier>k__BackingField: 62
   <HarvestableTool>k__BackingField: 4
   <HarvestResult>k__BackingField:
     item: {fileID: 11400000, guid: 0e342d0ccaa6bc74aa5cfaac4cd86241, type: 2}
